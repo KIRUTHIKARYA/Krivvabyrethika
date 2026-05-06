@@ -312,21 +312,28 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:32px
 <!-- NAV -->
 <nav>
   <div class="logo" onclick="showPage('home')">KRIVVA</div>
+
   <div class="nav-center">
     <span onclick="showPage('home')" id="nav-home" class="active">Home</span>
     <span onclick="showPage('wishlist')" id="nav-wishlist">Wishlist</span>
     <span onclick="showPage('orders')" id="nav-orders">Orders</span>
     <span onclick="showPage('admin')" id="nav-admin">Admin</span>
   </div>
+
   <div class="nav-right">
     <button class="nav-icon-btn" onclick="toggleSearch()" title="Search">🔍</button>
+
     <button class="nav-icon-btn" onclick="showPage('wishlist')" title="Wishlist">
       🤍<span class="nav-badge hide" id="wl-count-nav">0</span>
     </button>
-    <div id="user-nav-area">
-      <button class="nav-icon-btn" onclick="showAuthModal()" title="Login">👤</button>
+
+    <div id="welcome-user" style="color:gold;font-size:12px">
+      Welcome Guest
     </div>
-    <button class="cart-btn" onclick="showCart()">Bag <span id="cart-count">0</span></button>
+
+    <button class="cart-btn" onclick="showCart()">
+      Bag <span id="cart-count">0</span>
+    </button>
   </div>
 </nav>
 
@@ -1440,32 +1447,18 @@ renderCats();
 renderProducts();
 updateUserNav();
 </script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
-const supabaseClient = supabase.createClient(
-  "https://wprhexegrfgiqnwpbskj.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndwcmhleGVncmZnaXFud3Bic2tqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgwNTg2MTEsImV4cCI6MjA5MzYzNDYxMX0.GwW36z2aXppE9ji7LoFizUxWAqro77Ez4sLRleOTo5E"
-);
-</script>
-<!-- Signup UI -->
-<h2>Signup</h2>
-<input type="email" id="email" placeholder="Enter email">
-<input type="password" id="password" placeholder="Enter password">
-<button onclick="signup()">Sign Up</button>
-
-<!-- Supabase -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
-
-<script>
-const supabaseClient = supabase.createClient(
+const supabaseClient = window.supabase.createClient(
   "https://wprhexegrfgiqnwpbskj.supabase.co",
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndwcmhleGVncmZnaXFud3Bic2tqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgwNTg2MTEsImV4cCI6MjA5MzYzNDYxMX0.GwW36z2aXppE9ji7LoFizUxWAqro77Ez4sLRleOTo5E"
 );
 
 async function signup() {
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
+  const email = document.getElementById("signup-email").value;
+  const password = document.getElementById("signup-password").value;
 
   const { data, error } = await supabaseClient.auth.signUp({
     email: email,
@@ -1476,8 +1469,72 @@ async function signup() {
     alert(error.message);
   } else {
     alert("Signup successful!");
+
+    document.getElementById("welcome-user").innerText =
+      "Welcome " + email;
   }
 }
+
+async function login() {
+  const email = document.getElementById("login-email").value;
+  const password = document.getElementById("login-password").value;
+
+  const { data, error } = await supabaseClient.auth.signInWithPassword({
+    email: email,
+    password: password
+  });
+
+  if (error) {
+    alert(error.message);
+  } else {
+    alert("Login successful!");
+
+    document.getElementById("welcome-user").innerText =
+      "Welcome " + email;
+  }
+}
+
+function showAuthModal() {
+  document.getElementById("auth-modal").classList.remove("hide");
+
+  document.getElementById("auth-form-container").innerHTML = `
+
+    <div style="margin-bottom:20px">
+      <h3 style="margin-bottom:10px;color:gold">Login</h3>
+
+      <input type="email" id="login-email" placeholder="Email"
+      style="width:100%;padding:10px;margin-bottom:10px;background:#111;color:white;border:1px solid #333">
+
+      <input type="password" id="login-password" placeholder="Password"
+      style="width:100%;padding:10px;margin-bottom:10px;background:#111;color:white;border:1px solid #333">
+
+      <button onclick="login()" class="btn-gold" style="width:100%">
+        Login
+      </button>
+    </div>
+
+    <hr style="margin:20px 0;border-color:#333">
+
+    <div>
+      <h3 style="margin-bottom:10px;color:gold">Sign Up</h3>
+
+      <input type="email" id="signup-email" placeholder="Email"
+      style="width:100%;padding:10px;margin-bottom:10px;background:#111;color:white;border:1px solid #333">
+
+      <input type="password" id="signup-password" placeholder="Password"
+      style="width:100%;padding:10px;margin-bottom:10px;background:#111;color:white;border:1px solid #333">
+
+      <button onclick="signup()" class="btn-gold" style="width:100%">
+        Sign Up
+      </button>
+    </div>
+  `;
+}
+
+function closeAuth() {
+  document.getElementById("auth-modal").classList.add("hide");
+}
 </script>
+
 </body>
 </html>
