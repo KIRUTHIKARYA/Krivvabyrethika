@@ -1448,5 +1448,36 @@ const supabaseClient = supabase.createClient(
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndwcmhleGVncmZnaXFud3Bic2tqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgwNTg2MTEsImV4cCI6MjA5MzYzNDYxMX0.GwW36z2aXppE9ji7LoFizUxWAqro77Ez4sLRleOTo5E"
 );
 </script>
+<!-- Signup UI -->
+<h2>Signup</h2>
+<input type="email" id="email" placeholder="Enter email">
+<input type="password" id="password" placeholder="Enter password">
+<button onclick="signup()">Sign Up</button>
+
+<!-- Supabase -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+
+<script>
+const supabaseClient = supabase.createClient(
+  "https://wprhexegrfgiqnwpbskj.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndwcmhleGVncmZnaXFud3Bic2tqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgwNTg2MTEsImV4cCI6MjA5MzYzNDYxMX0.GwW36z2aXppE9ji7LoFizUxWAqro77Ez4sLRleOTo5E"
+);
+
+async function signup() {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+
+  const { data, error } = await supabaseClient.auth.signUp({
+    email: email,
+    password: password
+  });
+
+  if (error) {
+    alert(error.message);
+  } else {
+    alert("Signup successful!");
+  }
+}
+</script>
 </body>
 </html>
