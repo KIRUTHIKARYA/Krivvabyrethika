@@ -1,323 +1,50 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>KRIVVA — Luxury Women's Fashion</title>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,400;1,600&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet"/>
-<style>
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-:root{
-  --black:#080808;--gold:#c9a84c;--gold-light:#e8c97a;--gold-dim:#8a6f32;--gold-bg:rgba(201,168,76,0.08);
-  --white:#fafaf8;--surface:#121212;--surface2:#1a1a1a;--surface3:#222;--border:#252525;--border2:#303030;
-  --text:#e2e2e2;--muted:#777;--muted2:#555;--red:#e05252;--green:#4caf7d;--blue:#5b9bd5;--purple:#9b72cf;
-}
-html{scroll-behavior:smooth}
-body{font-family:'Jost',sans-serif;background:var(--black);color:var(--text);font-size:14px;overflow-x:hidden;cursor:none}
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>KRIVVA — Luxury Women's Fashion</title>
+  <meta name="description" content="KRIVVA — Curated luxury women's fashion. Shop kurtis, dresses, co-ords, ethnic wear and more. Timeless elegance, delivered to your door."/>
 
-/* CUSTOM CURSOR */
-#cursor{position:fixed;width:8px;height:8px;background:var(--gold);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:width .2s,height .2s,background .2s}
-#cursor-ring{position:fixed;width:32px;height:32px;border:1px solid var(--gold);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:all .12s ease;opacity:.6}
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,400;1,600&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet"/>
 
-.hide{display:none!important}
-.page{padding:20px;animation:fadeIn .35s ease}
-@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-
-/* LOADER */
-#loader{position:fixed;inset:0;background:var(--black);z-index:10000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;transition:opacity .6s ease}
-#loader .l-logo{font-family:'Cormorant Garamond',serif;font-size:2.4rem;letter-spacing:6px;color:var(--gold);animation:pulse 1.5s infinite}
-@keyframes pulse{0%,100%{opacity:.4}50%{opacity:1}}
-#loader .l-bar{width:120px;height:1px;background:var(--border);position:relative;overflow:hidden}
-#loader .l-bar::after{content:'';position:absolute;left:-100%;top:0;width:100%;height:100%;background:var(--gold);animation:load 1.2s ease infinite}
-@keyframes load{0%{left:-100%}100%{left:100%}}
-
-/* NAV */
-nav{background:rgba(8,8,8,0.96);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:56px;position:sticky;top:0;z-index:500}
-.logo{font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:700;color:var(--gold);letter-spacing:5px;cursor:pointer}
-.nav-center{display:flex;gap:28px}
-.nav-center span{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);cursor:pointer;transition:.2s;position:relative;padding-bottom:2px}
-.nav-center span::after{content:'';position:absolute;bottom:0;left:0;width:0;height:1px;background:var(--gold);transition:.3s}
-.nav-center span:hover::after,.nav-center span.active::after{width:100%}
-.nav-center span:hover,.nav-center span.active{color:var(--gold)}
-.nav-right{display:flex;align-items:center;gap:12px}
-.nav-icon-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:4px;transition:.2s;position:relative}
-.nav-icon-btn:hover{color:var(--gold)}
-.nav-badge{position:absolute;top:-4px;right:-4px;background:var(--red);color:#fff;border-radius:50%;width:15px;height:15px;font-size:9px;display:flex;align-items:center;justify-content:center}
-.cart-btn{background:var(--gold);color:var(--black);border:none;padding:7px 16px;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;font-family:'Jost',sans-serif;font-weight:600;transition:.2s;position:relative}
-.cart-btn:hover{background:var(--gold-light)}
-
-/* HERO */
-.hero{background:linear-gradient(145deg,#080808 50%,#110e02 100%);border:1px solid var(--border);padding:64px 40px;text-align:center;margin-bottom:32px;position:relative;overflow:hidden}
-.hero::before{content:'';position:absolute;top:-80px;right:-80px;width:280px;height:280px;border:1px solid var(--gold-dim);border-radius:50%;opacity:.15;animation:rotate 20s linear infinite}
-.hero::after{content:'';position:absolute;bottom:-60px;left:-60px;width:200px;height:200px;border:1px solid var(--gold-dim);border-radius:50%;opacity:.1;animation:rotate 15s linear infinite reverse}
-@keyframes rotate{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
-.hero-tag{font-size:10px;letter-spacing:4px;text-transform:uppercase;color:var(--gold);margin-bottom:16px;opacity:.8}
-.hero h1{font-family:'Cormorant Garamond',serif;font-size:3.2rem;font-weight:300;color:var(--white);line-height:1.1;margin-bottom:14px}
-.hero h1 em{color:var(--gold);font-style:italic}
-.hero p{color:var(--muted);font-size:12px;letter-spacing:1.5px;margin-bottom:28px}
-.hero-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
-
-/* ANNOUNCEMENT BAR */
-.announce-bar{background:var(--gold);color:var(--black);text-align:center;padding:8px;font-size:11px;letter-spacing:2px;text-transform:uppercase;font-weight:600;position:relative;overflow:hidden}
-.announce-bar .marquee{display:inline-block;animation:marquee 20s linear infinite;white-space:nowrap}
-@keyframes marquee{0%{transform:translateX(100vw)}100%{transform:translateX(-100%)}}
-
-/* COUNTDOWN */
-.countdown-bar{background:var(--surface2);border:1px solid var(--border);padding:14px 20px;display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:24px}
-.countdown-label{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted)}
-.countdown-timer{display:flex;gap:8px}
-.countdown-unit{text-align:center}
-.countdown-num{font-family:'Cormorant Garamond',serif;font-size:1.4rem;color:var(--gold);display:block;line-height:1}
-.countdown-sub{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
-
-/* SEARCH */
-.search-bar{display:flex;gap:0;margin-bottom:24px;border:1px solid var(--border);overflow:hidden;transition:.2s}
-.search-bar:focus-within{border-color:var(--gold)}
-.search-bar input{flex:1;background:var(--surface);border:none;color:var(--text);padding:11px 16px;font-family:'Jost',sans-serif;font-size:13px;outline:none}
-.search-bar button{background:var(--gold);border:none;color:var(--black);padding:0 16px;cursor:pointer;font-size:14px}
-
-/* BUTTONS */
-.btn-gold{background:var(--gold);color:var(--black);border:none;padding:10px 26px;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;font-family:'Jost',sans-serif;font-weight:600;transition:.2s}
-.btn-gold:hover{background:var(--gold-light);transform:translateY(-1px)}
-.btn-outline{background:transparent;color:var(--gold);border:1px solid var(--gold);padding:10px 26px;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;font-family:'Jost',sans-serif;transition:.2s}
-.btn-outline:hover{background:var(--gold);color:var(--black)}
-.btn-red{background:var(--red);color:#fff;border:none;padding:7px 14px;font-size:10px;letter-spacing:1px;text-transform:uppercase;cursor:pointer;font-family:'Jost',sans-serif;transition:.2s}
-.btn-red:hover{opacity:.85}
-.btn-sm{padding:6px 14px;font-size:9px}
-
-/* SECTION */
-.section-title{font-family:'Cormorant Garamond',serif;font-size:1.4rem;color:var(--white);margin-bottom:4px}
-.section-sub{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:16px}
-
-/* CATS */
-.cats{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:22px}
-.cat{background:var(--surface);border:1px solid var(--border);padding:7px 14px;cursor:pointer;transition:.2s;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted)}
-.cat:hover,.cat.active{border-color:var(--gold);color:var(--gold);background:var(--gold-bg)}
-
-/* PRODUCTS */
-.products-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(165px,1fr));gap:16px;margin-bottom:32px}
-.product-card{background:var(--surface);border:1px solid var(--border);overflow:hidden;transition:all .3s ease;position:relative;group:true}
-.product-card:hover{border-color:var(--gold-dim);transform:translateY(-3px);box-shadow:0 12px 32px rgba(0,0,0,.5)}
-.product-img{height:160px;display:flex;align-items:center;justify-content:center;background:var(--surface2);overflow:hidden;position:relative;cursor:pointer}
-.product-img img{width:100%;height:100%;object-fit:cover;transition:transform .4s ease}
-.product-card:hover .product-img img{transform:scale(1.05)}
-.product-img .emoji-fb{font-size:52px;transition:.3s}
-.product-img-overlay{position:absolute;inset:0;background:rgba(0,0,0,.4);opacity:0;transition:.3s;display:flex;align-items:center;justify-content:center;gap:10px}
-.product-card:hover .product-img-overlay{opacity:1}
-.overlay-btn{background:var(--gold);color:var(--black);border:none;padding:7px 14px;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;font-family:'Jost',sans-serif;font-weight:600}
-.p-badges{position:absolute;top:8px;left:8px;display:flex;flex-direction:column;gap:3px;z-index:2}
-.p-badge{font-size:8px;letter-spacing:1px;padding:3px 7px;text-transform:uppercase;font-weight:600}
-.badge-new{background:var(--gold);color:var(--black)}
-.badge-trending{background:var(--purple);color:#fff}
-.badge-offer{background:var(--red);color:#fff}
-.wishlist-btn{position:absolute;top:8px;right:8px;z-index:2;background:rgba(0,0,0,.6);border:none;color:var(--muted);width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;transition:.2s}
-.wishlist-btn:hover,.wishlist-btn.active{color:var(--red)}
-.product-info{padding:12px}
-.product-name{font-size:12px;font-weight:500;color:var(--white);margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.product-cat{font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:7px}
-.price-row{display:flex;align-items:baseline;gap:6px;flex-wrap:wrap;margin-bottom:8px}
-.product-price{font-family:'Cormorant Garamond',serif;font-size:1.1rem;color:var(--gold)}
-.product-old{font-size:10px;color:var(--muted2);text-decoration:line-through}
-.offer-tag{font-size:9px;color:var(--red)}
-.stars{color:var(--gold);font-size:10px;margin-bottom:6px}
-.add-cart{width:100%;background:transparent;border:1px solid var(--border);color:var(--text);padding:7px;font-size:9px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;font-family:'Jost',sans-serif;transition:.2s;font-weight:500}
-.add-cart:hover{background:var(--gold);color:var(--black);border-color:var(--gold)}
-
-/* PRODUCT DETAIL MODAL */
-.product-detail{display:grid;grid-template-columns:1fr 1fr;gap:20px}
-@media(max-width:560px){.product-detail{grid-template-columns:1fr}}
-.pd-img{height:220px;background:var(--surface2);display:flex;align-items:center;justify-content:center;overflow:hidden;font-size:64px}
-.pd-img img{width:100%;height:100%;object-fit:cover}
-.pd-title{font-family:'Cormorant Garamond',serif;font-size:1.4rem;color:var(--white);margin-bottom:6px}
-.pd-desc{font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:12px}
-.size-grid{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
-.size-btn{border:1px solid var(--border);background:transparent;color:var(--text);padding:6px 12px;font-size:11px;cursor:pointer;font-family:'Jost',sans-serif;transition:.2s}
-.size-btn:hover,.size-btn.active{border-color:var(--gold);color:var(--gold);background:var(--gold-bg)}
-
-/* REVIEWS */
-.review-card{background:var(--surface2);border:1px solid var(--border);padding:12px;margin-bottom:8px}
-.review-author{font-size:11px;font-weight:600;color:var(--white);margin-bottom:3px}
-.review-text{font-size:11px;color:var(--muted);line-height:1.5}
-
-/* CART */
-.cart-item{display:flex;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid var(--border)}
-.cart-thumb{width:48px;height:48px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;font-size:22px}
-.cart-thumb img{width:100%;height:100%;object-fit:cover}
-.qty-btn{background:var(--surface2);border:1px solid var(--border);color:var(--text);width:24px;height:24px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:.2s}
-.qty-btn:hover{border-color:var(--gold);color:var(--gold)}
-.remove-btn{margin-left:auto;background:none;border:none;color:var(--muted2);cursor:pointer;font-size:15px;transition:.2s}
-.remove-btn:hover{color:var(--red)}
-.coupon-row{display:flex;gap:0;border:1px solid var(--border);overflow:hidden;margin-bottom:12px}
-.coupon-row input{flex:1;background:var(--surface);border:none;color:var(--text);padding:9px 12px;font-family:'Jost',sans-serif;font-size:12px;outline:none}
-.coupon-row button{background:var(--surface2);border:none;border-left:1px solid var(--border);color:var(--gold);padding:0 14px;cursor:pointer;font-size:11px;letter-spacing:1px;text-transform:uppercase;font-family:'Jost',sans-serif}
-
-/* WISHLIST */
-.wishlist-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px}
-.wishlist-card{background:var(--surface);border:1px solid var(--border);overflow:hidden}
-.wl-img{height:110px;display:flex;align-items:center;justify-content:center;background:var(--surface2);font-size:36px;overflow:hidden}
-.wl-img img{width:100%;height:100%;object-fit:cover}
-.wl-info{padding:10px}
-
-/* FORM */
-.form-group{margin-bottom:12px}
-.form-group label{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:5px}
-.form-group input,.form-group select,.form-group textarea{width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:10px 12px;font-family:'Jost',sans-serif;font-size:13px;outline:none;transition:.2s}
-.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--gold)}
-.form-group select option{background:var(--surface2)}
-.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.razorpay-btn{width:100%;background:#072654;color:#fff;border:none;padding:13px;font-size:11px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;font-family:'Jost',sans-serif;margin-top:8px;transition:.2s;font-weight:600}
-.razorpay-btn:hover{background:#0a3a7a}
-
-/* ORDERS */
-.order-card{background:var(--surface);border:1px solid var(--border);padding:16px;margin-bottom:12px;transition:.2s}
-.order-card:hover{border-color:var(--border2)}
-.status-badge{font-size:9px;letter-spacing:1px;text-transform:uppercase;padding:3px 9px;font-weight:600}
-.status-placed{background:rgba(201,168,76,.12);color:var(--gold)}
-.status-packed{background:rgba(91,155,213,.12);color:var(--blue)}
-.status-dispatched{background:rgba(155,114,207,.12);color:var(--purple)}
-.status-delivered{background:rgba(76,175,125,.12);color:var(--green)}
-.track-bar{display:flex;align-items:flex-start;margin-top:14px}
-.track-step{flex:1;text-align:center;position:relative}
-.track-step::after{content:'';position:absolute;top:9px;left:50%;width:100%;height:1px;background:var(--border);z-index:0}
-.track-step:last-child::after{display:none}
-.track-dot{width:18px;height:18px;border-radius:50%;border:2px solid var(--border);background:var(--black);margin:0 auto 5px;position:relative;z-index:1;display:flex;align-items:center;justify-content:center;font-size:7px;transition:.3s}
-.track-dot.done{border-color:var(--gold);background:var(--gold);color:var(--black)}
-.track-label{font-size:9px;text-transform:uppercase;color:var(--muted)}
-.track-step.done .track-label{color:var(--gold)}
-
-/* ADMIN */
-.admin-tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:16px;overflow-x:auto;gap:0}
-.admin-tab{padding:10px 16px;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;color:var(--muted);border-bottom:2px solid transparent;white-space:nowrap;transition:.2s}
-.admin-tab:hover{color:var(--text)}
-.admin-tab.active{color:var(--gold);border-bottom-color:var(--gold)}
-.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:8px;margin-bottom:16px}
-.stat{background:var(--surface);border:1px solid var(--border);padding:14px;text-align:center;transition:.2s}
-.stat:hover{border-color:var(--gold-dim)}
-.stat-val{font-family:'Cormorant Garamond',serif;font-size:1.5rem;color:var(--gold)}
-.stat-label{font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-top:2px}
-.edit-card{background:var(--surface);border:1px solid var(--border);padding:16px;margin-bottom:12px}
-.edit-row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.edit-row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
-.toggle-row{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:12px}
-.toggle-item{display:flex;align-items:center;gap:6px;cursor:pointer}
-.toggle-item input{accent-color:var(--gold);width:14px;height:14px;cursor:pointer}
-.toggle-item label{font-size:11px;color:var(--muted);cursor:pointer}
-.photo-upload-area{border:1px dashed var(--border);padding:14px;text-align:center;cursor:pointer;transition:.2s;position:relative;margin-top:6px}
-.photo-upload-area:hover{border-color:var(--gold);background:var(--gold-bg)}
-.photo-upload-area input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
-.photo-preview-img{width:100%;max-height:90px;object-fit:cover;margin-top:8px;display:none}
-.computed-price{font-size:13px;color:var(--gold);font-family:'Cormorant Garamond',serif}
-.url-hint{font-size:10px;color:var(--muted2);margin-top:3px}
-.insta-note{background:var(--gold-bg);border:1px solid var(--gold-dim);padding:10px 14px;font-size:11px;color:var(--gold-light);margin-bottom:14px;line-height:1.5}
-.low-stock-alert{background:rgba(224,82,82,.1);border:1px solid rgba(224,82,82,.3);padding:10px 14px;font-size:11px;color:var(--red);margin-bottom:12px}
-.coupon-admin-card{background:var(--surface);border:1px solid var(--border);padding:12px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
-
-/* MODAL */
-.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:600;display:flex;align-items:center;justify-content:center;padding:16px;animation:fadeIn .2s ease}
-.modal{background:var(--surface);border:1px solid var(--border);padding:24px;width:100%;max-width:480px;max-height:88vh;overflow-y:auto;animation:slideUp .3s ease}
-@keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
-.modal-title{font-family:'Cormorant Garamond',serif;font-size:1.3rem;color:var(--white);margin-bottom:18px;display:flex;justify-content:space-between;align-items:center}
-.close-btn{background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;transition:.2s}
-.close-btn:hover{color:var(--text)}
-.divider{height:1px;background:var(--border);margin:14px 0}
-
-/* AUTH */
-.auth-tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:20px}
-.auth-tab{flex:1;text-align:center;padding:10px;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;color:var(--muted);border-bottom:2px solid transparent;transition:.2s}
-.auth-tab.active{color:var(--gold);border-bottom-color:var(--gold)}
-.social-login{display:flex;gap:8px;margin-bottom:14px}
-.social-btn{flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:9px;font-size:11px;cursor:pointer;font-family:'Jost',sans-serif;transition:.2s;display:flex;align-items:center;justify-content:center;gap:6px}
-.social-btn:hover{border-color:var(--gold-dim)}
-.or-divider{text-align:center;font-size:10px;color:var(--muted);margin:12px 0;position:relative}
-.or-divider::before,.or-divider::after{content:'';position:absolute;top:50%;width:42%;height:1px;background:var(--border)}
-.or-divider::before{left:0}.or-divider::after{right:0}
-.user-avatar{width:32px;height:32px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--black);font-weight:700;cursor:pointer}
-
-/* PINCODE CHECKER */
-.pincode-row{display:flex;gap:0;border:1px solid var(--border);overflow:hidden;margin-top:10px}
-.pincode-row input{flex:1;background:var(--surface);border:none;color:var(--text);padding:9px 12px;font-family:'Jost',sans-serif;font-size:12px;outline:none}
-.pincode-row button{background:var(--surface2);border:none;border-left:1px solid var(--border);color:var(--gold);padding:0 14px;cursor:pointer;font-size:10px;letter-spacing:1px;text-transform:uppercase;font-family:'Jost',sans-serif}
-.pincode-result{font-size:11px;margin-top:6px;padding:6px 10px}
-.pincode-ok{color:var(--green);background:rgba(76,175,125,.1);border:1px solid rgba(76,175,125,.2)}
-.pincode-no{color:var(--red);background:rgba(224,82,82,.1);border:1px solid rgba(224,82,82,.2)}
-
-/* WHATSAPP */
-.wa-float{position:fixed;bottom:80px;right:20px;z-index:400;background:#25d366;color:#fff;width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;cursor:pointer;box-shadow:0 4px 16px rgba(37,211,102,.4);animation:bounce 2s infinite;text-decoration:none}
-@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
-.scroll-top{position:fixed;bottom:20px;right:20px;z-index:400;background:var(--surface2);border:1px solid var(--border);color:var(--gold);width:38px;height:38px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;transition:.2s;opacity:0}
-.scroll-top.visible{opacity:1}
-.scroll-top:hover{background:var(--gold);color:var(--black)}
-
-/* BOTTOM NAV (mobile feel) */
-.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:rgba(12,12,12,.97);backdrop-filter:blur(12px);border-top:1px solid var(--border);display:flex;z-index:450;padding:8px 0 10px}
-.bottom-nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;color:var(--muted);transition:.2s;padding:4px 0}
-.bottom-nav-item:hover,.bottom-nav-item.active{color:var(--gold)}
-.bottom-nav-item svg,.bottom-nav-item .bn-icon{font-size:18px}
-.bottom-nav-item span{font-size:9px;letter-spacing:.5px;text-transform:uppercase}
-
-/* TOAST */
-.toast{position:fixed;bottom:70px;left:50%;transform:translateX(-50%);background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 20px;font-size:12px;letter-spacing:.5px;z-index:800;animation:toastIn .3s ease;white-space:nowrap;border-left:3px solid var(--gold)}
-@keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
-
-/* CHART */
-.chart-bar{display:flex;align-items:flex-end;gap:6px;height:100px;padding:8px 0}
-.bar{flex:1;background:linear-gradient(to top,var(--gold-dim),var(--gold));border-radius:2px 2px 0 0;transition:.8s ease;position:relative;min-width:20px}
-.bar-label{position:absolute;bottom:-18px;left:50%;transform:translateX(-50%);font-size:9px;color:var(--muted);white-space:nowrap}
-.bar-val{position:absolute;top:-18px;left:50%;transform:translateX(-50%);font-size:9px;color:var(--gold);white-space:nowrap}
-
-/* MAP */
-.map-placeholder{background:var(--surface2);border:1px solid var(--border);height:200px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:var(--muted)}
-
-/* RELATED */
-.related-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-top:16px}
-
-/* SKELETON */
-.skeleton{background:linear-gradient(90deg,var(--surface) 25%,var(--surface2) 50%,var(--surface) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite}
-@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
-
-/* FOOTER */
-footer{background:var(--surface);border-top:1px solid var(--border);padding:32px 24px 90px;margin-top:40px}
-.footer-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:24px;margin-bottom:24px}
-.footer-title{font-family:'Cormorant Garamond',serif;font-size:1rem;color:var(--gold);margin-bottom:10px;letter-spacing:1px}
-.footer-link{font-size:11px;color:var(--muted);display:block;margin-bottom:6px;cursor:pointer;transition:.2s;text-decoration:none}
-.footer-link:hover{color:var(--gold)}
-.footer-bottom{border-top:1px solid var(--border);padding-top:16px;text-align:center;font-size:10px;color:var(--muted2);letter-spacing:.5px}
-.f-logo{font-family:'Cormorant Garamond',serif;font-size:1.6rem;color:var(--gold);letter-spacing:5px;display:block;margin-bottom:8px}
-
-@media(max-width:480px){
-  nav{padding:0 14px}.logo{font-size:1.3rem;letter-spacing:3px}
-  .hero{padding:44px 20px}.hero h1{font-size:2.2rem}
-  .nav-center{display:none}
-  .page{padding:14px}
-}
-</style>
+  <!-- Main Stylesheet -->
+  <link rel="stylesheet" href="css/style.css"/>
 </head>
 <body>
 
-<!-- LOADER -->
+<!-- ============================================================
+     LOADER
+     ============================================================ -->
 <div id="loader">
   <div class="l-logo">KRIVVA</div>
   <div class="l-bar"></div>
 </div>
 
-<!-- CURSOR -->
+<!-- ============================================================
+     CUSTOM CURSOR
+     ============================================================ -->
 <div id="cursor"></div>
 <div id="cursor-ring"></div>
 
-<!-- ANNOUNCEMENT -->
+<!-- ============================================================
+     ANNOUNCEMENT BAR
+     ============================================================ -->
 <div class="announce-bar">
-  <span class="marquee">✦ FREE SHIPPING ON ORDERS ABOVE ₹999 ✦ USE CODE KRIVVA10 FOR 10% OFF ✦ NEW COLLECTION JUST DROPPED ✦ FREE SHIPPING ON ORDERS ABOVE ₹999 ✦ USE CODE KRIVVA10 FOR 10% OFF ✦</span>
+  <span class="marquee" id="announce-marquee">✦ FREE SHIPPING ON ORDERS ABOVE ₹999 ✦ USE CODE KRIVVA10 FOR 10% OFF ✦ NEW COLLECTION JUST DROPPED ✦ FREE SHIPPING ON ORDERS ABOVE ₹999 ✦ USE CODE KRIVVA10 FOR 10% OFF ✦</span>
 </div>
 
-<!-- NAV -->
+<!-- ============================================================
+     NAVIGATION
+     ============================================================ -->
 <nav>
   <div class="logo" onclick="showPage('home')">KRIVVA</div>
 
   <div class="nav-center">
-    <span onclick="showPage('home')" id="nav-home" class="active">Home</span>
-    <span onclick="showPage('wishlist')" id="nav-wishlist">Wishlist</span>
-    <span onclick="showPage('orders')" id="nav-orders">Orders</span>
-    <span onclick="showPage('admin')" id="nav-admin">Admin</span>
+    <span onclick="showPage('home')"     id="nav-home"     class="active">Home</span>
+    <span onclick="showPage('wishlist')" id="nav-wishlist"             >Wishlist</span>
+    <span onclick="showPage('orders')"   id="nav-orders"               >Orders</span>
   </div>
 
   <div class="nav-right">
@@ -327,9 +54,10 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:32px
       🤍<span class="nav-badge hide" id="wl-count-nav">0</span>
     </button>
 
-    <div id="welcome-user" style="color:gold;font-size:12px">
-      Welcome Guest
-    </div>
+    <!-- User area — swapped between avatar and login icon by JS -->
+    <div id="user-nav-area"></div>
+
+    <div id="welcome-user" style="color:gold;font-size:12px">Welcome Guest</div>
 
     <button class="cart-btn" onclick="showCart()">
       Bag <span id="cart-count">0</span>
@@ -337,46 +65,60 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:32px
   </div>
 </nav>
 
-<!-- HOME PAGE -->
+<!-- ============================================================
+     HOME PAGE
+     ============================================================ -->
 <div id="page-home" class="page">
-  <!-- SEARCH (hidden by default) -->
+
+  <!-- Search (hidden by default) -->
   <div id="search-area" class="hide" style="margin-bottom:20px">
     <div class="search-bar">
-      <input type="text" id="search-input" placeholder="Search products..." oninput="doSearch(this.value)"/>
+      <input type="text" id="search-input" placeholder="Search products…" oninput="doSearch(this.value)"/>
       <button onclick="closeSearch()">✕</button>
     </div>
     <div id="search-results" class="products-grid"></div>
   </div>
 
-  <!-- HERO -->
+  <!-- Hero -->
   <div class="hero" id="hero-section">
-    <div class="hero-tag">✦ New Collection 2026 ✦</div>
-    <h1>Dressed in<br><em>Elegance</em></h1>
-    <p>Curated luxury women's fashion — timeless, refined, yours</p>
+    <div class="hero-tag" id="hero-tagline">✦ New Collection 2026 ✦</div>
+    <h1 id="hero-title">Dressed in<br><em>Elegance</em></h1>
+    <p id="hero-subtitle">Curated luxury women's fashion — timeless, refined, yours</p>
     <div class="hero-btns">
-      <button class="btn-gold" onclick="document.getElementById('shop').scrollIntoView({behavior:'smooth'})">Shop Now</button>
+      <button class="btn-gold"    onclick="document.getElementById('shop').scrollIntoView({behavior:'smooth'})">Shop Now</button>
       <button class="btn-outline" onclick="filterCat('new')">New Arrivals</button>
       <button class="btn-outline" onclick="filterCat('trending')">🔥 Trending</button>
     </div>
   </div>
 
-  <!-- COUNTDOWN -->
+  <!-- Sale Countdown -->
   <div class="countdown-bar">
     <span class="countdown-label">Sale Ends In</span>
     <div class="countdown-timer">
-      <div class="countdown-unit"><span class="countdown-num" id="cd-h">00</span><span class="countdown-sub">Hrs</span></div>
+      <div class="countdown-unit">
+        <span class="countdown-num" id="cd-h">00</span>
+        <span class="countdown-sub">Hrs</span>
+      </div>
       <span style="color:var(--gold);font-size:1.2rem;align-self:flex-start;padding-top:2px">:</span>
-      <div class="countdown-unit"><span class="countdown-num" id="cd-m">00</span><span class="countdown-sub">Min</span></div>
+      <div class="countdown-unit">
+        <span class="countdown-num" id="cd-m">00</span>
+        <span class="countdown-sub">Min</span>
+      </div>
       <span style="color:var(--gold);font-size:1.2rem;align-self:flex-start;padding-top:2px">:</span>
-      <div class="countdown-unit"><span class="countdown-num" id="cd-s">00</span><span class="countdown-sub">Sec</span></div>
+      <div class="countdown-unit">
+        <span class="countdown-num" id="cd-s">00</span>
+        <span class="countdown-sub">Sec</span>
+      </div>
     </div>
     <span class="countdown-label">⚡ Limited Stock</span>
   </div>
 
+  <!-- Shop Section -->
   <div id="shop">
     <div class="section-title">Collections</div>
     <div class="section-sub">Browse by category</div>
     <div class="cats" id="cats-container"></div>
+
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
       <div>
         <div class="section-title">Products</div>
@@ -387,7 +129,7 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:32px
     <div class="products-grid" id="products-container"></div>
   </div>
 
-  <!-- STORE MAP -->
+  <!-- Store Location -->
   <div style="margin-bottom:28px">
     <div class="section-title">Find Us</div>
     <div class="section-sub">Visit our store</div>
@@ -395,65 +137,92 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:32px
       <div style="font-size:36px">📍</div>
       <div style="font-size:13px;color:var(--text)">KRIVVA Fashion Store</div>
       <div style="font-size:11px">Near City Mall, Main Road, Your City</div>
-      <a href="https://maps.google.com" target="_blank" class="btn-outline" style="margin-top:8px;text-decoration:none;font-size:10px;padding:7px 16px">Open in Google Maps</a>
+      <a href="https://maps.google.com" target="_blank" class="btn-outline"
+         style="margin-top:8px;text-decoration:none;font-size:10px;padding:7px 16px">
+        Open in Google Maps
+      </a>
     </div>
   </div>
-</div>
 
-<!-- WISHLIST PAGE -->
+</div><!-- /#page-home -->
+
+<!-- ============================================================
+     WISHLIST PAGE
+     ============================================================ -->
 <div id="page-wishlist" class="page hide">
   <div class="section-title">Wishlist</div>
   <div class="section-sub">Your saved items</div>
   <div id="wishlist-container"></div>
 </div>
 
-<!-- ORDERS PAGE -->
+<!-- ============================================================
+     MY ORDERS PAGE
+     ============================================================ -->
 <div id="page-orders" class="page hide">
   <div class="section-title">My Orders</div>
   <div class="section-sub">Track your deliveries</div>
   <div id="my-orders-container"></div>
 </div>
 
-<!-- ADMIN PAGE -->
+<!-- ============================================================
+     ADMIN PAGE
+     ============================================================ -->
 <div id="page-admin" class="page hide">
+
+  <!-- Login gate -->
   <div id="admin-login-section">
     <div class="section-title">Admin Panel</div>
     <div class="section-sub">Owner access only</div>
     <div style="max-width:300px;margin-top:16px">
-      <div class="form-group"><label>Password</label><input type="password" id="admin-pass" placeholder="Enter admin password"/></div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="admin-pass" placeholder="Enter admin password"/>
+      </div>
       <button class="btn-gold" onclick="adminLogin()" style="width:100%">Login to Admin</button>
       <div style="font-size:10px;color:var(--muted);margin-top:8px">Default: krivva123</div>
     </div>
   </div>
+
+  <!-- Admin Dashboard (shown after login) -->
   <div id="admin-panel" class="hide">
-    <div class="stats" id="admin-stats"></div>
-    <div id="admin-chart-area" style="margin-bottom:16px"></div>
-    <div id="low-stock-area"></div>
+    <div class="stats"         id="admin-stats"></div>
+    <div                       id="admin-chart-area" style="margin-bottom:16px"></div>
+    <div                       id="low-stock-area"></div>
+
     <div class="admin-tabs">
       <div class="admin-tab active" onclick="adminTab('orders',this)">Orders</div>
-      <div class="admin-tab" onclick="adminTab('products',this)">Edit Products</div>
-      <div class="admin-tab" onclick="adminTab('add',this)">Add Product</div>
-      <div class="admin-tab" onclick="adminTab('coupons',this)">Coupons</div>
-      <div class="admin-tab" onclick="adminTab('banner',this)">Banner</div>
+      <div class="admin-tab"        onclick="adminTab('products',this)">Edit Products</div>
+      <div class="admin-tab"        onclick="adminTab('add',this)">Add Product</div>
+      <div class="admin-tab"        onclick="adminTab('coupons',this)">Coupons</div>
+      <div class="admin-tab"        onclick="adminTab('banner',this)">Banner</div>
     </div>
+
     <div id="admin-orders-tab"></div>
     <div id="admin-products-tab" class="hide"></div>
-    <div id="admin-add-tab" class="hide"></div>
-    <div id="admin-coupons-tab" class="hide"></div>
-    <div id="admin-banner-tab" class="hide"></div>
+    <div id="admin-add-tab"      class="hide"></div>
+    <div id="admin-coupons-tab"  class="hide"></div>
+    <div id="admin-banner-tab"   class="hide"></div>
   </div>
-</div>
 
-<!-- CART MODAL -->
+</div><!-- /#page-admin -->
+
+<!-- ============================================================
+     CART MODAL
+     ============================================================ -->
 <div id="cart-modal" class="modal-bg hide">
   <div class="modal">
-    <div class="modal-title">Your Bag <button class="close-btn" onclick="closeCart()">✕</button></div>
+    <div class="modal-title">
+      Your Bag
+      <button class="close-btn" onclick="closeCart()">✕</button>
+    </div>
     <div id="cart-items-container"></div>
     <div id="cart-footer"></div>
   </div>
 </div>
 
-<!-- PRODUCT DETAIL MODAL -->
+<!-- ============================================================
+     PRODUCT DETAIL MODAL
+     ============================================================ -->
 <div id="detail-modal" class="modal-bg hide">
   <div class="modal" style="max-width:560px">
     <div class="modal-title" style="margin-bottom:12px">
@@ -464,7 +233,9 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:32px
   </div>
 </div>
 
-<!-- AUTH MODAL -->
+<!-- ============================================================
+     AUTH MODAL
+     ============================================================ -->
 <div id="auth-modal" class="modal-bg hide">
   <div class="modal" style="max-width:380px">
     <div class="modal-title">
@@ -473,7 +244,7 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:32px
     </div>
     <div class="auth-tabs">
       <div class="auth-tab active" onclick="authTab('login',this)">Login</div>
-      <div class="auth-tab" onclick="authTab('signup',this)">Sign Up</div>
+      <div class="auth-tab"        onclick="authTab('signup',this)">Sign Up</div>
     </div>
     <div class="social-login">
       <button class="social-btn" onclick="socialLogin('Google')">🌐 Google</button>
@@ -484,19 +255,31 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:32px
   </div>
 </div>
 
-<!-- ORDER / CHECKOUT MODAL -->
+<!-- ============================================================
+     CHECKOUT / ORDER MODAL
+     ============================================================ -->
 <div id="order-modal" class="modal-bg hide">
   <div class="modal">
-    <div class="modal-title">Checkout <button class="close-btn" onclick="closeOrderModal()">✕</button></div>
-    <div id="checkout-user-info" style="background:var(--gold-bg);border:1px solid var(--gold-dim);padding:10px 14px;font-size:12px;margin-bottom:14px"></div>
-    <div class="form-group"><label>Full Name</label><input type="text" id="o-name" placeholder="Your name"/></div>
-    <div class="form-group"><label>Phone</label><input type="text" id="o-phone" placeholder="10 digit"/></div>
-    <div class="form-group"><label>Email</label><input type="text" id="o-email" placeholder="email@example.com"/></div>
-    <div class="form-group"><label>Address</label><input type="text" id="o-addr" placeholder="Full address"/></div>
-    <div class="form-row">
-      <div class="form-group"><label>City</label><input type="text" id="o-city" placeholder="City"/></div>
-      <div class="form-group"><label>Pincode</label><input type="text" id="o-pin" placeholder="Pincode"/></div>
+    <div class="modal-title">
+      Checkout
+      <button class="close-btn" onclick="closeOrderModal()">✕</button>
     </div>
+
+    <!-- Logged-in user info strip -->
+    <div id="checkout-user-info"
+         style="background:var(--gold-bg);border:1px solid var(--gold-dim);padding:10px 14px;font-size:12px;margin-bottom:14px">
+    </div>
+
+    <div class="form-group"><label>Full Name</label><input  type="text" id="o-name"  placeholder="Your name"/></div>
+    <div class="form-group"><label>Phone</label>   <input  type="text" id="o-phone" placeholder="10 digit"/></div>
+    <div class="form-group"><label>Email</label>   <input  type="text" id="o-email" placeholder="email@example.com"/></div>
+    <div class="form-group"><label>Address</label> <input  type="text" id="o-addr"  placeholder="Full address"/></div>
+    <div class="form-row">
+      <div class="form-group"><label>City</label>   <input type="text" id="o-city" placeholder="City"/></div>
+      <div class="form-group"><label>Pincode</label><input type="text" id="o-pin"  placeholder="Pincode"/></div>
+    </div>
+
+    <!-- Delivery checker -->
     <div class="form-group">
       <label>Check Delivery</label>
       <div class="pincode-row">
@@ -505,63 +288,97 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:32px
       </div>
       <div id="delivery-result"></div>
     </div>
-    <div class="form-group"><label>Estimated Delivery</label>
-      <div style="font-size:12px;color:var(--green);padding:8px;background:rgba(76,175,125,.08);border:1px solid rgba(76,175,125,.2)" id="est-delivery">Usually 3-5 business days</div>
+
+    <div class="form-group">
+      <label>Estimated Delivery</label>
+      <div id="est-delivery"
+           style="font-size:12px;color:var(--green);padding:8px;background:rgba(76,175,125,.08);border:1px solid rgba(76,175,125,.2)">
+        Usually 3-5 business days
+      </div>
     </div>
+
     <div class="divider"></div>
+
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
       <span style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted)">Order Total</span>
       <span style="font-family:'Cormorant Garamond',serif;font-size:1.4rem;color:var(--gold)" id="order-total-display">₹0</span>
     </div>
+
     <button class="razorpay-btn" onclick="simulateRazorpay()">💳 Pay with Razorpay</button>
-    <div style="font-size:10px;color:var(--muted);text-align:center;margin-top:6px">UPI • Cards • NetBanking • Wallets — Secured by Razorpay</div>
+    <div style="font-size:10px;color:var(--muted);text-align:center;margin-top:6px">
+      UPI • Cards • NetBanking • Wallets — Secured by Razorpay
+    </div>
   </div>
 </div>
 
-<!-- REVIEW MODAL -->
+<!-- ============================================================
+     REVIEW MODAL
+     ============================================================ -->
 <div id="review-modal" class="modal-bg hide">
   <div class="modal" style="max-width:380px">
-    <div class="modal-title">Write a Review <button class="close-btn" onclick="document.getElementById('review-modal').classList.add('hide')">✕</button></div>
-    <div class="form-group"><label>Rating</label>
+    <div class="modal-title">
+      Write a Review
+      <button class="close-btn" onclick="document.getElementById('review-modal').classList.add('hide')">✕</button>
+    </div>
+    <div class="form-group">
+      <label>Rating</label>
       <div id="star-picker" style="font-size:24px;cursor:pointer;letter-spacing:4px">⭐⭐⭐⭐⭐</div>
     </div>
-    <div class="form-group"><label>Your Review</label><textarea id="review-text" rows="3" placeholder="Share your experience..."></textarea></div>
+    <div class="form-group">
+      <label>Your Review</label>
+      <textarea id="review-text" rows="3" placeholder="Share your experience…"></textarea>
+    </div>
     <input type="hidden" id="review-product-id"/>
     <button class="btn-gold" onclick="submitReview()" style="width:100%">Submit Review</button>
   </div>
 </div>
 
-<!-- WHATSAPP FLOAT -->
-<a class="wa-float" href="https://wa.me/919876543210?text=Hi! I'm interested in KRIVVA products" target="_blank" title="Chat on WhatsApp">💬</a>
+<!-- ============================================================
+     FLOATING WHATSAPP BUTTON
+     ============================================================ -->
+<a class="wa-float"
+   href="https://wa.me/919876543210?text=Hi! I'm interested in KRIVVA products"
+   target="_blank"
+   title="Chat on WhatsApp">
+  💬
+</a>
 
-<!-- SCROLL TOP -->
+<!-- ============================================================
+     SCROLL TO TOP
+     ============================================================ -->
 <div class="scroll-top" id="scroll-top" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</div>
 
-<!-- BOTTOM NAV -->
+<!-- ============================================================
+     BOTTOM NAV (mobile-style)
+     ============================================================ -->
 <div class="bottom-nav">
-  <div class="bottom-nav-item active" id="bn-home" onclick="showPage('home');setBN('home')">
+  <div class="bottom-nav-item active" id="bn-home"    onclick="showPage('home');setBN('home')">
     <span class="bn-icon">🏠</span><span>Home</span>
   </div>
-  <div class="bottom-nav-item" id="bn-search" onclick="showPage('home');toggleSearch();setBN('search')">
+  <div class="bottom-nav-item"        id="bn-search"  onclick="showPage('home');toggleSearch();setBN('search')">
     <span class="bn-icon">🔍</span><span>Search</span>
   </div>
-  <div class="bottom-nav-item" id="bn-wishlist" onclick="showPage('wishlist');setBN('wishlist')">
+  <div class="bottom-nav-item"        id="bn-wishlist" onclick="showPage('wishlist');setBN('wishlist')">
     <span class="bn-icon">🤍</span><span>Wishlist</span>
   </div>
-  <div class="bottom-nav-item" id="bn-orders" onclick="showPage('orders');setBN('orders')">
+  <div class="bottom-nav-item"        id="bn-orders"  onclick="showPage('orders');setBN('orders')">
     <span class="bn-icon">📦</span><span>Orders</span>
   </div>
-  <div class="bottom-nav-item" id="bn-account" onclick="showAuthModal();setBN('account')">
+  <div class="bottom-nav-item"        id="bn-account" onclick="showAuthModal();setBN('account')">
     <span class="bn-icon">👤</span><span>Account</span>
   </div>
 </div>
 
-<!-- FOOTER -->
+<!-- ============================================================
+     FOOTER
+     ============================================================ -->
 <footer>
   <div class="footer-grid">
     <div>
       <span class="f-logo">KRIVVA</span>
-      <p style="font-size:11px;color:var(--muted);line-height:1.6">Luxury women's fashion curated for the modern woman. Elegance in every thread.</p>
+      <p style="font-size:11px;color:var(--muted);line-height:1.6">
+        Luxury women's fashion curated for the modern woman. Elegance in every thread.
+      </p>
     </div>
     <div>
       <div class="footer-title">Quick Links</div>
@@ -580,7 +397,7 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:32px
     <div>
       <div class="footer-title">Policies</div>
       <span class="footer-link">Shipping Policy</span>
-      <span class="footer-link">Return & Exchange</span>
+      <span class="footer-link">Return &amp; Exchange</span>
       <span class="footer-link">Privacy Policy</span>
       <span class="footer-link">Terms of Service</span>
     </div>
@@ -588,952 +405,28 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:32px
   <div class="footer-bottom">© 2026 KRIVVA. All rights reserved. Made with ♥ for women who love fashion.</div>
 </footer>
 
-<script>
-// ===== DATA =====
-const CATS = [{id:'all',name:'All'},{id:'new',name:'New Arrivals'},{id:'trending',name:'🔥 Trending'},{id:'kurti',name:'Kurtis'},{id:'dress',name:'Dresses'},{id:'coord',name:'Co-ords'},{id:'ethnic',name:'Ethnic'},{id:'casual',name:'Casual'},{id:'winter',name:'Winter'}];
+<!-- ============================================================
+     SCRIPTS  (order matters: data → auth → admin → app)
+     ============================================================ -->
 
-let products = [
-  {id:1,name:'Midnight Bloom Kurti',cat:'kurti',mrp:1899,offer:0,photo:'',icon:'👘',isNew:true,isTrending:false,desc:'Elegant black kurti with gold embroidery. Perfect for festive and casual occasions.',sizes:['S','M','L','XL'],stock:12,reviews:[{author:'Priya S.',stars:5,text:'Absolutely stunning! The quality is amazing.'},{author:'Meera R.',stars:4,text:'Very elegant, fits perfectly.'}]},
-  {id:2,name:'Golden Hour Dress',cat:'dress',mrp:3499,offer:10,photo:'',icon:'👗',isNew:true,isTrending:true,desc:'Flowy gold-accent evening dress, perfect for parties and special occasions.',sizes:['S','M','L','XL','XXL'],stock:5,reviews:[{author:'Ananya K.',stars:5,text:'Got so many compliments wearing this!'},{author:'Riya M.',stars:5,text:'Worth every rupee!'}]},
-  {id:3,name:'Noir Co-ord Set',cat:'coord',mrp:4299,offer:0,photo:'',icon:'🧥',isNew:false,isTrending:true,desc:'Premium black co-ord set with belt. Sophisticated and modern styling.',sizes:['S','M','L'],stock:8,reviews:[{author:'Divya P.',stars:4,text:'Very chic and modern look.'}]},
-  {id:4,name:'Royal Anarkali',cat:'ethnic',mrp:5999,offer:15,photo:'',icon:'🥻',isNew:true,isTrending:true,desc:'Regal anarkali with gold zari work. A showstopper for weddings and festivals.',sizes:['S','M','L','XL'],stock:3,reviews:[{author:'Pooja V.',stars:5,text:'Perfect for wedding season. Gorgeous!'},{author:'Shruti A.',stars:5,text:'Received so many compliments!'}]},
-  {id:5,name:'Velvet Casual Top',cat:'casual',mrp:1299,offer:0,photo:'',icon:'👕',isNew:false,isTrending:false,desc:'Soft velvet casual top. Perfect for everyday comfort and style.',sizes:['S','M','L','XL'],stock:20,reviews:[{author:'Nisha K.',stars:4,text:'Super soft and comfortable!'}]},
-  {id:6,name:'Embroidered Kurti Set',cat:'kurti',mrp:2599,offer:20,photo:'',icon:'👘',isNew:false,isTrending:true,desc:'Cotton kurti with palazzo. Comfortable for daily wear with a traditional touch.',sizes:['M','L','XL'],stock:15,reviews:[{author:'Kavya M.',stars:4,text:'Great quality cotton fabric.'}]},
-  {id:7,name:'Wrap Maxi Dress',cat:'dress',mrp:2999,offer:0,photo:'',icon:'👗',isNew:true,isTrending:false,desc:'Elegant wrap style maxi dress. Versatile and sophisticated for any occasion.',sizes:['S','M','L'],stock:2,reviews:[]},
-  {id:8,name:'Bridal Lehenga',cat:'ethnic',mrp:9999,offer:30,photo:'',icon:'🥻',isNew:false,isTrending:true,desc:'Heavy embroidered bridal lehenga with dupatta. A dream come true for brides.',sizes:['S','M','L','XL'],stock:4,reviews:[{author:'Rashmi B.',stars:5,text:'My dream lehenga! Absolutely gorgeous!'}]},
-];
+<!-- 1. Data layer — products, orders, coupons, shared state & helpers -->
+<script src="js/data.js"></script>
 
-let orders = [
-  {id:'KRV-001',name:'Priya Sharma',phone:'9876543210',email:'priya@email.com',addr:'12 MG Road',city:'Pune',pin:'411001',items:[{name:'Golden Hour Dress',price:3149,qty:1,icon:'👗',size:'M'}],total:3149,status:'dispatched',date:'2026-04-28'},
-  {id:'KRV-002',name:'Ananya Singh',phone:'9812345678',email:'ananya@email.com',addr:'45 Park St',city:'Mumbai',pin:'400001',items:[{name:'Royal Anarkali',price:5099,qty:1,icon:'🥻',size:'L'}],total:5099,status:'delivered',date:'2026-04-25'},
-];
-
-let coupons = [{code:'KRIVVA10',discount:10,type:'percent'},{code:'FLAT200',discount:200,type:'flat'},{code:'NEW50',discount:50,type:'flat'}];
-
-let cart = [];
-let wishlist = [];
-let activeCat = 'all';
-let orderCount = 2;
-const photoStore = {};
-let newPhotoData = '';
-let currentUser = null;
-let selectedSizes = {};
-let activeReviewProductId = null;
-let appliedCoupon = null;
-
-// ===== HELPERS =====
-function ep(p){return p.offer>0?Math.round(p.mrp*(1-p.offer/100)):p.mrp;}
-
-function showToast(msg,type='gold'){
-  document.querySelectorAll('.toast').forEach(t=>t.remove());
-  const t=document.createElement('div');
-  t.className='toast';
-  t.style.borderLeftColor=type==='green'?'var(--green)':type==='red'?'var(--red)':'var(--gold)';
-  t.textContent=msg;
-  document.body.appendChild(t);
-  setTimeout(()=>t.remove(),2800);
-}
-
-function getPhoto(p){return photoStore[p.id]||p.photo||'';}
-
-function imgHTML(p,h=160){
-  const ph=getPhoto(p);
-  if(ph)return`<img src="${ph}" alt="${p.name}" style="width:100%;height:${h}px;object-fit:cover" onerror="this.style.display='none'"/>`;
-  return`<span class="emoji-fb" style="font-size:${h>100?52:36}px">${p.icon}</span>`;
-}
-
-// ===== CURSOR =====
-const cursor=document.getElementById('cursor'),ring=document.getElementById('cursor-ring');
-document.addEventListener('mousemove',e=>{
-  cursor.style.left=e.clientX+'px';cursor.style.top=e.clientY+'px';
-  ring.style.left=e.clientX+'px';ring.style.top=e.clientY+'px';
-});
-document.addEventListener('mousedown',()=>{cursor.style.width='12px';cursor.style.height='12px';});
-document.addEventListener('mouseup',()=>{cursor.style.width='8px';cursor.style.height='8px';});
-
-// ===== LOADER =====
-window.addEventListener('load',()=>{
-  setTimeout(()=>{
-    document.getElementById('loader').style.opacity='0';
-    setTimeout(()=>document.getElementById('loader').style.display='none',600);
-  },1200);
-});
-
-// ===== SCROLL =====
-window.addEventListener('scroll',()=>{
-  const st=document.getElementById('scroll-top');
-  if(window.scrollY>300)st.classList.add('visible');else st.classList.remove('visible');
-});
-
-// ===== COUNTDOWN =====
-function startCountdown(){
-  const end=new Date();end.setHours(end.getHours()+5,end.getMinutes()+30,0,0);
-  setInterval(()=>{
-    const diff=end-new Date();
-    if(diff<=0)return;
-    const h=Math.floor(diff/3600000),m=Math.floor((diff%3600000)/60000),s=Math.floor((diff%60000)/1000);
-    document.getElementById('cd-h').textContent=String(h).padStart(2,'0');
-    document.getElementById('cd-m').textContent=String(m).padStart(2,'0');
-    document.getElementById('cd-s').textContent=String(s).padStart(2,'0');
-  },1000);
-}
-startCountdown();
-
-// ===== NAVIGATION =====
-function showPage(pg){
-  ['home','wishlist','orders','admin'].forEach(x=>{
-    document.getElementById('page-'+x).classList.toggle('hide',x!==pg);
-    const n=document.getElementById('nav-'+x);if(n)n.classList.toggle('active',x===pg);
-  });
-  if(pg==='orders')renderMyOrders();
-  if(pg==='wishlist')renderWishlist();
-  if(pg==='admin')renderAdminStats();
-  setBN(pg);
-}
-
-function setBN(pg){
-  document.querySelectorAll('.bottom-nav-item').forEach(el=>el.classList.remove('active'));
-  const el=document.getElementById('bn-'+pg);if(el)el.classList.add('active');
-}
-
-// ===== SEARCH =====
-let searchOpen=false;
-function toggleSearch(){
-  searchOpen=!searchOpen;
-  document.getElementById('search-area').classList.toggle('hide',!searchOpen);
-  if(searchOpen){document.getElementById('search-input').focus();document.getElementById('search-results').innerHTML='';}
-}
-function closeSearch(){searchOpen=false;document.getElementById('search-area').classList.add('hide');}
-
-function doSearch(q){
-  const r=document.getElementById('search-results');
-  if(!q.trim()){r.innerHTML='';return;}
-  const res=products.filter(p=>p.name.toLowerCase().includes(q.toLowerCase())||p.cat.toLowerCase().includes(q.toLowerCase()));
-  if(!res.length){r.innerHTML='<div class="empty" style="padding:20px;color:var(--muted)">No products found</div>';return;}
-  r.innerHTML=res.map(p=>productCardHTML(p)).join('');
-}
-
-// ===== CATEGORIES =====
-function renderCats(){
-  document.getElementById('cats-container').innerHTML=CATS.map(c=>`<div class="cat ${c.id===activeCat?'active':''}" onclick="filterCat('${c.id}')">${c.name}</div>`).join('');
-}
-
-function filterCat(id){
-  activeCat=id;renderCats();renderProducts();
-  const label=CATS.find(c=>c.id===id)?.name||'All';
-  document.getElementById('filter-label').textContent=id==='all'?'All Items':label;
-  document.getElementById('shop').scrollIntoView({behavior:'smooth'});
-}
-
-function getFiltered(){
-  if(activeCat==='all')return products;
-  if(activeCat==='new')return products.filter(p=>p.isNew);
-  if(activeCat==='trending')return products.filter(p=>p.isTrending);
-  return products.filter(p=>p.cat===activeCat);
-}
-
-// ===== PRODUCTS =====
-function avgStars(p){if(!p.reviews?.length)return 0;return Math.round(p.reviews.reduce((a,b)=>a+b.stars,0)/p.reviews.length);}
-function starsHTML(n){return'⭐'.repeat(n)+'☆'.repeat(5-n);}
-
-function productCardHTML(p){
-  const price=ep(p),wl=wishlist.includes(p.id),isLow=p.stock>0&&p.stock<=5,stars=avgStars(p);
-  return`<div class="product-card" id="pc-${p.id}">
-    <div class="product-img" onclick="openDetail(${p.id})">
-      ${getPhoto(p)?`<img src="${getPhoto(p)}" alt="${p.name}" style="width:100%;height:160px;object-fit:cover" onerror="this.style.display='none'"/>`:`<span class="emoji-fb">${p.icon}</span>`}
-      <div class="product-img-overlay">
-        <button class="overlay-btn" onclick="event.stopPropagation();openDetail(${p.id})">Quick View</button>
-      </div>
-    </div>
-    <div class="p-badges">
-      ${p.isNew?'<span class="p-badge badge-new">New</span>':''}
-      ${p.isTrending?'<span class="p-badge badge-trending">🔥 Hot</span>':''}
-      ${p.offer>0?`<span class="p-badge badge-offer">${p.offer}% off</span>`:''}
-      ${isLow?`<span class="p-badge" style="background:rgba(224,82,82,.85);color:#fff">Only ${p.stock} left!</span>`:''}
-    </div>
-    <button class="wishlist-btn ${wl?'active':''}" onclick="toggleWishlist(${p.id})">♥</button>
-    <div class="product-info">
-      <div class="product-name">${p.name}</div>
-      <div class="product-cat">${p.cat}</div>
-      ${stars>0?`<div class="stars">${starsHTML(stars)} <span style="font-size:9px;color:var(--muted)">(${p.reviews.length})</span></div>`:''}
-      <div class="price-row">
-        <span class="product-price">₹${price.toLocaleString()}</span>
-        ${p.mrp>price?`<span class="product-old">₹${p.mrp.toLocaleString()}</span>`:''}
-        ${p.offer>0?`<span class="offer-tag">${p.offer}% off</span>`:''}
-      </div>
-      ${p.stock===0?'<div style="font-size:10px;color:var(--red);margin-bottom:6px">Out of Stock</div>':''}
-      <button class="add-cart" onclick="quickAddToCart(${p.id})" ${p.stock===0?'disabled style="opacity:.4;cursor:not-allowed"':''}>
-        ${p.stock===0?'Out of Stock':'Add to Bag'}
-      </button>
-    </div>
-  </div>`;
-}
-
-function renderProducts(){
-  const list=getFiltered();
-  document.getElementById('product-count').textContent=list.length+' items';
-  document.getElementById('products-container').innerHTML=list.length?list.map(productCardHTML).join(''):`<div style="grid-column:1/-1;padding:40px;text-align:center;color:var(--muted)"><div style="font-size:36px;margin-bottom:10px">👗</div><div>No products here</div></div>`;
-}
-
-// ===== PRODUCT DETAIL =====
-function openDetail(id){
-  const p=products.find(x=>x.id===id);if(!p)return;
-  const price=ep(p);
-  document.getElementById('detail-title').textContent=p.name;
-  document.getElementById('detail-content').innerHTML=`
-    <div class="product-detail">
-      <div>
-        <div class="pd-img">${getPhoto(p)?`<img src="${getPhoto(p)}" style="width:100%;height:220px;object-fit:cover"/>`:p.icon}</div>
-        <div style="margin-top:10px">
-          <div style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:6px">Share</div>
-          <div style="display:flex;gap:8px">
-            <button onclick="shareProduct(${p.id})" style="background:#25d366;border:none;color:#fff;padding:7px 14px;cursor:pointer;font-size:11px;font-family:'Jost',sans-serif">💬 WhatsApp</button>
-          </div>
-        </div>
-      </div>
-      <div>
-        <div class="pd-title">${p.name}</div>
-        <div style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:8px">${p.cat}</div>
-        ${avgStars(p)>0?`<div class="stars" style="margin-bottom:8px">${starsHTML(avgStars(p))} (${p.reviews.length} reviews)</div>`:''}
-        <div class="price-row" style="margin-bottom:10px">
-          <span class="product-price" style="font-size:1.4rem">₹${price.toLocaleString()}</span>
-          ${p.mrp>price?`<span class="product-old">₹${p.mrp.toLocaleString()}</span>`:''}
-          ${p.offer>0?`<span class="offer-tag">${p.offer}% off</span>`:''}
-        </div>
-        <div class="pd-desc">${p.desc}</div>
-        <div style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:8px">Select Size</div>
-        <div class="size-grid">${p.sizes.map(s=>`<button class="size-btn ${selectedSizes[id]===s?'active':''}" onclick="selectSize(${id},'${s}',this)">${s}</button>`).join('')}</div>
-        <div style="font-size:11px;color:${p.stock<=5?'var(--red)':'var(--muted)'};margin-bottom:12px">
-          ${p.stock===0?'Out of Stock':p.stock<=5?`Only ${p.stock} left!`:`${p.stock} in stock`}
-        </div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <button class="btn-gold" onclick="addToCartFromDetail(${id})" ${p.stock===0?'disabled':''}>${p.stock===0?'Out of Stock':'Add to Bag'}</button>
-          <button class="btn-outline btn-sm" onclick="toggleWishlist(${id})">${wishlist.includes(id)?'❤️ Saved':'🤍 Wishlist'}</button>
-        </div>
-      </div>
-    </div>
-    <div class="divider"></div>
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-      <div style="font-size:12px;font-weight:500;color:var(--white)">Customer Reviews</div>
-      <button class="btn-outline btn-sm" onclick="openReview(${id})">Write Review</button>
-    </div>
-    ${p.reviews?.length?p.reviews.map(r=>`<div class="review-card"><div style="display:flex;align-items:center;gap:8px;margin-bottom:4px"><div class="review-author">${r.author}</div><div style="font-size:10px">⭐${r.stars}</div></div><div class="review-text">${r.text}</div></div>`).join(''):'<div style="font-size:12px;color:var(--muted);padding:8px">No reviews yet. Be the first!</div>'}
-    <div class="divider"></div>
-    <div style="font-size:12px;font-weight:500;color:var(--white);margin-bottom:10px">You May Also Like</div>
-    <div class="related-grid">${products.filter(x=>x.cat===p.cat&&x.id!==p.id).slice(0,4).map(r=>`<div style="background:var(--surface);border:1px solid var(--border);cursor:pointer" onclick="closeDetail();setTimeout(()=>openDetail(${r.id}),100)"><div style="height:80px;display:flex;align-items:center;justify-content:center;background:var(--surface2);overflow:hidden">${getPhoto(r)?`<img src="${getPhoto(r)}" style="width:100%;height:80px;object-fit:cover"/>`:`<span style="font-size:28px">${r.icon}</span>`}</div><div style="padding:8px"><div style="font-size:11px;color:var(--white)">${r.name}</div><div style="font-size:10px;color:var(--gold)">₹${ep(r).toLocaleString()}</div></div></div>`).join('')}</div>
-  `;
-  document.getElementById('detail-modal').classList.remove('hide');
-}
-
-function closeDetail(){document.getElementById('detail-modal').classList.add('hide');}
-
-function selectSize(pid,size,el){
-  selectedSizes[pid]=size;
-  document.querySelectorAll('.size-btn').forEach(b=>b.classList.remove('active'));
-  el.classList.add('active');
-}
-
-function shareProduct(id){
-  const p=products.find(x=>x.id===id);if(!p)return;
-  const text=`Check out ${p.name} at KRIVVA for ₹${ep(p).toLocaleString()}! 👗✨`;
-  window.open(`https://wa.me/?text=${encodeURIComponent(text)}`,'_blank');
-}
-
-// ===== WISHLIST =====
-function toggleWishlist(id){
-  const idx=wishlist.indexOf(id);
-  if(idx>-1){wishlist.splice(idx,1);showToast('Removed from wishlist','red');}
-  else{wishlist.push(id);showToast('Added to wishlist ♥','gold');}
-  updateWLCount();renderProducts();
-  if(!document.getElementById('page-wishlist').classList.contains('hide'))renderWishlist();
-}
-
-function updateWLCount(){
-  const n=wishlist.length;
-  const el=document.getElementById('wl-count-nav');
-  el.textContent=n;el.classList.toggle('hide',n===0);
-}
-
-function renderWishlist(){
-  const c=document.getElementById('wishlist-container');
-  if(!wishlist.length){c.innerHTML='<div class="empty" style="padding:40px;text-align:center;color:var(--muted)"><div style="font-size:40px;margin-bottom:10px">🤍</div><div>No saved items</div></div>';return;}
-  const items=products.filter(p=>wishlist.includes(p.id));
-  c.innerHTML=`<div class="wishlist-grid">${items.map(p=>`
-    <div class="wishlist-card">
-      <div class="wl-img" onclick="openDetail(${p.id})" style="cursor:pointer">${getPhoto(p)?`<img src="${getPhoto(p)}" style="width:100%;height:110px;object-fit:cover"/>`:p.icon}</div>
-      <div class="wl-info">
-        <div style="font-size:12px;font-weight:500;color:var(--white);margin-bottom:3px">${p.name}</div>
-        <div style="font-family:'Cormorant Garamond',serif;font-size:1rem;color:var(--gold);margin-bottom:8px">₹${ep(p).toLocaleString()}</div>
-        <div style="display:flex;gap:6px">
-          <button class="add-cart" style="flex:1" onclick="quickAddToCart(${p.id})">Add to Bag</button>
-          <button onclick="toggleWishlist(${p.id})" style="background:none;border:1px solid var(--border);color:var(--red);padding:7px 8px;cursor:pointer">✕</button>
-        </div>
-      </div>
-    </div>`).join('')}</div>`;
-}
-
-// ===== CART =====
-function quickAddToCart(id){
-  const p=products.find(x=>x.id===id);if(!p||p.stock===0)return;
-  const size=selectedSizes[id]||(p.sizes?.length?p.sizes[0]:'M');
-  addToCartItem(p,size);
-}
-
-function addToCartFromDetail(id){
-  const p=products.find(x=>x.id===id);if(!p)return;
-  if(!selectedSizes[id]&&p.sizes?.length){showToast('Please select a size first','red');return;}
-  addToCartItem(p,selectedSizes[id]||'M');
-  closeDetail();
-}
-
-function addToCartItem(p,size){
-  const price=ep(p);
-  const key=`${p.id}-${size}`;
-  const ex=cart.find(x=>x.key===key);
-  if(ex)ex.qty++;
-  else cart.push({id:p.id,key,name:p.name,price,icon:p.icon,photo:getPhoto(p),qty:1,size});
-  updateCartCount();
-  showToast(`${p.name} (${size}) added to bag ✓`);
-}
-
-function updateCartCount(){document.getElementById('cart-count').textContent=cart.reduce((a,b)=>a+b.qty,0);}
-
-function showCart(){renderCart();document.getElementById('cart-modal').classList.remove('hide');}
-function closeCart(){document.getElementById('cart-modal').classList.add('hide');}
-
-function renderCart(){
-  const c=document.getElementById('cart-items-container'),f=document.getElementById('cart-footer');
-  if(!cart.length){c.innerHTML='<div style="text-align:center;padding:32px;color:var(--muted)"><div style="font-size:36px;margin-bottom:10px">🛍️</div><div>Your bag is empty</div></div>';f.innerHTML='';return;}
-  c.innerHTML=cart.map(i=>`
-    <div class="cart-item">
-      <div class="cart-thumb">${i.photo?`<img src="${i.photo}" style="width:100%;height:100%;object-fit:cover"/>`:i.icon}</div>
-      <div style="flex:1">
-        <div style="font-size:12px;font-weight:500;color:var(--white)">${i.name}</div>
-        <div style="font-size:10px;color:var(--muted)">Size: ${i.size}</div>
-        <div style="font-size:12px;color:var(--gold)">₹${i.price.toLocaleString()}</div>
-        <div style="display:flex;align-items:center;gap:7px;margin-top:5px">
-          <button class="qty-btn" onclick="changeQty('${i.key}',-1)">−</button>
-          <span style="font-size:12px">${i.qty}</span>
-          <button class="qty-btn" onclick="changeQty('${i.key}',1)">+</button>
-        </div>
-      </div>
-      <button class="remove-btn" onclick="removeFromCart('${i.key}')">✕</button>
-    </div>`).join('');
-
-  let subtotal=cart.reduce((a,b)=>a+b.price*b.qty,0);
-  let discount=0;
-  if(appliedCoupon){
-    if(appliedCoupon.type==='percent')discount=Math.round(subtotal*appliedCoupon.discount/100);
-    else discount=appliedCoupon.discount;
-  }
-  const total=Math.max(0,subtotal-discount);
-  const shipping=total>=999?0:99;
-  const grand=total+shipping;
-
-  f.innerHTML=`
-    <div class="coupon-row">
-      <input type="text" id="coupon-input" placeholder="Coupon code (try KRIVVA10)" value="${appliedCoupon?appliedCoupon.code:''}" ${appliedCoupon?'disabled':''}/>
-      <button onclick="${appliedCoupon?'removeCoupon()':'applyCoupon()'}">${appliedCoupon?'Remove':'Apply'}</button>
-    </div>
-    ${appliedCoupon?`<div style="font-size:11px;color:var(--green);margin-bottom:8px">✓ ${appliedCoupon.code} applied — Saved ₹${discount.toLocaleString()}</div>`:''}
-    <div style="font-size:11px;color:var(--muted);padding:8px 0;border-top:1px solid var(--border)">
-      <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span>Subtotal</span><span>₹${subtotal.toLocaleString()}</span></div>
-      ${discount>0?`<div style="display:flex;justify-content:space-between;margin-bottom:4px;color:var(--green)"><span>Discount</span><span>-₹${discount.toLocaleString()}</span></div>`:''}
-      <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span>Shipping</span><span>${shipping===0?'<span style="color:var(--green)">FREE</span>':'₹'+shipping}</span></div>
-    </div>
-    <div style="padding:10px 0;display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--border)">
-      <span style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted)">Total</span>
-      <span style="font-family:'Cormorant Garamond',serif;font-size:1.5rem;color:var(--gold)">₹${grand.toLocaleString()}</span>
-    </div>
-    <button class="btn-gold" style="width:100%" onclick="goCheckout(${grand})">Proceed to Checkout</button>
-    <div style="font-size:10px;color:var(--muted);text-align:center;margin-top:6px">${shipping===0?'🎉 You qualify for FREE shipping!':'Add ₹'+(999-subtotal)+' more for FREE shipping'}</div>`;
-}
-
-function changeQty(key,d){const i=cart.find(x=>x.key===key);if(!i)return;i.qty+=d;if(i.qty<=0)cart=cart.filter(x=>x.key!==key);updateCartCount();renderCart();}
-function removeFromCart(key){cart=cart.filter(x=>x.key!==key);updateCartCount();renderCart();}
-
-function applyCoupon(){
-  const code=document.getElementById('coupon-input').value.trim().toUpperCase();
-  const c=coupons.find(x=>x.code===code);
-  if(c){appliedCoupon=c;showToast('Coupon applied! ✓','green');}
-  else showToast('Invalid coupon code','red');
-  renderCart();
-}
-function removeCoupon(){appliedCoupon=null;renderCart();}
-
-function goCheckout(total){
-  if(!currentUser){closeCart();showToast('Please login to continue','red');showAuthModal('checkout');return;}
-  closeCart();
-  document.getElementById('o-name').value=currentUser.name||'';
-  document.getElementById('o-email').value=currentUser.email||'';
-  document.getElementById('order-total-display').textContent='₹'+total.toLocaleString();
-  document.getElementById('checkout-user-info').innerHTML=`👤 Logged in as <strong>${currentUser.name}</strong> (${currentUser.email})`;
-  setEstDelivery();
-  document.getElementById('order-modal').classList.remove('hide');
-}
-
-function setEstDelivery(){
-  const d=new Date();d.setDate(d.getDate()+4);
-  const opts={weekday:'long',month:'long',day:'numeric'};
-  document.getElementById('est-delivery').textContent='Estimated by '+d.toLocaleDateString('en-IN',opts);
-}
-
-function checkDelivery(){
-  const pin=document.getElementById('delivery-pin').value.trim();
-  const el=document.getElementById('delivery-result');
-  if(pin.length!==6||isNaN(pin)){el.innerHTML='<div class="pincode-result pincode-no">Please enter a valid 6-digit pincode</div>';return;}
-  const serviceablePins=['400001','411001','560001','500001','600001','110001','302001','380001'];
-  const ok=serviceablePins.includes(pin)||pin.startsWith('4')||pin.startsWith('5');
-  el.innerHTML=ok?`<div class="pincode-result pincode-ok">✓ Delivery available to ${pin} — arrives in 3-5 days</div>`:`<div class="pincode-result pincode-no">✕ We don't deliver to ${pin} yet. Try a nearby pincode.</div>`;
-}
-
-function closeOrderModal(){document.getElementById('order-modal').classList.add('hide');}
-
-function simulateRazorpay(){
-  const name=document.getElementById('o-name').value.trim();
-  const phone=document.getElementById('o-phone').value.trim();
-  const addr=document.getElementById('o-addr').value.trim();
-  if(!name||!phone||!addr){showToast('Please fill all required fields','red');return;}
-  const subtotal=cart.reduce((a,b)=>a+b.price*b.qty,0);
-  let discount=0;
-  if(appliedCoupon){
-    if(appliedCoupon.type==='percent')discount=Math.round(subtotal*appliedCoupon.discount/100);
-    else discount=appliedCoupon.discount;
-  }
-  const shipping=subtotal>=999?0:99;
-  const total=Math.max(0,subtotal-discount)+shipping;
-  orderCount++;
-  const oid='KRV-00'+orderCount;
-  orders.unshift({id:oid,name,phone,email:document.getElementById('o-email').value,addr,city:document.getElementById('o-city').value,pin:document.getElementById('o-pin').value,items:cart.map(i=>({name:i.name,price:i.price,qty:i.qty,icon:i.icon,size:i.size})),total,status:'placed',date:new Date().toISOString().split('T')[0]});
-  cart=[];appliedCoupon=null;updateCartCount();closeOrderModal();
-  showToast('Order '+oid+' placed! Payment successful ✓','green');
-  setTimeout(()=>showPage('orders'),1400);
-}
-
-// ===== MY ORDERS =====
-function renderMyOrders(){
-  const c=document.getElementById('my-orders-container');
-  const userOrders=currentUser?orders:[];
-  if(!currentUser){c.innerHTML='<div style="text-align:center;padding:40px;color:var(--muted)"><div style="font-size:36px;margin-bottom:10px">🔒</div><div>Please login to view your orders</div><button class="btn-gold" style="margin-top:14px" onclick="showAuthModal()">Login</button></div>';return;}
-  if(!userOrders.length){c.innerHTML='<div style="text-align:center;padding:40px;color:var(--muted)"><div style="font-size:36px;margin-bottom:10px">📦</div><div>No orders yet</div></div>';return;}
-  const steps=['placed','packed','dispatched','delivered'];
-  c.innerHTML=userOrders.map(o=>{
-    const si=steps.indexOf(o.status);
-    return`<div class="order-card">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:6px;margin-bottom:8px">
-        <div>
-          <div style="font-size:13px;font-weight:600;color:var(--white)">${o.id}</div>
-          <div style="font-size:10px;color:var(--muted)">${o.date} • ${o.city||''} • ${o.name}</div>
-        </div>
-        <span class="status-badge status-${o.status}">${o.status}</span>
-      </div>
-      <div style="font-size:11px;color:var(--muted);margin-bottom:6px">${o.items.map(i=>i.name+(i.size?' ('+i.size+')':[])+(i.qty>1?' ×'+i.qty:'')).join(', ')}</div>
-      <div style="font-family:'Cormorant Garamond',serif;font-size:1.1rem;color:var(--gold);margin-bottom:10px">₹${o.total.toLocaleString()}</div>
-      <div class="track-bar">${steps.map((s,i)=>`<div class="track-step ${i<=si?'done':''}"><div class="track-dot ${i<=si?'done':''}">${i<=si?'✓':''}</div><div class="track-label">${s}</div></div>`).join('')}</div>
-    </div>`;}).join('');
-}
-
-// ===== AUTH =====
-let pendingCheckout=false;
-function showAuthModal(ctx){
-  if(currentUser){showUserMenu();return;}
-  pendingCheckout=ctx==='checkout';
-  renderAuthForm('login');
-  document.getElementById('auth-modal').classList.remove('hide');
-}
-function closeAuth(){document.getElementById('auth-modal').classList.add('hide');}
-
-function authTab(tab,el){
-  document.querySelectorAll('.auth-tab').forEach(t=>t.classList.remove('active'));
-  el.classList.add('active');
-  renderAuthForm(tab);
-}
-
-function renderAuthForm(type){
-  const c=document.getElementById('auth-form-container');
-  if(type==='login'){
-    c.innerHTML=`
-      <div class="form-group"><label>Email</label><input type="email" id="auth-email" placeholder="email@example.com"/></div>
-      <div class="form-group"><label>Password</label><input type="password" id="auth-pass" placeholder="Password"/></div>
-      <button class="btn-gold" onclick="doLogin()" style="width:100%">Login</button>
-      <div style="font-size:10px;color:var(--muted);text-align:center;margin-top:10px">Demo: any email + any password</div>`;
-  } else {
-    c.innerHTML=`
-      <div class="form-group"><label>Full Name</label><input type="text" id="auth-name" placeholder="Your name"/></div>
-      <div class="form-group"><label>Email</label><input type="email" id="auth-email" placeholder="email@example.com"/></div>
-      <div class="form-group"><label>Password</label><input type="password" id="auth-pass" placeholder="Create password"/></div>
-      <div class="form-group"><label>Phone</label><input type="text" id="auth-phone" placeholder="10 digit number"/></div>
-      <button class="btn-gold" onclick="doSignup()" style="width:100%">Create Account</button>`;
-  }
-}
-
-function doLogin(){
-  const email=document.getElementById('auth-email').value.trim();
-  const pass=document.getElementById('auth-pass').value.trim();
-  if(!email||!pass){showToast('Please fill all fields','red');return;}
-  currentUser={name:email.split('@')[0],email,phone:''};
-  afterLogin();
-}
-
-function doSignup(){
-  const name=document.getElementById('auth-name').value.trim();
-  const email=document.getElementById('auth-email').value.trim();
-  const pass=document.getElementById('auth-pass').value.trim();
-  if(!name||!email||!pass){showToast('Please fill all fields','red');return;}
-  currentUser={name,email,phone:document.getElementById('auth-phone')?.value||''};
-  afterLogin();
-}
-
-function socialLogin(provider){
-  currentUser={name:provider+' User',email:'user@'+provider.toLowerCase()+'.com',phone:''};
-  afterLogin();
-}
-
-function afterLogin(){
-  closeAuth();
-  updateUserNav();
-  showToast('Welcome, '+currentUser.name+'! 👗','green');
-  if(pendingCheckout){pendingCheckout=false;const t=cart.reduce((a,b)=>a+b.price*b.qty,0);setTimeout(()=>goCheckout(t),400);}
-}
-
-function updateUserNav(){
-  const area=document.getElementById('user-nav-area');
-  if(currentUser){
-    area.innerHTML=`<div class="user-avatar" onclick="showUserMenu()" title="${currentUser.name}">${currentUser.name[0].toUpperCase()}</div>`;
-  } else {
-    area.innerHTML=`<button class="nav-icon-btn" onclick="showAuthModal()" title="Login">👤</button>`;
-  }
-}
-
-function showUserMenu(){
-  showToast(`Logged in as ${currentUser.name} | ${currentUser.email}`);
-}
-
-// ===== REVIEWS =====
-function openReview(id){activeReviewProductId=id;document.getElementById('review-modal').classList.remove('hide');}
-function submitReview(){
-  const text=document.getElementById('review-text').value.trim();
-  if(!text){showToast('Please write a review','red');return;}
-  if(!currentUser){showToast('Please login first','red');return;}
-  const p=products.find(x=>x.id===activeReviewProductId);
-  if(p){p.reviews.push({author:currentUser.name,stars:5,text});showToast('Review submitted! Thank you ✓','green');}
-  document.getElementById('review-modal').classList.add('hide');
-  document.getElementById('review-text').value='';
-  renderProducts();
-}
-
-// ===== ADMIN =====
-function adminLogin(){
-  if(document.getElementById('admin-pass').value==='krivva123'){
-    document.getElementById('admin-login-section').classList.add('hide');
-    document.getElementById('admin-panel').classList.remove('hide');
-    renderAdminStats();renderAdminChart();renderLowStock();renderAdminOrders();renderAdminEditProducts();renderAdminAddProduct();renderAdminCoupons();renderAdminBanner();
-  } else showToast('Wrong password!','red');
-}
-
-function renderAdminStats(){
-  const revenue=orders.reduce((a,b)=>a+b.total,0);
-  const pending=orders.filter(o=>o.status==='placed').length;
-  document.getElementById('admin-stats').innerHTML=`
-    <div class="stat"><div class="stat-val">${orders.length}</div><div class="stat-label">Orders</div></div>
-    <div class="stat"><div class="stat-val">₹${(revenue/1000).toFixed(1)}k</div><div class="stat-label">Revenue</div></div>
-    <div class="stat"><div class="stat-val">${products.length}</div><div class="stat-label">Products</div></div>
-    <div class="stat"><div class="stat-val">${pending}</div><div class="stat-label">Pending</div></div>
-    <div class="stat"><div class="stat-val">${wishlist.length}</div><div class="stat-label">Wishlists</div></div>
-    <div class="stat"><div class="stat-val">${coupons.length}</div><div class="stat-label">Coupons</div></div>`;
-}
-
-function renderAdminChart(){
-  const months=['Jan','Feb','Mar','Apr','May','Jun'];
-  const vals=[18,24,19,32,28,35];
-  const max=Math.max(...vals);
-  document.getElementById('admin-chart-area').innerHTML=`
-    <div style="background:var(--surface);border:1px solid var(--border);padding:16px;margin-bottom:12px">
-      <div style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:16px">Monthly Revenue (₹k)</div>
-      <div class="chart-bar">
-        ${vals.map((v,i)=>`<div class="bar" style="height:${(v/max*100)}%" title="₹${v}k">
-          <span class="bar-val">₹${v}k</span>
-          <span class="bar-label">${months[i]}</span>
-        </div>`).join('')}
-      </div>
-      <div style="margin-top:28px"></div>
-    </div>`;
-}
-
-function renderLowStock(){
-  const low=products.filter(p=>p.stock<=5&&p.stock>0);
-  const oos=products.filter(p=>p.stock===0);
-  let html='';
-  if(oos.length)html+=`<div class="low-stock-alert">⚠️ Out of Stock: ${oos.map(p=>p.name).join(', ')}</div>`;
-  if(low.length)html+=`<div class="low-stock-alert" style="color:orange;background:rgba(255,165,0,.08);border-color:rgba(255,165,0,.3)">⚡ Low Stock: ${low.map(p=>`${p.name} (${p.stock} left)`).join(', ')}</div>`;
-  document.getElementById('low-stock-area').innerHTML=html;
-}
-
-function adminTab(tab,el){
-  document.querySelectorAll('.admin-tab').forEach(t=>t.classList.remove('active'));
-  el.classList.add('active');
-  ['orders','products','add','coupons','banner'].forEach(t=>document.getElementById('admin-'+t+'-tab').classList.toggle('hide',t!==tab));
-}
-
-function renderAdminOrders(){
-  document.getElementById('admin-orders-tab').innerHTML=`
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-      <div style="font-size:11px;color:var(--muted)">${orders.length} total orders</div>
-      <button class="btn-outline btn-sm" onclick="exportOrders()">Export CSV</button>
-    </div>`+
-    orders.map(o=>`
-    <div class="edit-card">
-      <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;margin-bottom:8px">
-        <div>
-          <div style="font-size:13px;font-weight:600;color:var(--white)">${o.id} — ${o.name}</div>
-          <div style="font-size:10px;color:var(--muted)">${o.phone} • ${o.addr}, ${o.city} ${o.pin}</div>
-          <div style="font-size:10px;color:var(--muted);margin-top:2px">${o.items.map(i=>i.name+(i.size?' ('+i.size+')':[])+(i.qty>1?' ×'+i.qty:'')).join(', ')}</div>
-        </div>
-        <div style="font-family:'Cormorant Garamond',serif;color:var(--gold)">₹${o.total.toLocaleString()}</div>
-      </div>
-      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-        <select style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:6px 9px;font-family:'Jost',sans-serif;font-size:11px;outline:none" id="st-${o.id}">
-          ${['placed','packed','dispatched','delivered'].map(s=>`<option value="${s}" ${o.status===s?'selected':''}>${s}</option>`).join('')}
-        </select>
-        <button class="btn-gold btn-sm" onclick="updateStatus('${o.id}')">Update</button>
-        <button class="btn-outline btn-sm" onclick="notifyWhatsApp('${o.id}')">📱 Notify</button>
-        <span class="status-badge status-${o.status}" id="sbadge-${o.id}">${o.status}</span>
-      </div>
-    </div>`).join('');
-}
-
-function updateStatus(id){
-  const o=orders.find(x=>x.id===id);if(!o)return;
-  o.status=document.getElementById('st-'+id).value;
-  document.getElementById('sbadge-'+id).className='status-badge status-'+o.status;
-  document.getElementById('sbadge-'+id).textContent=o.status;
-  renderAdminStats();showToast('Order '+id+' → '+o.status,'green');
-}
-
-function notifyWhatsApp(id){
-  const o=orders.find(x=>x.id===id);if(!o)return;
-  const msg=`Hi ${o.name}! Your KRIVVA order ${id} is now "${o.status}". Thank you for shopping with us! 👗✨`;
-  window.open(`https://wa.me/91${o.phone}?text=${encodeURIComponent(msg)}`,'_blank');
-}
-
-function exportOrders(){
-  const rows=[['Order ID','Name','Phone','Items','Total','Status','Date'],...orders.map(o=>[o.id,o.name,o.phone,o.items.map(i=>i.name).join(';'),o.total,o.status,o.date])];
-  const csv=rows.map(r=>r.join(',')).join('\n');
-  const a=document.createElement('a');a.href='data:text/csv,'+encodeURIComponent(csv);a.download='krivva_orders.csv';a.click();
-  showToast('Orders exported!','green');
-}
-
-function renderAdminEditProducts(){
-  document.getElementById('admin-products-tab').innerHTML=
-    `<div class="insta-note">📸 Upload photos from device or paste image URLs. Edit all details and click Save.</div>`+
-    products.map(p=>`
-    <div class="edit-card">
-      <div style="display:flex;gap:10px;margin-bottom:12px;align-items:flex-start">
-        <div style="width:56px;height:56px;background:var(--surface2);flex-shrink:0;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:24px" id="thumb-${p.id}">
-          ${getPhoto(p)?`<img src="${getPhoto(p)}" style="width:100%;height:100%;object-fit:cover"/>`:p.icon}
-        </div>
-        <div>
-          <div style="font-size:13px;font-weight:600;color:var(--white)">${p.name}</div>
-          <div style="font-size:10px;color:var(--muted)">${p.cat} • Stock: ${p.stock} • ID: ${p.id}</div>
-        </div>
-      </div>
-      <div class="form-group"><label>Product Name</label><input type="text" id="ep-name-${p.id}" value="${p.name}"/></div>
-      <div class="form-group"><label>Description</label><textarea id="ep-desc-${p.id}" rows="2">${p.desc}</textarea></div>
-      <div class="form-group">
-        <label>Photo URL</label>
-        <input type="text" id="ep-url-${p.id}" value="${p.photo}" placeholder="https://..." oninput="previewURL(${p.id})"/>
-        <div class="url-hint">Paste Instagram or Google image link</div>
-      </div>
-      <div class="photo-upload-area" onclick="document.getElementById('ep-file-${p.id}').click()">
-        <input type="file" id="ep-file-${p.id}" accept="image/*" onchange="handleFileUpload(event,${p.id})" style="display:none"/>
-        <div style="font-size:11px;color:var(--muted)">📁 Upload from device</div>
-        <img id="ep-preview-${p.id}" class="photo-preview-img" src="" alt=""/>
-      </div>
-      <div class="edit-row3" style="margin-top:10px">
-        <div class="form-group"><label>MRP (₹)</label><input type="number" id="ep-mrp-${p.id}" value="${p.mrp}" oninput="computeOffer(${p.id})"/></div>
-        <div class="form-group"><label>Offer %</label><input type="number" id="ep-offer-${p.id}" value="${p.offer}" min="0" max="90" oninput="computeOffer(${p.id})"/></div>
-        <div class="form-group"><label>Final Price</label><div class="computed-price" id="ep-computed-${p.id}">₹${ep(p).toLocaleString()}</div></div>
-      </div>
-      <div class="edit-row2">
-        <div class="form-group"><label>Category</label>
-          <select id="ep-cat-${p.id}">${['kurti','dress','coord','ethnic','casual','winter'].map(c=>`<option value="${c}" ${p.cat===c?'selected':''}>${c}</option>`).join('')}</select>
-        </div>
-        <div class="form-group"><label>Stock Qty</label><input type="number" id="ep-stock-${p.id}" value="${p.stock}" min="0"/></div>
-      </div>
-      <div class="form-group"><label>Sizes (comma separated)</label><input type="text" id="ep-sizes-${p.id}" value="${p.sizes?.join(',')||'S,M,L,XL'}"/></div>
-      <div class="toggle-row">
-        <div class="toggle-item"><input type="checkbox" id="ep-new-${p.id}" ${p.isNew?'checked':''}/><label for="ep-new-${p.id}">🆕 New Arrival</label></div>
-        <div class="toggle-item"><input type="checkbox" id="ep-trend-${p.id}" ${p.isTrending?'checked':''}/><label for="ep-trend-${p.id}">🔥 Trending</label></div>
-      </div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <button class="btn-gold btn-sm" onclick="saveProduct(${p.id})">Save Changes</button>
-        <button class="btn-red btn-sm" onclick="deleteProduct(${p.id})">Remove</button>
-      </div>
-    </div>`).join('');
-}
-
-function computeOffer(id){
-  const mrp=parseFloat(document.getElementById('ep-mrp-'+id)?.value)||0;
-  const offer=parseFloat(document.getElementById('ep-offer-'+id)?.value)||0;
-  const final=offer>0?Math.round(mrp*(1-offer/100)):mrp;
-  const el=document.getElementById('ep-computed-'+id);
-  if(el)el.textContent='₹'+final.toLocaleString()+(offer>0?` (${offer}% off)`:'');
-}
-
-function previewURL(id){
-  const url=document.getElementById('ep-url-'+id)?.value.trim();
-  if(!url)return;
-  const thumb=document.getElementById('thumb-'+id);
-  if(thumb)thumb.innerHTML=`<img src="${url}" style="width:100%;height:100%;object-fit:cover" onerror="this.innerHTML='${products.find(p=>p.id===id)?.icon||'👗'}'"/>`;
-}
-
-function handleFileUpload(e,id){
-  const file=e.target.files[0];if(!file)return;
-  const reader=new FileReader();
-  reader.onload=ev=>{
-    const data=ev.target.result;
-    photoStore[id]=data;
-    const thumb=document.getElementById('thumb-'+id);
-    if(thumb)thumb.innerHTML=`<img src="${data}" style="width:100%;height:100%;object-fit:cover"/>`;
-    const prev=document.getElementById('ep-preview-'+id);
-    if(prev){prev.src=data;prev.style.display='block';}
-    showToast('Photo uploaded!','green');
-  };
-  reader.readAsDataURL(file);
-}
-
-function saveProduct(id){
-  const p=products.find(x=>x.id===id);if(!p)return;
-  p.name=document.getElementById('ep-name-'+id)?.value.trim()||p.name;
-  p.desc=document.getElementById('ep-desc-'+id)?.value.trim()||p.desc;
-  p.photo=document.getElementById('ep-url-'+id)?.value.trim()||p.photo;
-  p.mrp=parseFloat(document.getElementById('ep-mrp-'+id)?.value)||p.mrp;
-  p.offer=parseFloat(document.getElementById('ep-offer-'+id)?.value)||0;
-  p.price=ep(p);
-  p.cat=document.getElementById('ep-cat-'+id)?.value||p.cat;
-  p.stock=parseInt(document.getElementById('ep-stock-'+id)?.value)||0;
-  const sizesVal=document.getElementById('ep-sizes-'+id)?.value;
-  if(sizesVal)p.sizes=sizesVal.split(',').map(s=>s.trim()).filter(Boolean);
-  p.isNew=document.getElementById('ep-new-'+id)?.checked||false;
-  p.isTrending=document.getElementById('ep-trend-'+id)?.checked||false;
-  if(photoStore[id])p.photo=photoStore[id];
-  renderProducts();renderAdminStats();renderLowStock();
-  showToast(p.name+' saved ✓','green');
-}
-
-function deleteProduct(id){
-  products=products.filter(p=>p.id!==id);
-  renderProducts();renderAdminStats();renderAdminEditProducts();renderLowStock();
-  showToast('Product removed','red');
-}
-
-function renderAdminAddProduct(){
-  document.getElementById('admin-add-tab').innerHTML=`
-    <div class="edit-card">
-      <div class="section-title" style="margin-bottom:14px">Add New Product</div>
-      <div class="form-group"><label>Product Name</label><input type="text" id="np-name" placeholder="e.g. Silk Kurti Set"/></div>
-      <div class="form-group"><label>Description</label><textarea id="np-desc" rows="2" placeholder="Describe the product..."></textarea></div>
-      <div class="form-group"><label>Photo URL</label><input type="text" id="np-url" placeholder="https://..."/><div class="url-hint">Or upload from device below</div></div>
-      <div class="photo-upload-area" onclick="document.getElementById('np-file').click()">
-        <input type="file" id="np-file" accept="image/*" onchange="handleNewFileUpload(event)" style="display:none"/>
-        <div style="font-size:11px;color:var(--muted)">📁 Upload product photo</div>
-        <img id="np-preview" class="photo-preview-img" src="" alt=""/>
-      </div>
-      <div class="edit-row2" style="margin-top:10px">
-        <div class="form-group"><label>MRP (₹)</label><input type="number" id="np-mrp" placeholder="1999" oninput="computeNewOffer()"/></div>
-        <div class="form-group"><label>Offer %</label><input type="number" id="np-offer" placeholder="0" min="0" max="90" oninput="computeNewOffer()"/></div>
-      </div>
-      <div class="computed-price" id="np-computed" style="margin-bottom:10px"></div>
-      <div class="edit-row2">
-        <div class="form-group"><label>Category</label><select id="np-cat">${['kurti','dress','coord','ethnic','casual','winter'].map(c=>`<option>${c}</option>`).join('')}</select></div>
-        <div class="form-group"><label>Stock Qty</label><input type="number" id="np-stock" placeholder="10" min="0"/></div>
-      </div>
-      <div class="form-group"><label>Sizes (comma separated)</label><input type="text" id="np-sizes" placeholder="S,M,L,XL"/></div>
-      <div class="form-group"><label>Icon (emoji)</label><input type="text" id="np-icon" placeholder="👗" style="width:80px"/></div>
-      <div class="toggle-row">
-        <div class="toggle-item"><input type="checkbox" id="np-new"/><label for="np-new">🆕 New Arrival</label></div>
-        <div class="toggle-item"><input type="checkbox" id="np-trend"/><label for="np-trend">🔥 Trending</label></div>
-      </div>
-      <button class="btn-gold" onclick="addNewProduct()" style="width:100%;margin-top:4px">Add Product</button>
-    </div>`;
-}
-
-function handleNewFileUpload(e){
-  const file=e.target.files[0];if(!file)return;
-  const reader=new FileReader();
-  reader.onload=ev=>{
-    newPhotoData=ev.target.result;
-    const prev=document.getElementById('np-preview');
-    if(prev){prev.src=newPhotoData;prev.style.display='block';}
-    showToast('Photo ready!','green');
-  };
-  reader.readAsDataURL(file);
-}
-
-function computeNewOffer(){
-  const mrp=parseFloat(document.getElementById('np-mrp')?.value)||0;
-  const offer=parseFloat(document.getElementById('np-offer')?.value)||0;
-  const final=offer>0?Math.round(mrp*(1-offer/100)):mrp;
-  const el=document.getElementById('np-computed');
-  if(el&&mrp)el.textContent='Final: ₹'+final.toLocaleString()+(offer>0?` (${offer}% off)`:'');
-}
-
-function addNewProduct(){
-  const name=document.getElementById('np-name')?.value.trim();
-  const mrp=parseFloat(document.getElementById('np-mrp')?.value);
-  if(!name||!mrp){showToast('Name and MRP are required','red');return;}
-  const offer=parseFloat(document.getElementById('np-offer')?.value)||0;
-  const photo=newPhotoData||document.getElementById('np-url')?.value.trim()||'';
-  const sizesVal=document.getElementById('np-sizes')?.value||'S,M,L,XL';
-  const id=Date.now();
-  const p={id,name,desc:document.getElementById('np-desc')?.value.trim()||name,photo,icon:document.getElementById('np-icon')?.value.trim()||'👗',cat:document.getElementById('np-cat')?.value||'kurti',mrp,offer,price:offer>0?Math.round(mrp*(1-offer/100)):mrp,stock:parseInt(document.getElementById('np-stock')?.value)||10,sizes:sizesVal.split(',').map(s=>s.trim()).filter(Boolean),isNew:document.getElementById('np-new')?.checked||false,isTrending:document.getElementById('np-trend')?.checked||false,reviews:[]};
-  if(photo)photoStore[id]=photo;
-  products.unshift(p);
-  renderProducts();renderAdminStats();renderAdminEditProducts();renderLowStock();
-  newPhotoData='';renderAdminAddProduct();
-  showToast(name+' added ✓','green');
-}
-
-function renderAdminCoupons(){
-  document.getElementById('admin-coupons-tab').innerHTML=`
-    <div style="margin-bottom:14px">
-      <div style="font-size:11px;color:var(--muted);margin-bottom:10px">Active Coupons</div>
-      ${coupons.map(c=>`<div class="coupon-admin-card">
-        <div>
-          <div style="font-size:13px;font-weight:600;color:var(--gold);letter-spacing:2px">${c.code}</div>
-          <div style="font-size:11px;color:var(--muted)">${c.type==='percent'?c.discount+'% off':'Flat ₹'+c.discount+' off'}</div>
-        </div>
-        <button class="btn-red btn-sm" onclick="deleteCoupon('${c.code}')">Remove</button>
-      </div>`).join('')}
-    </div>
-    <div class="edit-card">
-      <div style="font-size:12px;font-weight:600;color:var(--white);margin-bottom:12px">Add New Coupon</div>
-      <div class="form-group"><label>Coupon Code</label><input type="text" id="nc-code" placeholder="e.g. SAVE20" style="text-transform:uppercase"/></div>
-      <div class="edit-row2">
-        <div class="form-group"><label>Discount</label><input type="number" id="nc-val" placeholder="10"/></div>
-        <div class="form-group"><label>Type</label><select id="nc-type"><option value="percent">Percent %</option><option value="flat">Flat ₹</option></select></div>
-      </div>
-      <button class="btn-gold" onclick="addCoupon()" style="width:100%">Add Coupon</button>
-    </div>`;
-}
-
-function deleteCoupon(code){coupons=coupons.filter(c=>c.code!==code);renderAdminCoupons();showToast('Coupon removed','red');}
-function addCoupon(){
-  const code=document.getElementById('nc-code').value.trim().toUpperCase();
-  const val=parseFloat(document.getElementById('nc-val').value);
-  if(!code||!val){showToast('Fill all fields','red');return;}
-  coupons.push({code,discount:val,type:document.getElementById('nc-type').value});
-  renderAdminCoupons();showToast('Coupon '+code+' added ✓','green');
-}
-
-function renderAdminBanner(){
-  document.getElementById('admin-banner-tab').innerHTML=`
-    <div class="edit-card">
-      <div style="font-size:12px;font-weight:600;color:var(--white);margin-bottom:12px">Announcement Banner</div>
-      <div class="form-group"><label>Banner Text</label><input type="text" id="banner-text" value="FREE SHIPPING ON ORDERS ABOVE ₹999 ✦ USE CODE KRIVVA10 FOR 10% OFF ✦ NEW COLLECTION JUST DROPPED"/></div>
-      <button class="btn-gold" onclick="updateBanner()" style="width:100%">Update Banner</button>
-    </div>`;
-}
-
-function updateBanner(){
-  const text=document.getElementById('banner-text').value.trim();
-  if(!text)return;
-  document.querySelector('.announce-bar .marquee').textContent='✦ '+text+' ✦ '+text;
-  showToast('Banner updated ✓','green');
-}
-
-// ===== INIT =====
-renderCats();
-renderProducts();
-updateUserNav();
-</script>
-
+<!-- 2. Supabase SDK (loaded before auth.js so initSupabase() can find it) -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
+<!-- 3. Auth module — login, signup, Supabase integration -->
+<script src="js/auth.js"></script>
+
+<!-- 4. Admin panel -->
+<script src="js/admin.js"></script>
+
+<!-- 5. Core app logic — UI, products, cart, wishlist, orders, reviews -->
+<script src="js/app.js"></script>
+
+<!-- 6. Boot Supabase client after SDK is loaded -->
 <script>
-const supabaseClient = window.supabase.createClient(
-  "https://wprhexegrfgiqnwpbskj.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndwcmhleGVncmZnaXFud3Bic2tqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgwNTg2MTEsImV4cCI6MjA5MzYzNDYxMX0.GwW36z2aXppE9ji7LoFizUxWAqro77Ez4sLRleOTo5E"
-);
-
-async function signup() {
-  const email = document.getElementById("signup-email").value;
-  const password = document.getElementById("signup-password").value;
-
-  const { data, error } = await supabaseClient.auth.signUp({
-    email: email,
-    password: password
-  });
-
-  if (error) {
-    alert(error.message);
-  } else {
-    alert("Signup successful!");
-
-    document.getElementById("welcome-user").innerText =
-      "Welcome " + email;
-  }
-}
-
-async function login() {
-  const email = document.getElementById("login-email").value;
-  const password = document.getElementById("login-password").value;
-
-  const { data, error } = await supabaseClient.auth.signInWithPassword({
-    email: email,
-    password: password
-  });
-
-  if (error) {
-    alert(error.message);
-  } else {
-    alert("Login successful!");
-
-    document.getElementById("welcome-user").innerText =
-      "Welcome " + email;
-  }
-}
-
-function showAuthModal() {
-  document.getElementById("auth-modal").classList.remove("hide");
-
-  document.getElementById("auth-form-container").innerHTML = `
-
-    <div style="margin-bottom:20px">
-      <h3 style="margin-bottom:10px;color:gold">Login</h3>
-
-      <input type="email" id="login-email" placeholder="Email"
-      style="width:100%;padding:10px;margin-bottom:10px;background:#111;color:white;border:1px solid #333">
-
-      <input type="password" id="login-password" placeholder="Password"
-      style="width:100%;padding:10px;margin-bottom:10px;background:#111;color:white;border:1px solid #333">
-
-      <button onclick="login()" class="btn-gold" style="width:100%">
-        Login
-      </button>
-    </div>
-
-    <hr style="margin:20px 0;border-color:#333">
-
-    <div>
-      <h3 style="margin-bottom:10px;color:gold">Sign Up</h3>
-
-      <input type="email" id="signup-email" placeholder="Email"
-      style="width:100%;padding:10px;margin-bottom:10px;background:#111;color:white;border:1px solid #333">
-
-      <input type="password" id="signup-password" placeholder="Password"
-      style="width:100%;padding:10px;margin-bottom:10px;background:#111;color:white;border:1px solid #333">
-
-      <button onclick="signup()" class="btn-gold" style="width:100%">
-        Sign Up
-      </button>
-    </div>
-  `;
-}
-
-function closeAuth() {
-  document.getElementById("auth-modal").classList.add("hide");
-}
+  initSupabase();
 </script>
 
 </body>
