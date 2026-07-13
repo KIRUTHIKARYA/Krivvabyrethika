@@ -28,6 +28,12 @@ async function loadProductsFromSupabase() {
           stock (
             quantity
           )
+        ),
+        product_reviews (
+          user_name,
+          rating,
+          review_text,
+          created_at
         )
       `)
       .eq('is_active', true);
@@ -38,6 +44,12 @@ async function loadProductsFromSupabase() {
       const rawVariants = p.variants || [];
       const sizes = rawVariants.map(v => v.size);
       const totalStock = rawVariants.reduce((sum, v) => sum + (v.stock?.quantity || 0), 0);
+      const rawReviews = p.product_reviews || [];
+      const reviews = rawReviews.map(r => ({
+        author: r.user_name,
+        stars: Number(r.rating || 5),
+        text: r.review_text
+      }));
       return {
         id: p.id,
         name: p.name,
@@ -49,7 +61,7 @@ async function loadProductsFromSupabase() {
         desc: p.description || p.name || '',
         sizes: sizes,
         stock: totalStock,
-        reviews: [],
+        reviews: reviews,
         raw_variants: rawVariants,
         isNew: p.is_new || false,
         isTrending: p.is_trending || false
@@ -80,6 +92,7 @@ async function loadProductsFromSupabase() {
     renderProducts();
     loadWishlistFromSupabase();
     handleURLHashProduct();
+    loadCartFromLocalStorage();
   } catch (err) {
     console.error("Error loading products from Supabase:", err);
     showToast("Error loading catalog", "red");
@@ -549,6 +562,7 @@ function addToCartItem(p, size) {
   if (ex) ex.qty++;
   else cart.push({ id: p.id, key, name: p.name, price, icon: p.icon, photo: getPhoto(p), qty: 1, size });
   updateCartCount();
+  saveCartToLocalStorage();
   showToast(`${p.name} (${size}) added to bag ✓`);
 }
 
@@ -623,10 +637,12 @@ function changeQty(key, d) {
   i.qty += d;
   if (i.qty <= 0) cart = cart.filter(x => x.key !== key);
   updateCartCount(); renderCart();
+  saveCartToLocalStorage();
 }
 function removeFromCart(key) {
   cart = cart.filter(x => x.key !== key);
   updateCartCount(); renderCart();
+  saveCartToLocalStorage();
 }
 
 function applyCoupon() {
@@ -783,6 +799,7 @@ async function simulateRazorpay() {
     cart = [];
     appliedCoupon = null;
     updateCartCount();
+    saveCartToLocalStorage();
     closeOrderModal();
 
     // Reload the catalog to reflect the decremented stock immediately
@@ -953,15 +970,43 @@ function openReview(id) {
   document.getElementById('review-modal').classList.remove('hide');
 }
 
-function submitReview() {
+async function submitReview() {
   const text = document.getElementById('review-text').value.trim();
+  const rating = Number(document.getElementById('review-rating')?.value || 5);
   if (!text) { showToast('Please write a review', 'red'); return; }
   if (!currentUser) { showToast('Please login first', 'red'); return; }
-  const p = products.find(x => x.id === activeReviewProductId);
-  if (p) { p.reviews.push({ author: currentUser.name, stars: 5, text }); showToast('Review submitted! Thank you ✓', 'green'); }
+
+  if (supabaseClient) {
+    try {
+      const { error } = await supabaseClient
+        .from('product_reviews')
+        .insert({
+          product_id: activeReviewProductId,
+          user_name: currentUser.name,
+          user_email: currentUser.email,
+          rating: rating,
+          review_text: text
+        });
+
+      if (error) throw error;
+
+      showToast('Review submitted successfully! ✓', 'green');
+      loadProductsFromSupabase();
+    } catch (err) {
+      console.error('Error submitting review:', err);
+      showToast('Error submitting review: ' + err.message, 'red');
+    }
+  } else {
+    const p = products.find(x => x.id === activeReviewProductId);
+    if (p) {
+      p.reviews.push({ author: currentUser.name, stars: rating, text });
+      showToast('Review submitted! Thank you ✓ (Demo)', 'green');
+    }
+    renderProducts();
+  }
   document.getElementById('review-modal').classList.add('hide');
   document.getElementById('review-text').value = '';
-  renderProducts();
+  setRating(5);
 }
 
 // ===== INIT =====
@@ -1027,4 +1072,41 @@ function subscribeStorefrontSettings() {
     })
     .subscribe();
 }
+
+function saveCartToLocalStorage() {
+  const email = currentUser ? currentUser.email : 'guest';
+  localStorage.setItem(`krivva_cart_${email}`, JSON.stringify(cart));
+}
+
+function loadCartFromLocalStorage() {
+  const email = currentUser ? currentUser.email : 'guest';
+  const saved = localStorage.getItem(`krivva_cart_${email}`);
+  if (saved) {
+    try {
+      cart = JSON.parse(saved) || [];
+    } catch (e) {
+      console.error("Error loading cart:", e);
+      cart = [];
+    }
+  } else {
+    cart = [];
+  }
+  updateCartCount();
+  if (document.getElementById('cart-modal') && !document.getElementById('cart-modal').classList.contains('hide')) {
+    renderCart();
+  }
+}
+
+function setRating(val) {
+  const ratingInput = document.getElementById('review-rating');
+  if (ratingInput) ratingInput.value = val;
+  for (let i = 1; i <= 5; i++) {
+    const star = document.getElementById('star-' + i);
+    if (star) {
+      star.style.opacity = i <= val ? '1' : '0.3';
+    }
+  }
+}
+
 updateUserNav();
+loadCartFromLocalStorage();

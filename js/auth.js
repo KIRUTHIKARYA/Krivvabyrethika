@@ -49,6 +49,9 @@ function initSupabase() {
       }
       updateUserNav();
       updateWelcomeBanner();
+      if (typeof loadCartFromLocalStorage === 'function') {
+        loadCartFromLocalStorage();
+      }
     });
   }
 }
