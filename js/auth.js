@@ -158,9 +158,18 @@ function doSignup() {
         if (error) {
           showToast('Signup error: ' + error.message, 'red');
         } else {
-          currentUser = { name, email, phone };
-          afterLogin();
-          showToast('Account created! Check email to verify.', 'green');
+          if (data?.session) {
+            const u = data.user;
+            currentUser = {
+              name: u.user_metadata?.full_name || name,
+              email: u.email,
+              phone: u.user_metadata?.phone || phone
+            };
+            afterLogin();
+          } else {
+            closeAuth();
+            showToast('Account created! Please check your Gmail to confirm and verify your email.', 'green', 8000);
+          }
         }
       });
   } else {
