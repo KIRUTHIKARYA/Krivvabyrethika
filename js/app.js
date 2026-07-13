@@ -355,9 +355,10 @@ function openDetail(id) {
         </div>
         <div class="pd-desc">${p.desc}</div>
         <div style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:8px">Select Size</div>
-        <div class="size-grid">
+        <div class="size-grid" style="margin-bottom:4px">
           ${p.sizes.map(s => `<button class="size-btn ${selectedSizes[id] === s ? 'active' : ''}" onclick="selectSize('${id}','${s}',this)">${s}</button>`).join('')}
         </div>
+        <div id="size-chart-btn-container" style="margin-bottom:8px"></div>
         <div id="detail-stock-display" style="font-size:11px;color:${p.stock <= 5 ? 'var(--red)' : 'var(--muted)'};margin-bottom:12px">
           ${p.stock === 0 ? 'Out of Stock' : p.stock <= 5 ? `Only ${p.stock} left!` : `${p.stock} in stock`}
         </div>
@@ -398,6 +399,27 @@ function openDetail(id) {
         </div>`).join('')}
     </div>`;
   document.getElementById('detail-modal').classList.remove('hide');
+
+  // Query size chart after details element is added to DOM
+  setTimeout(async () => {
+    try {
+      const { data } = await supabaseClient
+        .from('storefront_settings')
+        .select('value')
+        .eq('key', `size_chart_${p.id}`)
+        .single();
+      if (data && data.value?.url) {
+        const btnContainer = document.getElementById('size-chart-btn-container');
+        if (btnContainer) {
+          btnContainer.innerHTML = `
+            <button type="button" onclick="openSizeChart('${data.value.url}')" class="btn-outline btn-sm" style="padding:4px 8px;font-size:10px;display:inline-flex;align-items:center;gap:4px;margin-top:2px">
+              📐 View Size Chart
+            </button>
+          `;
+        }
+      }
+    } catch (e) {}
+  }, 50);
 }
 
 function closeDetail() {
@@ -1177,3 +1199,19 @@ function updateSlidePosition(id, total) {
     }
   }
 }
+
+window.openSizeChart = function(url) {
+  const modal = document.getElementById('size-chart-modal');
+  const img = document.getElementById('size-chart-img');
+  if (modal && img) {
+    img.src = url;
+    modal.classList.remove('hide');
+  }
+};
+
+window.closeSizeChart = function() {
+  const modal = document.getElementById('size-chart-modal');
+  if (modal) {
+    modal.classList.add('hide');
+  }
+};
