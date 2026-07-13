@@ -312,6 +312,33 @@
 </div>
 
 <!-- ============================================================
+     PROFILE MODAL
+     ============================================================ -->
+<div id="profile-modal" class="modal-bg hide">
+  <div class="modal" style="max-width:400px; text-align: center;">
+    <div class="modal-title">
+      Profile
+      <button class="close-btn" onclick="closeProfileModal()">✕</button>
+    </div>
+    
+    <div style="margin: 20px 0;">
+      <div id="profile-avatar" style="width: 80px; height: 80px; border-radius: 50%; background: var(--gold); color: var(--black); font-size: 32px; font-weight: 700; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px;">U</div>
+      <h3 id="profile-name" style="color: var(--white); font-family: 'Cormorant Garamond', serif; font-size: 1.6rem; margin-bottom: 5px;">User Name</h3>
+      <p id="profile-email" style="color: var(--muted); font-size: 13px; margin-bottom: 15px;">user@example.com</p>
+      <p id="profile-phone" style="color: var(--muted); font-size: 13px; margin-bottom: 15px;"></p>
+    </div>
+    
+    <div class="divider"></div>
+    
+    <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 15px;">
+      <button class="btn-outline" onclick="showPage('orders'); closeProfileModal();" style="width: 100%;">📦 View My Orders</button>
+      <button class="btn-outline" onclick="showPage('wishlist'); closeProfileModal();" style="width: 100%;">🤍 View My Wishlist</button>
+      <button class="btn-gold" onclick="doLogout()" style="width: 100%; margin-top: 10px; background: var(--red); color: white; border-color: var(--red);">Log Out</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
      REVIEW MODAL
      ============================================================ -->
 <div id="review-modal" class="modal-bg hide">

@@ -32,8 +32,8 @@ function initSupabase() {
       subscribeStorefrontSettings();
     }
 
-    // Auto-restore session on load
-    supabaseClient.auth.getSession().then(({ data: { session } }) => {
+    // Auto-restore session on load and listen to auth changes dynamically
+    supabaseClient.auth.onAuthStateChange((event, session) => {
       if (session?.user) {
         const u = session.user;
         currentUser = {
@@ -41,9 +41,14 @@ function initSupabase() {
           email: u.email,
           phone: u.user_metadata?.phone || '',
         };
-        updateUserNav();
-        updateWelcomeBanner();
+        if (typeof loadWishlistFromSupabase === 'function') {
+          loadWishlistFromSupabase();
+        }
+      } else {
+        currentUser = null;
       }
+      updateUserNav();
+      updateWelcomeBanner();
     });
   }
 }
@@ -165,12 +170,25 @@ function doSignup() {
 }
 
 function socialLogin(provider) {
-  currentUser = {
-    name:  provider + ' User',
-    email: 'user@' + provider.toLowerCase() + '.com',
-    phone: '',
-  };
-  afterLogin();
+  if (supabaseClient && provider.toLowerCase() === 'google') {
+    supabaseClient.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: window.location.origin
+      }
+    }).then(({ error }) => {
+      if (error) {
+        showToast('Google login error: ' + error.message, 'red');
+      }
+    });
+  } else {
+    currentUser = {
+      name:  provider + ' User',
+      email: 'user@' + provider.toLowerCase() + '.com',
+      phone: '',
+    };
+    afterLogin();
+  }
 }
 
 // ----- POST-LOGIN ACTIONS -----
@@ -207,7 +225,50 @@ function updateWelcomeBanner() {
 }
 
 function showUserMenu() {
-  showToast(`Logged in as ${currentUser.name} | ${currentUser.email}`);
+  openProfileModal();
+}
+
+function openProfileModal() {
+  if (!currentUser) return;
+  const avatarEl = document.getElementById('profile-avatar');
+  const nameEl = document.getElementById('profile-name');
+  const emailEl = document.getElementById('profile-email');
+  const phoneEl = document.getElementById('profile-phone');
+  
+  if (avatarEl) avatarEl.textContent = currentUser.name[0].toUpperCase();
+  if (nameEl) nameEl.textContent = currentUser.name;
+  if (emailEl) emailEl.textContent = currentUser.email;
+  if (phoneEl) phoneEl.textContent = currentUser.phone ? '📞 ' + currentUser.phone : 'No phone number added';
+  
+  document.getElementById('profile-modal').classList.remove('hide');
+}
+
+function closeProfileModal() {
+  document.getElementById('profile-modal').classList.add('hide');
+}
+
+function doLogout() {
+  if (supabaseClient) {
+    supabaseClient.auth.signOut().then(({ error }) => {
+      if (error) {
+        showToast('Logout error: ' + error.message, 'red');
+      } else {
+        currentUser = null;
+        closeProfileModal();
+        updateUserNav();
+        updateWelcomeBanner();
+        showToast('Logged out successfully', 'gold');
+        showPage('home');
+      }
+    });
+  } else {
+    currentUser = null;
+    closeProfileModal();
+    updateUserNav();
+    updateWelcomeBanner();
+    showToast('Logged out successfully (Demo)', 'gold');
+    showPage('home');
+  }
 }
 
 // ----- ADMIN AUTH -----
