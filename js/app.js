@@ -314,7 +314,29 @@ function openDetail(id) {
   document.getElementById('detail-content').innerHTML = `
     <div class="product-detail">
       <div>
-        <div class="pd-img">${getPhoto(p) ? `<img src="${getPhoto(p)}" style="width:100%;height:220px;object-fit:cover"/>` : p.icon}</div>
+        <div class="pd-img">
+          ${(() => {
+            const photos = p.photo ? p.photo.split(',') : [];
+            if (photos.length > 1) {
+              return `
+                <div class="carousel-container" style="position:relative;width:100%;height:220px;overflow:hidden;border-radius:4px">
+                  <div class="carousel-slides" style="display:flex;width:100%;height:100%;transition:transform 0.3s ease-in-out" id="slides-${p.id}">
+                    ${photos.map(url => `<img src="${url}" style="width:100%;height:100%;object-fit:cover;flex-shrink:0"/>`).join('')}
+                  </div>
+                  <button type="button" onclick="prevSlide('${p.id}')" style="position:absolute;left:8px;top:50%;transform:translateY(-50%);background:rgba(0,0,0,0.6);border:none;color:#fff;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:10px;z-index:2">◀</button>
+                  <button type="button" onclick="nextSlide('${p.id}')" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:rgba(0,0,0,0.6);border:none;color:#fff;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:10px;z-index:2">▶</button>
+                  <div style="position:absolute;bottom:8px;left:50%;transform:translateX(-50%);display:flex;gap:4px;z-index:2">
+                    ${photos.map((_, idx) => `<span class="dot" onclick="setSlide('${p.id}', ${idx})" style="width:6px;height:6px;border-radius:50%;background:${idx === 0 ? 'var(--gold)' : 'rgba(255,255,255,0.5)'};cursor:pointer" id="dot-${p.id}-${idx}"></span>`).join('')}
+                  </div>
+                </div>
+              `;
+            } else if (photos.length === 1) {
+              return `<img src="${photos[0]}" style="width:100%;height:220px;object-fit:cover;border-radius:4px"/>`;
+            } else {
+              return `<div style="font-size:52px;height:220px;display:flex;align-items:center;justify-content:center;background:var(--surface2)">${p.icon}</div>`;
+            }
+          })()}
+        </div>
         <div style="margin-top:10px">
           <div style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:6px">Share</div>
           <button onclick="shareProduct('${p.id}')" class="btn-outline btn-sm" style="display:flex;align-items:center;gap:6px;padding:6px 12px;font-size:11px;">
@@ -1112,3 +1134,46 @@ function setRating(val) {
 
 updateUserNav();
 loadCartFromLocalStorage();
+
+// ===== MULTI-PHOTO CAROUSEL CONTROLS =====
+let activeSlides = {};
+
+window.nextSlide = function(id) {
+  const p = products.find(x => x.id === id);
+  const photos = p && p.photo ? p.photo.split(',') : [];
+  if (photos.length <= 1) return;
+  if (activeSlides[id] === undefined) activeSlides[id] = 0;
+  activeSlides[id] = (activeSlides[id] + 1) % photos.length;
+  updateSlidePosition(id, photos.length);
+};
+
+window.prevSlide = function(id) {
+  const p = products.find(x => x.id === id);
+  const photos = p && p.photo ? p.photo.split(',') : [];
+  if (photos.length <= 1) return;
+  if (activeSlides[id] === undefined) activeSlides[id] = 0;
+  activeSlides[id] = (activeSlides[id] - 1 + photos.length) % photos.length;
+  updateSlidePosition(id, photos.length);
+};
+
+window.setSlide = function(id, idx) {
+  const p = products.find(x => x.id === id);
+  const photos = p && p.photo ? p.photo.split(',') : [];
+  if (photos.length <= 1) return;
+  activeSlides[id] = idx;
+  updateSlidePosition(id, photos.length);
+};
+
+function updateSlidePosition(id, total) {
+  const idx = activeSlides[id] || 0;
+  const slidesEl = document.getElementById(`slides-${id}`);
+  if (slidesEl) {
+    slidesEl.style.transform = `translateX(-${idx * 100}%)`;
+  }
+  for (let i = 0; i < total; i++) {
+    const dot = document.getElementById(`dot-${id}-${i}`);
+    if (dot) {
+      dot.style.background = i === idx ? 'var(--gold)' : 'rgba(255,255,255,0.5)';
+    }
+  }
+}
