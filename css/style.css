@@ -744,3 +744,90 @@ footer {
   .nav-center { display: none; }
   .page { padding: 14px; }
 }
+
+/* ---- COOKIE CONSENT BAR ---- */
+#cookie-bar {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 9000;
+  background: rgba(18,12,8,0.97); backdrop-filter: blur(14px);
+  border-top: 1px solid var(--border2);
+  padding: 14px 24px;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 16px; flex-wrap: wrap;
+  transform: translateY(100%); transition: transform 0.4s cubic-bezier(.4,0,.2,1);
+}
+#cookie-bar.visible { transform: translateY(0); }
+#cookie-bar p { font-size: 11px; color: var(--muted); flex: 1; min-width: 220px; line-height: 1.6; }
+#cookie-bar a { color: var(--gold); text-decoration: underline; cursor: pointer; }
+#cookie-bar .cookie-btns { display: flex; gap: 8px; flex-shrink: 0; }
+#cookie-bar .cookie-btns button { font-size: 11px; padding: 7px 18px; border-radius: 2px; cursor: pointer; border: 1px solid var(--border2); }
+#cookie-bar .cookie-accept { background: var(--gold); color: #000; font-weight: 600; border-color: var(--gold); }
+#cookie-bar .cookie-decline { background: transparent; color: var(--muted); }
+
+/* ---- TRUST BADGES ---- */
+.trust-badges {
+  display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;
+  padding: 10px 0 6px; border-top: 1px solid var(--border);
+  margin-top: 8px;
+}
+.trust-badge {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 9px; color: var(--muted); letter-spacing: 0.03em;
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 20px; padding: 4px 10px; white-space: nowrap;
+}
+.trust-badge span.tb-icon { font-size: 12px; }
+
+/* ---- TERMS OF SERVICE MODAL ---- */
+#tos-modal { z-index: 10005; }
+#tos-modal .modal {
+  max-width: 520px; max-height: 80vh;
+  display: flex; flex-direction: column;
+}
+#tos-modal .modal-body {
+  overflow-y: auto; flex: 1;
+  font-size: 11px; color: var(--muted); line-height: 1.8;
+  padding-right: 4px;
+}
+#tos-modal .modal-body h3 {
+  font-family: 'Cormorant Garamond', serif;
+  color: var(--gold); font-size: 14px; margin: 14px 0 4px;
+}
+
+/* ---- NOTIFY ME MODAL ---- */
+#notify-modal { z-index: 10005; }
+
+/* ---- SOLD OUT CARD OVERLAY ---- */
+.product-card .sold-out-overlay {
+  position: absolute; inset: 0;
+  background: rgba(8,8,8,0.62);
+  display: flex; align-items: center; justify-content: center;
+  pointer-events: none; border-radius: 4px;
+}
+.sold-out-stamp {
+  font-size: 11px; font-weight: 700; letter-spacing: 2px;
+  text-transform: uppercase; color: #fff;
+  background: rgba(80,80,80,0.92);
+  border: 1px solid rgba(255,255,255,0.18);
+  padding: 5px 14px; border-radius: 2px;
+}
+/* Enhanced stock badge styles */
+.p-badge.badge-soldout {
+  background: rgba(60,60,60,0.92); color: #ddd;
+}
+.p-badge.badge-sale {
+  background: rgba(201,168,76,0.9); color: #000; font-weight: 700;
+}
+
+/* ---- ORDER NOTE ---- */
+.order-note-row { margin-bottom: 10px; }
+.order-note-row textarea {
+  width: 100%; background: var(--surface2); border: 1px solid var(--border2);
+  color: var(--text); border-radius: 2px; padding: 8px 10px;
+  font-family: 'Jost', sans-serif; font-size: 11px; resize: vertical;
+  min-height: 52px; outline: none; transition: border-color .2s;
+}
+.order-note-row textarea:focus { border-color: var(--gold-dim); }
+.order-note-label {
+  font-size: 10px; color: var(--muted); text-transform: uppercase;
+  letter-spacing: 1px; margin-bottom: 4px;
+}

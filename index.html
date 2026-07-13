@@ -357,6 +357,12 @@
       </div>
     </div>
 
+    <!-- Order Note -->
+    <div class="form-group">
+      <label>Order Note <span style="font-size:10px;color:var(--muted);font-weight:400">(optional)</span></label>
+      <textarea id="o-note" rows="2" placeholder="Any special instructions for your order? e.g. gift wrapping, colour preference…" style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);border-radius:2px;padding:8px 10px;font-family:'Jost',sans-serif;font-size:11px;resize:vertical;outline:none"></textarea>
+    </div>
+
     <div class="divider"></div>
 
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
@@ -364,9 +370,20 @@
       <span style="font-family:'Cormorant Garamond',serif;font-size:1.4rem;color:var(--gold)" id="order-total-display">₹0</span>
     </div>
 
+    <!-- Trust Badges -->
+    <div class="trust-badges" style="margin-bottom:12px">
+      <span class="trust-badge"><span class="tb-icon">🔒</span> Secure Payment</span>
+      <span class="trust-badge"><span class="tb-icon">✅</span> 100% Genuine</span>
+      <span class="trust-badge"><span class="tb-icon">↩️</span> Easy Returns</span>
+      <span class="trust-badge"><span class="tb-icon">🚚</span> Fast Delivery</span>
+    </div>
+
     <button class="razorpay-btn" onclick="simulateRazorpay()">💳 Pay with Razorpay</button>
     <div style="font-size:10px;color:var(--muted);text-align:center;margin-top:6px">
       UPI • Cards • NetBanking • Wallets — Secured by Razorpay
+    </div>
+    <div style="font-size:10px;color:var(--muted);text-align:center;margin-top:6px">
+      By placing your order you agree to our <a href="#" onclick="openTos();return false;" style="color:var(--gold);text-decoration:underline">Terms of Service</a>
     </div>
   </div>
 </div>
@@ -440,6 +457,65 @@
 <!-- ============================================================
      FOOTER
      ============================================================ -->
+<!-- ============================================================
+     COOKIE CONSENT BAR
+     ============================================================ -->
+<div id="cookie-bar">
+  <p>🍪 We use cookies to enhance your shopping experience and show you personalised content. By continuing to browse, you agree to our <a onclick="openTos()">Terms of Service</a> and <a onclick="openTos()">Privacy Policy</a>.</p>
+  <div class="cookie-btns">
+    <button class="cookie-decline" onclick="dismissCookies(false)">Decline</button>
+    <button class="cookie-accept" onclick="dismissCookies(true)">Accept All</button>
+  </div>
+</div>
+
+<!-- ============================================================
+     TERMS OF SERVICE MODAL
+     ============================================================ -->
+<div id="tos-modal" class="modal-bg hide">
+  <div class="modal">
+    <div class="modal-title">
+      <span>📄 Terms of Service &amp; Policies</span>
+      <button class="close-btn" onclick="closeTos()">✕</button>
+    </div>
+    <div class="modal-body">
+      <h3>Terms of Service</h3>
+      <p>By placing an order on KRIVVA you agree to our terms. All purchases are final once dispatched. We reserve the right to cancel orders due to stock discrepancies.</p>
+      <h3>Shipping Policy</h3>
+      <p>Orders are dispatched within 1–2 business days. Estimated delivery is 3–7 business days across India. Free shipping on orders above ₹999. Express shipping available at ₹149.</p>
+      <h3>Return &amp; Exchange Policy</h3>
+      <p>We accept returns within 7 days of delivery for items that are unused, unwashed, and in original packaging with tags. Custom and sale items are non-returnable. To initiate a return contact us on WhatsApp.</p>
+      <h3>Privacy Policy</h3>
+      <p>We collect personal information (name, email, address, phone) solely for processing and delivering your orders. We do not sell or share your data with third parties. Payment data is processed securely by Razorpay and never stored on our servers.</p>
+      <h3>Cookie Policy</h3>
+      <p>We use cookies to keep your shopping cart, remember your login session, and improve site performance. You may decline non-essential cookies at any time.</p>
+      <h3>Contact Us</h3>
+      <p>For any queries, reach us at hello@krivvabyrethika.com or WhatsApp us at +91 98765 43210.</p>
+    </div>
+    <div style="margin-top:16px">
+      <button class="btn-gold" style="width:100%" onclick="closeTos()">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     NOTIFY ME MODAL
+     ============================================================ -->
+<div id="notify-modal" class="modal-bg hide">
+  <div class="modal" style="max-width:360px">
+    <div class="modal-title">
+      <span>🔔 Notify Me When Back</span>
+      <button class="close-btn" onclick="closeNotifyModal()">✕</button>
+    </div>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:14px">Enter your email and we'll send you a message the moment this item is back in stock.</p>
+    <input type="hidden" id="notify-product-id"/>
+    <div class="form-group">
+      <label>Your Email</label>
+      <input type="email" id="notify-email" placeholder="email@example.com" required/>
+    </div>
+    <button class="btn-gold" style="width:100%" onclick="submitNotifyMe()">🔔 Notify Me</button>
+  </div>
+</div>
+
 <footer>
   <div class="footer-grid">
     <div>
@@ -464,10 +540,10 @@
     </div>
     <div>
       <div class="footer-title">Policies</div>
-      <span class="footer-link">Shipping Policy</span>
-      <span class="footer-link">Return &amp; Exchange</span>
-      <span class="footer-link">Privacy Policy</span>
-      <span class="footer-link">Terms of Service</span>
+      <span class="footer-link" onclick="openTos()">Shipping Policy</span>
+      <span class="footer-link" onclick="openTos()">Return &amp; Exchange</span>
+      <span class="footer-link" onclick="openTos()">Privacy Policy</span>
+      <span class="footer-link" onclick="openTos()">Terms of Service</span>
     </div>
   </div>
   <div class="footer-bottom">© 2026 KRIVVA. All rights reserved. Made with ♥ for women who love fashion.</div>
@@ -485,9 +561,6 @@
 
 <!-- 3. Auth module — login, signup, Supabase integration -->
 <script src="js/auth.js"></script>
-
-<!-- 4. Admin panel -->
-<script src="js/admin.js"></script>
 
 <!-- 5. Core app logic — UI, products, cart, wishlist, orders, reviews -->
 <script src="js/app.js"></script>

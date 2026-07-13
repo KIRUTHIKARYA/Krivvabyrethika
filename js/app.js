@@ -260,22 +260,26 @@ function starsHTML(n) { return '⭐'.repeat(n) + '☆'.repeat(5 - n); }
 
 function productCardHTML(p) {
   const price = ep(p), wl = wishlist.includes(p.id);
-  const isLow = p.stock > 0 && p.stock <= 5;
+  const isSoldOut = p.stock === 0;
+  const isLow     = p.stock > 0 && p.stock <= 5;
+  const isOnSale  = p.offer > 0;
   const stars = avgStars(p);
-  return `<div class="product-card" id="pc-${p.id}">
+  return `<div class="product-card" id="pc-${p.id}" style="position:relative">
     <div class="product-img" onclick="openDetail('${p.id}')">
       ${getPhoto(p)
         ? `<img src="${getPhoto(p)}" alt="${p.name}" style="width:100%;height:160px;object-fit:cover" onerror="this.style.display='none'"/>`
         : `<span class="emoji-fb">${p.icon}</span>`}
+      ${isSoldOut ? '<div class="sold-out-overlay"><div class="sold-out-stamp">SOLD OUT</div></div>' : ''}
       <div class="product-img-overlay">
         <button class="overlay-btn" onclick="event.stopPropagation();openDetail('${p.id}')">Quick View</button>
       </div>
     </div>
     <div class="p-badges">
-      ${p.isNew        ? '<span class="p-badge badge-new">New</span>' : ''}
-      ${p.isTrending   ? '<span class="p-badge badge-trending">🔥 Hot</span>' : ''}
-      ${p.offer > 0    ? `<span class="p-badge badge-offer">${p.offer}% off</span>` : ''}
-      ${isLow          ? `<span class="p-badge" style="background:rgba(224,82,82,.85);color:#fff">Only ${p.stock} left!</span>` : ''}
+      ${p.isNew      ? '<span class="p-badge badge-new">New</span>' : ''}
+      ${p.isTrending ? '<span class="p-badge badge-trending">🔥 Hot</span>' : ''}
+      ${isOnSale     ? `<span class="p-badge badge-sale">${p.offer}% OFF</span>` : ''}
+      ${isSoldOut    ? '<span class="p-badge badge-soldout">Sold Out</span>' : ''}
+      ${isLow && !isSoldOut ? `<span class="p-badge" style="background:rgba(224,82,82,.85);color:#fff">Only ${p.stock} left!</span>` : ''}
     </div>
     <button class="wishlist-btn ${wl ? 'active' : ''}" onclick="toggleWishlist('${p.id}')">♥</button>
     <div class="product-info">
@@ -285,12 +289,11 @@ function productCardHTML(p) {
       <div class="price-row">
         <span class="product-price">₹${price.toLocaleString()}</span>
         ${p.mrp > price ? `<span class="product-old">₹${p.mrp.toLocaleString()}</span>` : ''}
-        ${p.offer > 0   ? `<span class="offer-tag">${p.offer}% off</span>` : ''}
+        ${isOnSale     ? `<span class="offer-tag">${p.offer}% off</span>` : ''}
       </div>
-      ${p.stock === 0 ? '<div style="font-size:10px;color:var(--red);margin-bottom:6px">Out of Stock</div>' : ''}
-      <button class="add-cart" onclick="quickAddToCart('${p.id}')" ${p.stock === 0 ? 'disabled style="opacity:.4;cursor:not-allowed"' : ''}>
-        ${p.stock === 0 ? 'Out of Stock' : 'Add to Bag'}
-      </button>
+      ${isSoldOut
+        ? `<button class="add-cart" onclick="event.stopPropagation();openNotifyMe('${p.id}')" style="background:var(--surface2);border:1px solid var(--border2);color:var(--muted);cursor:pointer">🔔 Notify Me</button>`
+        : `<button class="add-cart" onclick="quickAddToCart('${p.id}')">Add to Bag</button>`}
     </div>
   </div>`;
 }
@@ -363,7 +366,10 @@ function openDetail(id) {
           ${p.stock === 0 ? 'Out of Stock' : p.stock <= 5 ? `Only ${p.stock} left!` : `${p.stock} in stock`}
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <button class="btn-gold" onclick="addToCartFromDetail('${id}')" ${p.stock === 0 ? 'disabled' : ''}>${p.stock === 0 ? 'Out of Stock' : 'Add to Bag'}</button>
+          ${p.stock === 0
+            ? `<button class="btn-outline btn-sm" onclick="openNotifyMe('${id}')" style="flex:1">🔔 Notify Me When Back</button>`
+            : `<button class="btn-gold" onclick="addToCartFromDetail('${id}')">Add to Bag</button>`
+          }
           <button class="btn-outline btn-sm" onclick="toggleWishlist('${id}')">${wishlist.includes(id) ? '❤️ Saved' : '🤍 Wishlist'}</button>
         </div>
       </div>
@@ -661,6 +667,10 @@ function renderCart() {
       <button onclick="${appliedCoupon ? 'removeCoupon()' : 'applyCoupon()'}">${appliedCoupon ? 'Remove' : 'Apply'}</button>
     </div>
     ${appliedCoupon ? `<div style="font-size:11px;color:var(--green);margin-bottom:8px">✓ ${appliedCoupon.code} applied — Saved ₹${discount.toLocaleString()}</div>` : ''}
+    <div class="order-note-row">
+      <div class="order-note-label">📝 Order Note (optional)</div>
+      <textarea id="cart-note" placeholder="Any special instructions? (gift wrapping, colour preference…)" rows="2">${cartNote || ''}</textarea>
+    </div>
     <div style="font-size:11px;color:var(--muted);padding:8px 0;border-top:1px solid var(--border)">
       <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span>Subtotal</span><span>₹${subtotal.toLocaleString()}</span></div>
       ${discount > 0 ? `<div style="display:flex;justify-content:space-between;margin-bottom:4px;color:var(--green)"><span>Discount</span><span>-₹${discount.toLocaleString()}</span></div>` : ''}
@@ -670,7 +680,13 @@ function renderCart() {
       <span style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted)">Total</span>
       <span style="font-family:'Cormorant Garamond',serif;font-size:1.5rem;color:var(--gold)">₹${grand.toLocaleString()}</span>
     </div>
-    <button class="btn-gold" style="width:100%" onclick="goCheckout(${grand})">Proceed to Checkout</button>
+    <div class="trust-badges" style="margin-bottom:10px">
+      <span class="trust-badge"><span class="tb-icon">🔒</span> Secure</span>
+      <span class="trust-badge"><span class="tb-icon">✅</span> Genuine</span>
+      <span class="trust-badge"><span class="tb-icon">↩️</span> 7-day Returns</span>
+      <span class="trust-badge"><span class="tb-icon">🚚</span> Fast Ship</span>
+    </div>
+    <button class="btn-gold" style="width:100%" onclick="syncCartNoteAndCheckout(${grand})">Proceed to Checkout</button>
     <div style="font-size:10px;color:var(--muted);text-align:center;margin-top:6px">
       ${shipping === 0 ? '🎉 You qualify for FREE shipping!' : 'Add ₹' + (999 - subtotal) + ' more for FREE shipping'}
     </div>`;
@@ -754,6 +770,12 @@ function checkDelivery() {
 
 function closeOrderModal() { document.getElementById('order-modal').classList.add('hide'); }
 
+// Sync cart note to checkout note field before opening checkout
+function syncCartNoteAndCheckout(total) {
+  cartNote = (document.getElementById('cart-note')?.value || '').trim();
+  goCheckout(total);
+}
+
 async function simulateRazorpay() {
   const name  = document.getElementById('o-name').value.trim();
   const phone = document.getElementById('o-phone').value.trim();
@@ -761,6 +783,7 @@ async function simulateRazorpay() {
   const email = document.getElementById('o-email').value.trim();
   const city  = document.getElementById('o-city').value.trim();
   const pin   = document.getElementById('o-pin').value.trim();
+  const note  = document.getElementById('o-note')?.value?.trim() || cartNote || '';
   if (!name || !phone || !addr) { showToast('Please fill all required fields', 'red'); return; }
 
   const subtotal = cart.reduce((a, b) => a + b.price * b.qty, 0);
@@ -786,7 +809,8 @@ async function simulateRazorpay() {
         total_amount: total,
         shipping_address: addr,
         shipping_city: city,
-        shipping_pincode: pin
+        shipping_pincode: pin,
+        customer_note: note || null
       })
       .select()
       .single();
@@ -1020,6 +1044,34 @@ async function submitReview() {
   if (!text) { showToast('Please write a review', 'red'); return; }
   if (!currentUser) { showToast('Please login first', 'red'); return; }
 
+  // Verify the reviewer has actually placed an order for this product
+  if (supabaseClient && activeReviewProductId) {
+    try {
+      // Look for any order_items with a matching variant for this product, linked to an order by this user's email
+      const { data: purchased, error: purchaseErr } = await supabaseClient
+        .from('orders')
+        .select('id, order_items(id, variants(id, products(id)))')
+        .eq('customer_email', currentUser.email)
+        .neq('status', 'cancelled');
+
+      if (purchaseErr) throw purchaseErr;
+
+      const hasBought = (purchased || []).some(order =>
+        (order.order_items || []).some(item =>
+          item.variants?.products?.id === activeReviewProductId
+        )
+      );
+
+      if (!hasBought) {
+        showToast('Only verified buyers can leave a review for this product.', 'red');
+        return;
+      }
+    } catch (err) {
+      // If check fails due to network, allow the review to go through rather than blocking
+      console.warn('Could not verify purchase status, allowing review:', err);
+    }
+  }
+
   if (supabaseClient) {
     try {
       const { error } = await supabaseClient
@@ -1215,3 +1267,93 @@ window.closeSizeChart = function() {
     modal.classList.add('hide');
   }
 };
+
+// ===== CART NOTE GLOBAL =====
+let cartNote = '';
+
+// ===== COOKIE CONSENT =====
+function initCookieConsent() {
+  const choice = localStorage.getItem('krivva_cookie_consent');
+  if (!choice) {
+    // Show bar after a short delay so it doesn't flash on load
+    setTimeout(() => {
+      const bar = document.getElementById('cookie-bar');
+      if (bar) bar.classList.add('visible');
+    }, 1800);
+  }
+}
+
+function dismissCookies(accepted) {
+  localStorage.setItem('krivva_cookie_consent', accepted ? 'accepted' : 'declined');
+  const bar = document.getElementById('cookie-bar');
+  if (bar) {
+    bar.style.transform = 'translateY(100%)';
+    setTimeout(() => bar.style.display = 'none', 400);
+  }
+}
+
+// ===== TERMS OF SERVICE MODAL =====
+function openTos() {
+  document.getElementById('tos-modal').classList.remove('hide');
+}
+function closeTos() {
+  document.getElementById('tos-modal').classList.add('hide');
+}
+
+// ===== NOTIFY ME (sold-out restock alert) =====
+function openNotifyMe(productId) {
+  const p = products.find(x => x.id === productId || x.id === String(productId));
+  document.getElementById('notify-product-id').value = productId;
+  // Pre-fill with logged-in user email if available
+  const emailInput = document.getElementById('notify-email');
+  if (emailInput && currentUser?.email) emailInput.value = currentUser.email;
+  document.getElementById('notify-modal').classList.remove('hide');
+}
+
+function closeNotifyModal() {
+  document.getElementById('notify-modal').classList.add('hide');
+}
+
+async function submitNotifyMe() {
+  const productId = document.getElementById('notify-product-id').value;
+  const email = document.getElementById('notify-email').value.trim();
+  const p = products.find(x => x.id === productId || x.id === String(productId));
+
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    showToast('Please enter a valid email address', 'red');
+    return;
+  }
+
+  if (supabaseClient) {
+    try {
+      // Store in storefront_settings as a notify request list
+      const key = `notify_requests_${productId}`;
+      const { data: existing } = await supabaseClient
+        .from('storefront_settings')
+        .select('value')
+        .eq('key', key)
+        .single();
+
+      const current = existing?.value?.emails || [];
+      if (!current.includes(email)) current.push(email);
+
+      await supabaseClient
+        .from('storefront_settings')
+        .upsert({ key, value: { emails: current, product_name: p?.name || '' } });
+
+      showToast(`We'll notify ${email} when it's back! 🔔`, 'green');
+    } catch (err) {
+      console.error('Notify Me error:', err);
+      // Still show success to customer — don't expose DB errors
+      showToast(`We'll notify you when it's back! 🔔`, 'green');
+    }
+  } else {
+    showToast(`We'll notify you when it's back! 🔔`, 'green');
+  }
+
+  closeNotifyModal();
+  document.getElementById('notify-email').value = '';
+}
+
+// ===== BOOT COOKIE CONSENT CHECK =====
+initCookieConsent();
