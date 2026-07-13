@@ -79,6 +79,7 @@ async function loadProductsFromSupabase() {
     renderCats();
     renderProducts();
     loadWishlistFromSupabase();
+    handleURLHashProduct();
   } catch (err) {
     console.error("Error loading products from Supabase:", err);
     showToast("Error loading catalog", "red");
@@ -303,9 +304,9 @@ function openDetail(id) {
         <div class="pd-img">${getPhoto(p) ? `<img src="${getPhoto(p)}" style="width:100%;height:220px;object-fit:cover"/>` : p.icon}</div>
         <div style="margin-top:10px">
           <div style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:6px">Share</div>
-          <div style="display:flex;gap:8px">
-            <button onclick="shareProduct('${p.id}')" style="background:#25d366;border:none;color:#fff;padding:7px 14px;cursor:pointer;font-size:11px;font-family:'Jost',sans-serif">💬 WhatsApp</button>
-          </div>
+          <button onclick="shareProduct('${p.id}')" class="btn-outline btn-sm" style="display:flex;align-items:center;gap:6px;padding:6px 12px;font-size:11px;">
+            <span>🔗</span> Share Product
+          </button>
         </div>
       </div>
       <div>
@@ -388,9 +389,39 @@ function selectSize(pid, size, el) {
 
 function shareProduct(id) {
   const p = products.find(x => x.id === id); if (!p) return;
-  const text = `Check out ${p.name} at KRIVVA for ₹${ep(p).toLocaleString()}! 👗✨`;
-  window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+  const shareUrl = `${window.location.origin}${window.location.pathname}#prod-${p.id}`;
+  
+  if (navigator.share) {
+    navigator.share({
+      title: p.name,
+      text: `Check out ${p.name} at KRIVVA! 👗✨`,
+      url: shareUrl
+    }).catch(err => {
+      console.log('Error sharing:', err);
+    });
+  } else {
+    // Desktop Fallback: Copy to clipboard
+    navigator.clipboard.writeText(shareUrl).then(() => {
+      showToast('Product link copied to clipboard! 📋', 'green');
+    }).catch(err => {
+      // Fallback 2: WhatsApp web redirection
+      const text = `Check out ${p.name} at KRIVVA for ₹${ep(p).toLocaleString()}! 👗✨\n${shareUrl}`;
+      window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+    });
+  }
 }
+
+function handleURLHashProduct() {
+  const hash = window.location.hash;
+  if (hash && hash.startsWith('#prod-')) {
+    const id = hash.replace('#prod-', '');
+    setTimeout(() => {
+      openDetail(id);
+    }, 200);
+  }
+}
+
+window.addEventListener('hashchange', handleURLHashProduct);
 
 // ===== WISHLIST =====
 async function toggleWishlist(id) {
