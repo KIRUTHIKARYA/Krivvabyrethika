@@ -252,48 +252,6 @@
 </div>
 
 <!-- ============================================================
-     ADMIN PAGE
-     ============================================================ -->
-<div id="page-admin" class="page hide">
-
-  <!-- Login gate -->
-  <div id="admin-login-section">
-    <div class="section-title">Admin Panel</div>
-    <div class="section-sub">Owner access only</div>
-    <div style="max-width:300px;margin-top:16px">
-      <div class="form-group">
-        <label>Password</label>
-        <input type="password" id="admin-pass" placeholder="Enter admin password"/>
-      </div>
-      <button class="btn-gold" onclick="adminLogin()" style="width:100%">Login to Admin</button>
-      <div style="font-size:10px;color:var(--muted);margin-top:8px">Default: krivva123</div>
-    </div>
-  </div>
-
-  <!-- Admin Dashboard (shown after login) -->
-  <div id="admin-panel" class="hide">
-    <div class="stats"         id="admin-stats"></div>
-    <div                       id="admin-chart-area" style="margin-bottom:16px"></div>
-    <div                       id="low-stock-area"></div>
-
-    <div class="admin-tabs">
-      <div class="admin-tab active" onclick="adminTab('orders',this)">Orders</div>
-      <div class="admin-tab"        onclick="adminTab('products',this)">Edit Products</div>
-      <div class="admin-tab"        onclick="adminTab('add',this)">Add Product</div>
-      <div class="admin-tab"        onclick="adminTab('coupons',this)">Coupons</div>
-      <div class="admin-tab"        onclick="adminTab('banner',this)">Banner</div>
-    </div>
-
-    <div id="admin-orders-tab"></div>
-    <div id="admin-products-tab" class="hide"></div>
-    <div id="admin-add-tab"      class="hide"></div>
-    <div id="admin-coupons-tab"  class="hide"></div>
-    <div id="admin-banner-tab"   class="hide"></div>
-  </div>
-
-</div><!-- /#page-admin -->
-
-<!-- ============================================================
      CART MODAL
      ============================================================ -->
 <div id="cart-modal" class="modal-bg hide">
