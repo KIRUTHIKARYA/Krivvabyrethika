@@ -1026,10 +1026,10 @@ async function loadStorefrontSettings() {
     
     if (data) {
       const ann = data.find(s => s.key === 'announcement_banner');
-      if (ann && ann.value?.text) {
+      if (ann && ann.value && ann.value.text !== undefined) {
         const marquee = document.getElementById('announce-marquee');
         if (marquee) {
-          marquee.textContent = '✦ ' + ann.value.text + ' ✦ ' + ann.value.text;
+          marquee.textContent = ann.value.text ? '✦ ' + ann.value.text + ' ✦ ' + ann.value.text : '';
         }
       }
       
@@ -1059,7 +1059,9 @@ function subscribeStorefrontSettings() {
       if (payload.new.key === 'announcement_banner') {
         const text = payload.new.value?.text;
         const marquee = document.getElementById('announce-marquee');
-        if (marquee && text) marquee.textContent = '✦ ' + text + ' ✦ ' + text;
+        if (marquee && text !== undefined) {
+          marquee.textContent = text ? '✦ ' + text + ' ✦ ' + text : '';
+        }
       } else if (payload.new.key === 'hero_banner') {
         const tag = document.getElementById('hero-tagline');
         const title = document.getElementById('hero-title');
