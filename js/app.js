@@ -468,15 +468,15 @@ function renderWishlist() {
   const items = products.filter(p => wishlist.includes(p.id));
   c.innerHTML = `<div class="wishlist-grid">${items.map(p => `
     <div class="wishlist-card">
-      <div class="wl-img" onclick="openDetail(${p.id})" style="cursor:pointer">
+      <div class="wl-img" onclick="openDetail('${p.id}')" style="cursor:pointer">
         ${getPhoto(p) ? `<img src="${getPhoto(p)}" style="width:100%;height:110px;object-fit:cover"/>` : p.icon}
       </div>
       <div class="wl-info">
         <div style="font-size:12px;font-weight:500;color:var(--white);margin-bottom:3px">${p.name}</div>
         <div style="font-family:'Cormorant Garamond',serif;font-size:1rem;color:var(--gold);margin-bottom:8px">₹${ep(p).toLocaleString()}</div>
         <div style="display:flex;gap:6px">
-          <button class="add-cart" style="flex:1" onclick="quickAddToCart(${p.id})">Add to Bag</button>
-          <button onclick="toggleWishlist(${p.id})" style="background:none;border:1px solid var(--border);color:var(--red);padding:7px 8px;cursor:pointer">✕</button>
+          <button class="add-cart" style="flex:1" onclick="quickAddToCart('${p.id}')">Add to Bag</button>
+          <button onclick="toggleWishlist('${p.id}')" style="background:none;border:1px solid var(--border);color:var(--red);padding:7px 8px;cursor:pointer">✕</button>
         </div>
       </div>
     </div>`).join('')}</div>`;

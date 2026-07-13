@@ -201,17 +201,17 @@ function renderAdminEditProducts() {
       <div class="form-group"><label>Description</label><textarea id="ep-desc-${p.id}" rows="2">${p.desc}</textarea></div>
       <div class="form-group">
         <label>Photo URL</label>
-        <input type="text" id="ep-url-${p.id}" value="${p.photo}" placeholder="https://..." oninput="previewURL(${p.id})"/>
+        <input type="text" id="ep-url-${p.id}" value="${p.photo}" placeholder="https://..." oninput="previewURL('${p.id}')"/>
         <div class="url-hint">Paste Instagram or Google image link</div>
       </div>
       <div class="photo-upload-area" onclick="document.getElementById('ep-file-${p.id}').click()">
-        <input type="file" id="ep-file-${p.id}" accept="image/*" onchange="handleFileUpload(event,${p.id})" style="display:none"/>
+        <input type="file" id="ep-file-${p.id}" accept="image/*" onchange="handleFileUpload(event,'${p.id}')" style="display:none"/>
         <div style="font-size:11px;color:var(--muted)">📁 Upload from device</div>
         <img id="ep-preview-${p.id}" class="photo-preview-img" src="" alt=""/>
       </div>
       <div class="edit-row3" style="margin-top:10px">
-        <div class="form-group"><label>MRP (₹)</label><input type="number" id="ep-mrp-${p.id}" value="${p.mrp}" oninput="computeOffer(${p.id})"/></div>
-        <div class="form-group"><label>Offer %</label><input type="number" id="ep-offer-${p.id}" value="${p.offer}" min="0" max="90" oninput="computeOffer(${p.id})"/></div>
+        <div class="form-group"><label>MRP (₹)</label><input type="number" id="ep-mrp-${p.id}" value="${p.mrp}" oninput="computeOffer('${p.id}')"/></div>
+        <div class="form-group"><label>Offer %</label><input type="number" id="ep-offer-${p.id}" value="${p.offer}" min="0" max="90" oninput="computeOffer('${p.id}')"/></div>
         <div class="form-group"><label>Final Price</label><div class="computed-price" id="ep-computed-${p.id}">₹${ep(p).toLocaleString()}</div></div>
       </div>
       <div class="edit-row2">
@@ -227,8 +227,8 @@ function renderAdminEditProducts() {
         <div class="toggle-item"><input type="checkbox" id="ep-trend-${p.id}" ${p.isTrending ? 'checked' : ''}/><label for="ep-trend-${p.id}">🔥 Trending</label></div>
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <button class="btn-gold btn-sm" onclick="saveProduct(${p.id})">Save Changes</button>
-        <button class="btn-red btn-sm" onclick="deleteProduct(${p.id})">Remove</button>
+        <button class="btn-gold btn-sm" onclick="saveProduct('${p.id}')">Save Changes</button>
+        <button class="btn-red btn-sm" onclick="deleteProduct('${p.id}')">Remove</button>
       </div>
     </div>`).join('');
 }
