@@ -119,29 +119,25 @@ function doLogin() {
   const pass  = document.getElementById('auth-pass').value.trim();
   if (!email || !pass) { showToast('Please fill all fields', 'red'); return; }
 
-  // Try Supabase first; fall back to demo mode if SDK not loaded
   if (supabaseClient) {
     supabaseClient.auth.signInWithPassword({ email, password: pass })
       .then(({ data, error }) => {
         if (error) {
-          // Supabase failed – fall back to demo mode so dev can still test
-          currentUser = { name: email.split('@')[0], email, phone: '' };
-          afterLogin();
-          showToast('Demo mode (Supabase: ' + error.message + ')');
+          showToast('Login error: ' + error.message, 'red');
         } else {
           const u = data.user;
           currentUser = {
             name:  u.user_metadata?.full_name || u.email.split('@')[0],
             email: u.email,
-            phone: '',
+            phone: u.user_metadata?.phone || '',
           };
           afterLogin();
         }
       });
   } else {
-    // Pure demo fallback
     currentUser = { name: email.split('@')[0], email, phone: '' };
     afterLogin();
+    showToast('Offline Demo Mode');
   }
 }
 
