@@ -169,19 +169,21 @@ function startCountdown() {
 
 // ===== NAVIGATION =====
 function showPage(pg) {
-  ['home', 'wishlist', 'orders', 'admin'].forEach(x => {
+  ['home', 'wishlist', 'orders', 'admin', 'profile'].forEach(x => {
     document.getElementById('page-' + x).classList.toggle('hide', x !== pg);
     const n = document.getElementById('nav-' + x); if (n) n.classList.toggle('active', x === pg);
   });
   if (pg === 'orders')   renderMyOrders();
   if (pg === 'wishlist') renderWishlist();
   if (pg === 'admin')    renderAdminStats();
+  if (pg === 'profile')  populateProfilePage();
   setBN(pg);
 }
 
 function setBN(pg) {
   document.querySelectorAll('.bottom-nav-item').forEach(el => el.classList.remove('active'));
-  const el = document.getElementById('bn-' + pg); if (el) el.classList.add('active');
+  const bnId = pg === 'profile' ? 'account' : pg;
+  const el = document.getElementById('bn-' + bnId); if (el) el.classList.add('active');
 }
 
 // ===== SEARCH =====
@@ -609,8 +611,30 @@ function removeCoupon() { appliedCoupon = null; renderCart(); }
 function goCheckout(total) {
   if (!currentUser) { closeCart(); showToast('Please login to continue', 'red'); showAuthModal('checkout'); return; }
   closeCart();
-  document.getElementById('o-name').value  = currentUser.name  || '';
-  document.getElementById('o-email').value = currentUser.email || '';
+  
+  // Try to load saved profile address details
+  const savedAddress = localStorage.getItem(`profile_address_${currentUser.email}`);
+  if (savedAddress) {
+    try {
+      const addr = JSON.parse(savedAddress);
+      document.getElementById('o-name').value  = addr.name || currentUser.name || '';
+      document.getElementById('o-phone').value = addr.phone || '';
+      document.getElementById('o-email').value = currentUser.email || '';
+      document.getElementById('o-addr').value  = addr.street || '';
+      document.getElementById('o-city').value  = addr.city || '';
+      document.getElementById('o-pin').value   = addr.pin || '';
+    } catch (e) {
+      console.error('Error auto-filling checkout address:', e);
+    }
+  } else {
+    document.getElementById('o-name').value  = currentUser.name || '';
+    document.getElementById('o-email').value = currentUser.email || '';
+    document.getElementById('o-phone').value = '';
+    document.getElementById('o-addr').value  = '';
+    document.getElementById('o-city').value  = '';
+    document.getElementById('o-pin').value   = '';
+  }
+
   document.getElementById('order-total-display').textContent = '₹' + total.toLocaleString();
   document.getElementById('checkout-user-info').innerHTML =
     `👤 Logged in as <strong>${currentUser.name}</strong> (${currentUser.email})`;

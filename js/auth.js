@@ -233,26 +233,74 @@ function updateWelcomeBanner() {
 }
 
 function showUserMenu() {
-  openProfileModal();
+  showPage('profile');
 }
 
-function openProfileModal() {
+function populateProfilePage() {
   if (!currentUser) return;
-  const avatarEl = document.getElementById('profile-avatar');
-  const nameEl = document.getElementById('profile-name');
-  const emailEl = document.getElementById('profile-email');
-  const phoneEl = document.getElementById('profile-phone');
   
-  if (avatarEl) avatarEl.textContent = currentUser.name[0].toUpperCase();
-  if (nameEl) nameEl.textContent = currentUser.name;
-  if (emailEl) emailEl.textContent = currentUser.email;
-  if (phoneEl) phoneEl.textContent = currentUser.phone ? '📞 ' + currentUser.phone : 'No phone number added';
+  const greetingEl = document.getElementById('profile-greeting');
+  if (greetingEl) {
+    greetingEl.textContent = `Hello, ${currentUser.name}`;
+  }
   
-  document.getElementById('profile-modal').classList.remove('hide');
+  const secEmail = document.getElementById('sec-email');
+  if (secEmail) secEmail.textContent = currentUser.email;
+  
+  const secId = document.getElementById('sec-id');
+  if (secId) {
+    if (supabaseClient) {
+      supabaseClient.auth.getUser().then(({ data: { user } }) => {
+        if (user) secId.textContent = user.id;
+      });
+    } else {
+      secId.textContent = 'demo-user-id';
+    }
+  }
+
+  // Load address
+  const savedAddress = localStorage.getItem(`profile_address_${currentUser.email}`);
+  if (savedAddress) {
+    try {
+      const addr = JSON.parse(savedAddress);
+      document.getElementById('prof-addr-name').value = addr.name || '';
+      document.getElementById('prof-addr-phone').value = addr.phone || '';
+      document.getElementById('prof-addr-street').value = addr.street || '';
+      document.getElementById('prof-addr-city').value = addr.city || '';
+      document.getElementById('prof-addr-pin').value = addr.pin || '';
+    } catch (e) {
+      console.error('Error parsing profile address:', e);
+    }
+  } else {
+    document.getElementById('prof-addr-name').value = currentUser.name || '';
+    document.getElementById('prof-addr-phone').value = '';
+    document.getElementById('prof-addr-street').value = '';
+    document.getElementById('prof-addr-city').value = '';
+    document.getElementById('prof-addr-pin').value = '';
+  }
 }
 
-function closeProfileModal() {
-  document.getElementById('profile-modal').classList.add('hide');
+function saveProfileAddress(event) {
+  event.preventDefault();
+  if (!currentUser) { showToast('Please log in first', 'red'); return; }
+  
+  const addressDetails = {
+    name: document.getElementById('prof-addr-name').value.trim(),
+    phone: document.getElementById('prof-addr-phone').value.trim(),
+    street: document.getElementById('prof-addr-street').value.trim(),
+    city: document.getElementById('prof-addr-city').value.trim(),
+    pin: document.getElementById('prof-addr-pin').value.trim(),
+  };
+
+  localStorage.setItem(`profile_address_${currentUser.email}`, JSON.stringify(addressDetails));
+  showToast('Default shipping address saved successfully! ✓', 'green');
+}
+
+function toggleSecurityInfo() {
+  const details = document.getElementById('security-details');
+  if (details) {
+    details.classList.toggle('hide');
+  }
 }
 
 function doLogout() {
@@ -262,7 +310,6 @@ function doLogout() {
         showToast('Logout error: ' + error.message, 'red');
       } else {
         currentUser = null;
-        closeProfileModal();
         updateUserNav();
         updateWelcomeBanner();
         showToast('Logged out successfully', 'gold');
@@ -271,7 +318,6 @@ function doLogout() {
     });
   } else {
     currentUser = null;
-    closeProfileModal();
     updateUserNav();
     updateWelcomeBanner();
     showToast('Logged out successfully (Demo)', 'gold');
@@ -294,5 +340,13 @@ function adminLogin() {
     renderAdminBanner();
   } else {
     showToast('Wrong password!', 'red');
+  }
+}
+
+function handleAccountNav() {
+  if (currentUser) {
+    showPage('profile');
+  } else {
+    showAuthModal();
   }
 }

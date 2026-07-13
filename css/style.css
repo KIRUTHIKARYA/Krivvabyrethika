@@ -690,6 +690,51 @@ footer {
   color: var(--gold); letter-spacing: 5px; display: block; margin-bottom: 8px;
 }
 
+/* ---- ACCOUNT DASHBOARD ---- */
+.account-dashboard {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin-top: 20px;
+}
+.account-card {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 20px;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+.account-card:hover {
+  border-color: var(--gold);
+  background: var(--surface);
+  transform: translateY(-2px);
+}
+.card-icon {
+  font-size: 28px;
+  line-height: 1;
+}
+.card-content h3 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.25rem;
+  color: var(--gold);
+  margin-bottom: 4px;
+}
+.card-content p {
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.4;
+  margin: 0;
+}
+.address-section form .form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
 /* ---- RESPONSIVE ---- */
 @media (max-width: 480px) {
   nav { padding: 0 14px; }

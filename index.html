@@ -165,6 +165,93 @@
 </div>
 
 <!-- ============================================================
+     ACCOUNT PROFILE PAGE (Amazon-style Dashboard)
+     ============================================================ -->
+<div id="page-profile" class="page hide">
+  <div class="section-title">Your Account</div>
+  <div id="profile-greeting" class="section-sub">Hello, User</div>
+  
+  <div class="account-dashboard">
+    <!-- Card 1: Your Orders -->
+    <div class="account-card" onclick="showPage('orders')">
+      <div class="card-icon">📦</div>
+      <div class="card-content">
+        <h3>Your Orders</h3>
+        <p>Track, return, or buy items again</p>
+      </div>
+    </div>
+
+    <!-- Card 2: Your Wishlist -->
+    <div class="account-card" onclick="showPage('wishlist')">
+      <div class="card-icon">🤍</div>
+      <div class="card-content">
+        <h3>Your Wishlist</h3>
+        <p>View, edit, and buy saved items</p>
+      </div>
+    </div>
+
+    <!-- Card 3: Support -->
+    <a href="https://wa.me/919876543210?text=Hi! I need support with my KRIVVA account." target="_blank" class="account-card" style="text-decoration: none;">
+      <div class="card-icon">💬</div>
+      <div class="card-content">
+        <h3>Contact Us</h3>
+        <p>Chat with our styling team on WhatsApp</p>
+      </div>
+    </a>
+
+    <!-- Card 4: Login & Security -->
+    <div class="account-card" onclick="toggleSecurityInfo()">
+      <div class="card-icon">🔑</div>
+      <div class="card-content">
+        <h3>Login & Security</h3>
+        <p>View registered email & credentials</p>
+        <div id="security-details" class="hide" style="font-size: 11px; color: var(--muted); margin-top: 8px; text-align: left;">
+          <p>Email: <span id="sec-email"></span></p>
+          <p>User ID: <span id="sec-id" style="font-family: monospace;"></span></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Shipping Address Section -->
+  <div class="address-section" style="margin-top: 35px; border-top: 1px solid var(--border); padding-top: 25px;">
+    <div class="section-title" style="font-size: 1.4rem;">Default Shipping Address</div>
+    <div class="section-sub">Save address details to auto-fill at checkout</div>
+    
+    <form id="profile-address-form" onsubmit="saveProfileAddress(event)" style="max-width: 500px; margin-top: 15px; text-align: left;">
+      <div class="form-group">
+        <label>Full Name</label>
+        <input type="text" id="prof-addr-name" placeholder="Full Name" required />
+      </div>
+      <div class="form-group">
+        <label>Phone Number</label>
+        <input type="text" id="prof-addr-phone" placeholder="10 digit mobile number" required />
+      </div>
+      <div class="form-group">
+        <label>Street Address</label>
+        <input type="text" id="prof-addr-street" placeholder="Flat, House no., Apartment, Street" required />
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>City</label>
+          <input type="text" id="prof-addr-city" placeholder="City" required />
+        </div>
+        <div class="form-group">
+          <label>Pincode</label>
+          <input type="text" id="prof-addr-pin" placeholder="6 digit pincode" required />
+        </div>
+      </div>
+      <button type="submit" class="btn-gold" style="width: 100%; margin-top: 10px;">Save Address Details</button>
+    </form>
+  </div>
+
+  <!-- Log Out Section -->
+  <div style="margin-top: 40px; border-top: 1px solid var(--border); padding-top: 20px; text-align: left;">
+    <button class="btn-gold" onclick="doLogout()" style="background: var(--red); color: white; border-color: var(--red); max-width: 200px; width: 100%;">Sign Out</button>
+  </div>
+</div>
+
+<!-- ============================================================
      ADMIN PAGE
      ============================================================ -->
 <div id="page-admin" class="page hide">
@@ -311,32 +398,6 @@
   </div>
 </div>
 
-<!-- ============================================================
-     PROFILE MODAL
-     ============================================================ -->
-<div id="profile-modal" class="modal-bg hide">
-  <div class="modal" style="max-width:400px; text-align: center;">
-    <div class="modal-title">
-      Profile
-      <button class="close-btn" onclick="closeProfileModal()">✕</button>
-    </div>
-    
-    <div style="margin: 20px 0;">
-      <div id="profile-avatar" style="width: 80px; height: 80px; border-radius: 50%; background: var(--gold); color: var(--black); font-size: 32px; font-weight: 700; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px;">U</div>
-      <h3 id="profile-name" style="color: var(--white); font-family: 'Cormorant Garamond', serif; font-size: 1.6rem; margin-bottom: 5px;">User Name</h3>
-      <p id="profile-email" style="color: var(--muted); font-size: 13px; margin-bottom: 15px;">user@example.com</p>
-      <p id="profile-phone" style="color: var(--muted); font-size: 13px; margin-bottom: 15px;"></p>
-    </div>
-    
-    <div class="divider"></div>
-    
-    <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 15px;">
-      <button class="btn-outline" onclick="showPage('orders'); closeProfileModal();" style="width: 100%;">📦 View My Orders</button>
-      <button class="btn-outline" onclick="showPage('wishlist'); closeProfileModal();" style="width: 100%;">🤍 View My Wishlist</button>
-      <button class="btn-gold" onclick="doLogout()" style="width: 100%; margin-top: 10px; background: var(--red); color: white; border-color: var(--red);">Log Out</button>
-    </div>
-  </div>
-</div>
 
 <!-- ============================================================
      REVIEW MODAL
@@ -391,7 +452,7 @@
   <div class="bottom-nav-item"        id="bn-orders"  onclick="showPage('orders');setBN('orders')">
     <span class="bn-icon">📦</span><span>Orders</span>
   </div>
-  <div class="bottom-nav-item"        id="bn-account" onclick="showAuthModal();setBN('account')">
+  <div class="bottom-nav-item"        id="bn-account" onclick="handleAccountNav();setBN('account')">
     <span class="bn-icon">👤</span><span>Account</span>
   </div>
 </div>
