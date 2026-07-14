@@ -241,13 +241,13 @@ async function startCountdown() {
   const cdBar = document.querySelector('.countdown-bar');
   if (!cdBar) return;
   
-  if (!window.supabaseClient) {
+  if (!supabaseClient) {
     cdBar.style.display = 'none';
     return;
   }
 
   try {
-    const { data, error } = await window.supabaseClient
+    const { data, error } = await supabaseClient
       .from('storefront_settings')
       .select('value')
       .eq('key', 'sale_countdown')
