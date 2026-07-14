@@ -236,18 +236,54 @@ window.addEventListener('scroll', () => {
 });
 
 // ===== COUNTDOWN =====
-function startCountdown() {
-  const end = new Date(); end.setHours(end.getHours() + 5, end.getMinutes() + 30, 0, 0);
-  setInterval(() => {
-    const diff = end - new Date();
-    if (diff <= 0) return;
-    const h = Math.floor(diff / 3600000);
-    const m = Math.floor((diff % 3600000) / 60000);
-    const s = Math.floor((diff % 60000) / 1000);
-    document.getElementById('cd-h').textContent = String(h).padStart(2, '0');
-    document.getElementById('cd-m').textContent = String(m).padStart(2, '0');
-    document.getElementById('cd-s').textContent = String(s).padStart(2, '0');
-  }, 1000);
+async function startCountdown() {
+  const cdBar = document.querySelector('.countdown-bar');
+  if (!cdBar) return;
+  
+  if (!window.supabaseClient) {
+    cdBar.style.display = 'none';
+    return;
+  }
+
+  try {
+    const { data, error } = await window.supabaseClient
+      .from('storefront_settings')
+      .select('value')
+      .eq('key', 'sale_countdown')
+      .single();
+
+    if (error || !data || !data.value || data.value.enabled === false || !data.value.end_time) {
+      cdBar.style.display = 'none';
+      return;
+    }
+
+    const end = new Date(data.value.end_time);
+    
+    if (end - new Date() <= 0) {
+      cdBar.style.display = 'none';
+      return;
+    }
+
+    cdBar.style.display = 'flex';
+
+    const interval = setInterval(() => {
+      const diff = end - new Date();
+      if (diff <= 0) {
+        cdBar.style.display = 'none';
+        clearInterval(interval);
+        return;
+      }
+      const h = Math.floor(diff / 3600000);
+      const m = Math.floor((diff % 3600000) / 60000);
+      const s = Math.floor((diff % 60000) / 1000);
+      document.getElementById('cd-h').textContent = String(h).padStart(2, '0');
+      document.getElementById('cd-m').textContent = String(m).padStart(2, '0');
+      document.getElementById('cd-s').textContent = String(s).padStart(2, '0');
+    }, 1000);
+  } catch (err) {
+    console.error('Error starting countdown:', err);
+    cdBar.style.display = 'none';
+  }
 }
 
 // ===== NAVIGATION =====
