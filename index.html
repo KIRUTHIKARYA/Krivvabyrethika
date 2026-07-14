@@ -89,14 +89,19 @@
   </div>
 
   <!-- Hero -->
-  <div class="hero" id="hero-section">
-    <div class="hero-tag" id="hero-tagline">✦ New Collection 2026 ✦</div>
-    <h1 id="hero-title">Dressed in<br><em>Elegance</em></h1>
-    <p id="hero-subtitle">Curated luxury women's fashion — timeless, refined, yours</p>
-    <div class="hero-btns">
-      <button class="btn-gold"    onclick="document.getElementById('shop').scrollIntoView({behavior:'smooth'})">Shop Now</button>
-      <button class="btn-outline" onclick="filterCat('new')">New Arrivals</button>
-      <button class="btn-outline" onclick="filterCat('trending')">🔥 Trending</button>
+  <div class="hero" id="hero-section" style="position:relative; overflow:hidden">
+    <!-- Hero Slideshow Background -->
+    <div class="hero-slideshow" id="hero-slideshow" style="position:absolute; inset:0; z-index:1"></div>
+    
+    <div class="hero-content" style="position:relative; z-index:2; width:100%">
+      <div class="hero-tag" id="hero-tagline">✦ New Collection 2026 ✦</div>
+      <h1 id="hero-title">Dressed in<br><em>Elegance</em></h1>
+      <p id="hero-subtitle">Curated luxury women's fashion — timeless, refined, yours</p>
+      <div class="hero-btns">
+        <button class="btn-gold"    onclick="document.getElementById('shop').scrollIntoView({behavior:'smooth'})">Shop Now</button>
+        <button class="btn-outline" onclick="filterCat('new')">New Arrivals</button>
+        <button class="btn-outline" onclick="filterCat('trending')">🔥 Trending</button>
+      </div>
     </div>
   </div>
 

@@ -104,6 +104,7 @@ async function loadProductsFromSupabase() {
     handleURLHashProduct();
     loadCartFromLocalStorage();
     loadReelsFromSupabase();
+    loadPostersFromSupabase();
   } catch (err) {
     console.error("Error loading products from Supabase:", err);
     showToast("Error loading catalog", "red");
@@ -1766,6 +1767,63 @@ window.resetZoom = function(element) {
   if (!img) return;
   img.style.transform = 'scale(1)';
 };
+
+// ===== HOMEPAGE SLIDESHOW / POSTERS LOGIC =====
+let posters = [];
+let activePosterIdx = 0;
+let posterInterval = null;
+
+async function loadPostersFromSupabase() {
+  if (!supabaseClient) return;
+  try {
+    const { data, error } = await supabaseClient
+      .from('storefront_settings')
+      .select('value')
+      .eq('key', 'homepage_posters')
+      .single();
+      
+    if (!error && data && Array.isArray(data.value) && data.value.length > 0) {
+      posters = data.value;
+      renderPostersSlideshow();
+    } else {
+      renderDefaultHeroBackground();
+    }
+  } catch (err) {
+    console.error('Error loading posters:', err);
+    renderDefaultHeroBackground();
+  }
+}
+
+function renderPostersSlideshow() {
+  const container = document.getElementById('hero-slideshow');
+  if (!container) return;
+
+  container.innerHTML = posters.map((p, idx) => `
+    <div class="hero-slide ${idx === 0 ? 'active' : ''}" style="background-image: url('${p.url}')"></div>
+  `).join('');
+
+  if (posters.length > 1) {
+    startPostersInterval();
+  }
+}
+
+function startPostersInterval() {
+  if (posterInterval) clearInterval(posterInterval);
+  posterInterval = setInterval(() => {
+    const slides = document.querySelectorAll('.hero-slide');
+    if (!slides.length) return;
+    
+    slides[activePosterIdx].classList.remove('active');
+    activePosterIdx = (activePosterIdx + 1) % slides.length;
+    slides[activePosterIdx].classList.add('active');
+  }, 5000); // rotates every 5 seconds
+}
+
+function renderDefaultHeroBackground() {
+  const container = document.getElementById('hero-slideshow');
+  if (!container) return;
+  container.innerHTML = `<div class="hero-slide active" style="background: linear-gradient(145deg, #080808 50%, #110e02 100%)"></div>`;
+}
 
 // ===== BOOT COOKIE CONSENT CHECK =====
 initCookieConsent();
