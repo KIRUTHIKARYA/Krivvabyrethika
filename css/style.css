@@ -340,10 +340,30 @@ nav {
   border: 1px solid var(--border); background: transparent; color: var(--text);
   padding: 6px 12px; font-size: 11px; cursor: pointer;
   font-family: 'Jost', sans-serif; transition: .2s;
+  position: relative;
 }
-.size-btn:hover, .size-btn.active {
+.size-btn:hover:not(.out-of-stock), .size-btn.active {
   border-color: var(--gold); color: var(--gold); background: var(--gold-bg);
 }
+/* Out-of-stock size: blurred, strikethrough, not clickable */
+.size-btn.out-of-stock {
+  opacity: 0.32;
+  cursor: not-allowed;
+  text-decoration: line-through;
+  filter: grayscale(1);
+  pointer-events: none;
+}
+/* Small stock badge on size button */
+.size-btn .size-stock-badge {
+  display: block;
+  font-size: 8px;
+  color: var(--red);
+  line-height: 1;
+  margin-top: 1px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
 
 /* ---- REVIEWS ---- */
 .review-card {

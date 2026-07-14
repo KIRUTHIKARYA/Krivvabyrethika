@@ -146,9 +146,11 @@ function ep(p) {
   return p.offer > 0 ? Math.round(p.mrp * (1 - p.offer / 100)) : p.mrp;
 }
 
-/** Get the best available photo for a product */
+/** Get the best available photo for a product (always returns the first photo URL) */
 function getPhoto(p) {
-  return photoStore[p.id] || p.photo || '';
+  const raw = photoStore[p.id] || p.photo || '';
+  // photos are stored comma-separated — always use first one for card/thumbnail
+  return raw.split(',')[0].trim();
 }
 
 /** Build an <img> or emoji fallback for a product */

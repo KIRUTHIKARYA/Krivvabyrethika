@@ -16,18 +16,16 @@ async function loadProductsFromSupabase() {
     return;
   }
   try {
+    // Read from product_variants (inventory manager's actual table)
+    // product_reviews joined gracefully — won't break if table is missing
     const { data, error } = await supabaseClient
       .from('products')
       .select(`
         *,
-        variants (
+        product_variants (
           id,
           size,
-          color,
-          sku,
-          stock (
-            quantity
-          )
+          qty
         ),
         product_reviews (
           user_name,
@@ -36,30 +34,41 @@ async function loadProductsFromSupabase() {
           created_at
         )
       `)
-      .eq('is_active', true);
+      .neq('is_active', false);
 
     if (error) throw error;
 
     products = (data || []).map(p => {
-      const rawVariants = p.variants || [];
+      // Sort variants by standard size order
+      const sizeOrder = ['XXS', 'XS', 'S', 'M', 'L', 'XL', 'XXL'];
+      const rawVariants = (p.product_variants || []).sort((a, b) => {
+        const idxA = sizeOrder.indexOf(a.size);
+        const idxB = sizeOrder.indexOf(b.size);
+        return (idxA > -1 ? idxA : 99) - (idxB > -1 ? idxB : 99);
+      });
+      
       const sizes = rawVariants.map(v => v.size);
-      const totalStock = rawVariants.reduce((sum, v) => sum + (v.stock?.quantity || 0), 0);
+      const totalStock = rawVariants.reduce((sum, v) => sum + (v.qty || 0), 0);
       const rawReviews = p.product_reviews || [];
       const reviews = rawReviews.map(r => ({
         author: r.user_name,
         stars: Number(r.rating || 5),
         text: r.review_text
       }));
+      // Build a size→qty map for cart quantity checks
+      const sizeQtyMap = {};
+      rawVariants.forEach(v => { sizeQtyMap[v.size] = v.qty || 0; });
       return {
         id: p.id,
         name: p.name,
         cat: p.category || 'Other',
         mrp: Number(p.price),
         offer: 0,
-        photo: p.image_url || p.photo || '',
-        icon: '👗',
-        desc: p.description || p.name || '',
+        photo: p.photo || p.image_url || '',
+        icon: '\uD83D\uDC57',
+        desc: p.description || '',
         sizes: sizes,
+        sizeQtyMap: sizeQtyMap,
         stock: totalStock,
         reviews: reviews,
         raw_variants: rawVariants,
@@ -72,7 +81,7 @@ async function loadProductsFromSupabase() {
     const baseCats = [
       { id: 'all',      name: 'All' },
       { id: 'new',      name: 'New Arrivals' },
-      { id: 'trending', name: '🔥 Trending' }
+      { id: 'trending', name: '\uD83D\uDD25 Trending' }
     ];
     const uniqueCats = new Set();
     products.forEach(p => {
@@ -102,24 +111,53 @@ async function loadProductsFromSupabase() {
 function subscribeStockChanges() {
   if (!supabaseClient) return;
 
+  // Subscribe to product_variants table (inventory manager's actual stock table)
   supabaseClient
-    .channel('public:stock')
-    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'stock' }, payload => {
-      console.log('Realtime stock update:', payload);
+    .channel('public:product_variants')
+    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'product_variants' }, payload => {
+      console.log('Realtime stock update (product_variants):', payload);
       let updated = false;
       products.forEach(p => {
-        const variant = p.raw_variants?.find(v => v.id === payload.new.variant_id);
+        // Match by variant id directly
+        const variant = p.raw_variants?.find(v => v.id === payload.new.id);
         if (variant) {
-          if (!variant.stock) variant.stock = {};
-          variant.stock.quantity = payload.new.quantity;
-          p.stock = p.raw_variants.reduce((sum, v) => sum + (v.stock?.quantity || 0), 0);
+          // Update the qty in place
+          variant.qty = payload.new.qty;
+          // Rebuild sizeQtyMap
+          p.sizeQtyMap = p.sizeQtyMap || {};
+          p.sizeQtyMap[variant.size] = payload.new.qty;
+          // Recalculate total stock
+          p.stock = p.raw_variants.reduce((sum, v) => sum + (v.qty || 0), 0);
+          // Keep all sizes, sorted in order
+          const sizeOrder = ['XXS', 'XS', 'S', 'M', 'L', 'XL', 'XXL'];
+          p.sizes = p.raw_variants.map(v => v.size).sort((a, b) => {
+            const idxA = sizeOrder.indexOf(a);
+            const idxB = sizeOrder.indexOf(b);
+            return (idxA > -1 ? idxA : 99) - (idxB > -1 ? idxB : 99);
+          });
           updated = true;
 
-          // If this is the currently open product detail, refresh the size buttons & stock text
+          // If this is the currently open product detail, refresh stock display and size buttons
           if (activeDetailProductId === p.id) {
             const selectedSize = selectedSizes[p.id];
+            
+            // Refresh size grid buttons dynamically
+            const sizeGrid = document.querySelector('#detail-modal .size-grid');
+            if (sizeGrid) {
+              sizeGrid.innerHTML = p.sizes.map(s => {
+                const q = p.sizeQtyMap[s] || 0;
+                if (q === 0) {
+                  return `<button class="size-btn out-of-stock" disabled>${s}<span class="size-stock-badge">Sold Out</span></button>`;
+                } else if (q <= 5) {
+                  return `<button class="size-btn ${selectedSizes[p.id] === s ? 'active' : ''}" onclick="selectSize('${p.id}','${s}',this)">${s}<span class="size-stock-badge">${q} left</span></button>`;
+                } else {
+                  return `<button class="size-btn ${selectedSizes[p.id] === s ? 'active' : ''}" onclick="selectSize('${p.id}','${s}',this)">${s}</button>`;
+                }
+              }).join('');
+            }
+
             if (selectedSize && selectedSize === variant.size) {
-              const qty = payload.new.quantity;
+              const qty = payload.new.qty;
               const stockEl = document.getElementById('detail-stock-display');
               if (stockEl) {
                 stockEl.style.color = qty <= 5 ? 'var(--red)' : 'var(--muted)';
@@ -138,6 +176,34 @@ function subscribeStockChanges() {
 
       if (updated) {
         renderProducts();
+      }
+    })
+    .subscribe();
+
+  // Also subscribe to products table for is_active / is_new / is_trending changes
+  supabaseClient
+    .channel('public:products')
+    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'products' }, payload => {
+      console.log('Realtime product update:', payload);
+      const idx = products.findIndex(p => p.id === payload.new.id);
+      if (idx !== -1) {
+        // If product was deactivated, remove from list
+        if (payload.new.is_active === false) {
+          products.splice(idx, 1);
+        } else {
+          // Update name, price, description, flags in-place
+          products[idx].name = payload.new.name;
+          products[idx].mrp = Number(payload.new.price);
+          products[idx].desc = payload.new.description || '';
+          products[idx].isNew = payload.new.is_new || false;
+          products[idx].isTrending = payload.new.is_trending || false;
+          products[idx].photo = payload.new.photo || payload.new.image_url || '';
+          products[idx].cat = payload.new.category || 'Other';
+        }
+        renderProducts();
+      } else if (payload.new.is_active !== false) {
+        // New product became active — reload full list
+        loadProductsFromSupabase();
       }
     })
     .subscribe();
@@ -359,11 +425,28 @@ function openDetail(id) {
         <div class="pd-desc">${p.desc}</div>
         <div style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:8px">Select Size</div>
         <div class="size-grid" style="margin-bottom:4px">
-          ${p.sizes.map(s => `<button class="size-btn ${selectedSizes[id] === s ? 'active' : ''}" onclick="selectSize('${id}','${s}',this)">${s}</button>`).join('')}
+          ${p.sizes.map(s => {
+            const q = p.sizeQtyMap[s] || 0;
+            if (q === 0) {
+              return `<button class="size-btn out-of-stock" disabled>${s}<span class="size-stock-badge">Sold Out</span></button>`;
+            } else if (q <= 5) {
+              return `<button class="size-btn ${selectedSizes[id] === s ? 'active' : ''}" onclick="selectSize('${id}','${s}',this)">${s}<span class="size-stock-badge">${q} left</span></button>`;
+            } else {
+              return `<button class="size-btn ${selectedSizes[id] === s ? 'active' : ''}" onclick="selectSize('${id}','${s}',this)">${s}</button>`;
+            }
+          }).join('')}
         </div>
         <div id="size-chart-btn-container" style="margin-bottom:8px"></div>
-        <div id="detail-stock-display" style="font-size:11px;color:${p.stock <= 5 ? 'var(--red)' : 'var(--muted)'};margin-bottom:12px">
-          ${p.stock === 0 ? 'Out of Stock' : p.stock <= 5 ? `Only ${p.stock} left!` : `${p.stock} in stock`}
+        <div id="detail-stock-display" style="font-size:11px;color:${(() => {
+          const selectedSize = selectedSizes[id];
+          const qty = selectedSize ? (p.sizeQtyMap[selectedSize] || 0) : p.stock;
+          return qty <= 5 ? 'var(--red)' : 'var(--muted)';
+        })()};margin-bottom:12px">
+          ${(() => {
+            const selectedSize = selectedSizes[id];
+            const qty = selectedSize ? (p.sizeQtyMap[selectedSize] || 0) : p.stock;
+            return qty === 0 ? 'Out of Stock' : qty <= 5 ? `Only ${qty} left!` : `${qty} in stock`;
+          })()}
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap">
           ${p.stock === 0
@@ -435,13 +518,12 @@ function closeDetail() {
 
 function selectSize(pid, size, el) {
   selectedSizes[pid] = size;
-  document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('#detail-modal .size-btn').forEach(b => b.classList.remove('active'));
   el.classList.add('active');
 
   const p = products.find(x => x.id === pid);
-  if (p && p.raw_variants) {
-    const variant = p.raw_variants.find(v => v.size === size);
-    const qty = variant?.stock?.quantity || 0;
+  if (p) {
+    const qty = p.sizeQtyMap[size] || 0;
     const stockEl = document.getElementById('detail-stock-display');
     if (stockEl) {
       stockEl.style.color = qty <= 5 ? 'var(--red)' : 'var(--muted)';
@@ -595,12 +677,21 @@ function addToCartFromDetail(id) {
   const p = products.find(x => x.id === id); if (!p) return;
   if (!selectedSizes[id] && p.sizes?.length) { showToast('Please select a size first', 'red'); return; }
   const size = selectedSizes[id] || 'M';
-  const variant = p.raw_variants?.find(v => v.size === size);
-  const qty = variant?.stock?.quantity || 0;
+  const qty = p.sizeQtyMap[size] || 0;
+
+  // Check how many items of this size are already in the cart
+  const key = `${id}-${size}`;
+  const inCart = cart.find(x => x.key === key)?.qty || 0;
+
   if (qty === 0) {
     showToast(`Size ${size} is out of stock`, 'red');
     return;
   }
+  if (inCart >= qty) {
+    showToast(`Only ${qty} left in stock for size ${size}. Cannot add more.`, 'red');
+    return;
+  }
+
   addToCartItem(p, size);
   closeDetail();
 }
@@ -694,6 +785,16 @@ function renderCart() {
 
 function changeQty(key, d) {
   const i = cart.find(x => x.key === key); if (!i) return;
+
+  if (d > 0) {
+    const p = products.find(prod => prod.id === i.id);
+    const maxQty = p?.sizeQtyMap?.[i.size] || 0;
+    if (i.qty >= maxQty) {
+      showToast(`Only ${maxQty} items available in stock for size ${i.size}`, 'red');
+      return;
+    }
+  }
+
   i.qty += d;
   if (i.qty <= 0) cart = cart.filter(x => x.key !== key);
   updateCartCount(); renderCart();
