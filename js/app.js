@@ -105,6 +105,7 @@ async function loadProductsFromSupabase() {
     loadCartFromLocalStorage();
     loadReelsFromSupabase();
     loadPostersFromSupabase();
+    startCountdown();
   } catch (err) {
     console.error("Error loading products from Supabase:", err);
     showToast("Error loading catalog", "red");
@@ -1321,7 +1322,6 @@ async function submitReview() {
 }
 
 // ===== INIT =====
-startCountdown();
 renderCats();
 renderProducts();
 
