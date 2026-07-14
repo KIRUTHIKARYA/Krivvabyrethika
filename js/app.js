@@ -73,7 +73,8 @@ async function loadProductsFromSupabase() {
         reviews: reviews,
         raw_variants: rawVariants,
         isNew: p.is_new || false,
-        isTrending: p.is_trending || false
+        isTrending: p.is_trending || false,
+        isFestive: p.is_festive || false
       };
     });
 
@@ -102,6 +103,7 @@ async function loadProductsFromSupabase() {
     loadWishlistFromSupabase();
     handleURLHashProduct();
     loadCartFromLocalStorage();
+    loadReelsFromSupabase();
   } catch (err) {
     console.error("Error loading products from Supabase:", err);
     showToast("Error loading catalog", "red");
@@ -285,17 +287,63 @@ function closeSearch() {
 
 function doSearch(q) {
   const r = document.getElementById('search-results');
-  if (!q.trim()) { r.innerHTML = ''; return; }
+  const suggestionsBox = document.getElementById('search-suggestions');
+  
+  if (!q.trim()) { 
+    r.innerHTML = ''; 
+    if (suggestionsBox) {
+      suggestionsBox.innerHTML = '';
+      suggestionsBox.classList.add('hide');
+    }
+    return; 
+  }
+  
   const res = products.filter(p =>
     p.name.toLowerCase().includes(q.toLowerCase()) ||
     p.cat.toLowerCase().includes(q.toLowerCase())
   );
+  
+  // Suggestions Dropdown rendering
+  if (suggestionsBox) {
+    if (res.length > 0) {
+      suggestionsBox.classList.remove('hide');
+      suggestionsBox.innerHTML = res.slice(0, 5).map(p => `
+        <div class="suggestion-item" onclick="openDetail('${p.id}'); closeSearchSuggestion()">
+          <img src="${getPhoto(p)}" alt="" />
+          <div class="suggestion-item-details">
+            <span class="suggestion-title">${p.name}</span>
+            <span class="suggestion-meta">${p.cat} • ₹${ep(p).toLocaleString()}</span>
+          </div>
+        </div>
+      `).join('');
+    } else {
+      suggestionsBox.innerHTML = '<div style="padding:12px; font-size:11px; color:var(--muted); text-align:center">No suggestions</div>';
+      suggestionsBox.classList.remove('hide');
+    }
+  }
+
   if (!res.length) {
     r.innerHTML = '<div class="empty" style="padding:20px;color:var(--muted)">No products found</div>';
     return;
   }
   r.innerHTML = res.map(p => productCardHTML(p)).join('');
 }
+
+window.closeSearchSuggestion = function() {
+  const suggestionsBox = document.getElementById('search-suggestions');
+  if (suggestionsBox) {
+    suggestionsBox.classList.add('hide');
+  }
+};
+
+// Close search suggestions when clicking outside
+document.addEventListener('click', (e) => {
+  const suggestionsBox = document.getElementById('search-suggestions');
+  const searchInput = document.getElementById('search-input');
+  if (suggestionsBox && e.target !== searchInput && !suggestionsBox.contains(e.target)) {
+    suggestionsBox.classList.add('hide');
+  }
+});
 
 // ===== CATEGORIES =====
 function renderCats() {
@@ -310,11 +358,32 @@ function filterCat(id) {
   document.getElementById('shop').scrollIntoView({ behavior: 'smooth' });
 }
 
+let activeTab = 'all'; // 'all', 'best_sellers', 'new_arrivals', 'festive_wear'
+
 function getFiltered() {
-  if (activeCat === 'all')      return products;
-  if (activeCat === 'new')      return products.filter(p => p.isNew);
-  if (activeCat === 'trending') return products.filter(p => p.isTrending);
-  return products.filter(p => p.cat === activeCat);
+  return products.filter(p => {
+    // 1. Filter by category
+    let matchesCat = true;
+    if (activeCat === 'new') {
+      matchesCat = p.isNew;
+    } else if (activeCat === 'trending') {
+      matchesCat = p.isTrending;
+    } else if (activeCat !== 'all') {
+      matchesCat = (p.cat === activeCat);
+    }
+    
+    // 2. Filter by tab
+    let matchesTab = true;
+    if (activeTab === 'best_sellers') {
+      matchesTab = p.isTrending;
+    } else if (activeTab === 'new_arrivals') {
+      matchesTab = p.isNew;
+    } else if (activeTab === 'festive_wear') {
+      matchesTab = p.isFestive;
+    }
+    
+    return matchesCat && matchesTab;
+  });
 }
 
 // ===== PRODUCTS =====
@@ -390,7 +459,11 @@ function openDetail(id) {
               return `
                 <div class="carousel-container" style="position:relative;width:100%;height:220px;overflow:hidden;border-radius:4px">
                   <div class="carousel-slides" style="display:flex;width:100%;height:100%;transition:transform 0.3s ease-in-out" id="slides-${p.id}">
-                    ${photos.map(url => `<img src="${url}" style="width:100%;height:100%;object-fit:cover;flex-shrink:0"/>`).join('')}
+                    ${photos.map(url => `
+                      <div class="zoom-img-wrapper" onmousemove="zoomPhoto(event, this)" onmouseleave="resetZoom(this)" style="width:100%;height:100%;overflow:hidden;flex-shrink:0;">
+                        <img src="${url}" style="width:100%;height:100%;object-fit:cover;transition:transform 0.1s ease-out"/>
+                      </div>
+                    `).join('')}
                   </div>
                   <button type="button" onclick="prevSlide('${p.id}')" style="position:absolute;left:8px;top:50%;transform:translateY(-50%);background:rgba(0,0,0,0.6);border:none;color:#fff;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:10px;z-index:2">◀</button>
                   <button type="button" onclick="nextSlide('${p.id}')" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:rgba(0,0,0,0.6);border:none;color:#fff;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:10px;z-index:2">▶</button>
@@ -400,7 +473,11 @@ function openDetail(id) {
                 </div>
               `;
             } else if (photos.length === 1) {
-              return `<img src="${photos[0]}" style="width:100%;height:220px;object-fit:cover;border-radius:4px"/>`;
+              return `
+                <div class="zoom-img-wrapper" onmousemove="zoomPhoto(event, this)" onmouseleave="resetZoom(this)" style="width:100%;height:220px;overflow:hidden;border-radius:4px;">
+                  <img src="${photos[0]}" style="width:100%;height:220px;object-fit:cover;transition:transform 0.1s ease-out"/>
+                </div>
+              `;
             } else {
               return `<div style="font-size:52px;height:220px;display:flex;align-items:center;justify-content:center;background:var(--surface2)">${p.icon}</div>`;
             }
@@ -1455,6 +1532,214 @@ async function submitNotifyMe() {
   closeNotifyModal();
   document.getElementById('notify-email').value = '';
 }
+
+// ===== INSTAGRAM STORIES / REELS LOGIC =====
+let reels = [];
+let activeReelIdx = 0;
+let reelPlaybackTimer = null;
+let reelMuted = true; // Auto-muted by default to comply with browser autoplay rules
+let reelPaused = false;
+
+async function loadReelsFromSupabase() {
+  if (!supabaseClient) return;
+  try {
+    const { data, error } = await supabaseClient
+      .from('storefront_settings')
+      .select('value')
+      .eq('key', 'storefront_reels')
+      .single();
+      
+    if (!error && data && Array.isArray(data.value)) {
+      reels = data.value;
+      renderReelsBubbles();
+    }
+  } catch (err) {
+    console.error('Error loading reels:', err);
+  }
+}
+
+function renderReelsBubbles() {
+  const container = document.getElementById('reels-row-container');
+  const list = document.getElementById('reels-list');
+  if (!container || !list) return;
+
+  if (reels.length === 0) {
+    container.classList.add('hide');
+    return;
+  }
+
+  container.classList.remove('hide');
+  list.innerHTML = reels.map((r, idx) => `
+    <div class="reel-bubble-wrapper" onclick="openReel(${idx})">
+      <div class="reel-bubble">
+        <div class="reel-bubble-inner">
+          <video src="${r.video_url}" muted playsinline loop autoplay></video>
+        </div>
+      </div>
+      <div class="reel-bubble-title">${r.caption || 'Krivva Reels'}</div>
+    </div>
+  `).join('');
+}
+
+window.openReel = function(idx) {
+  activeReelIdx = idx;
+  const modal = document.getElementById('reels-modal');
+  const video = document.getElementById('reel-video-player');
+  if (!modal || !video) return;
+
+  modal.classList.remove('hide');
+  
+  // Set muted state
+  video.muted = reelMuted;
+  document.getElementById('reel-mute-btn').textContent = reelMuted ? '🔇' : '🔊';
+
+  playReelIndex(idx);
+};
+
+function playReelIndex(idx) {
+  if (idx < 0 || idx >= reels.length) {
+    closeReels();
+    return;
+  }
+  
+  activeReelIdx = idx;
+  const reel = reels[idx];
+  const video = document.getElementById('reel-video-player');
+  if (!video) return;
+
+  video.src = reel.video_url;
+  document.getElementById('reel-caption').textContent = reel.caption || '';
+  
+  // Render progress segments
+  const progressBars = document.getElementById('reels-progress-bars');
+  if (progressBars) {
+    progressBars.innerHTML = reels.map((_, i) => `
+      <div class="progress-bar-segment">
+        <div class="progress-bar-fill" id="reel-progress-fill-${i}" style="width: ${i < idx ? '100%' : '0%'}"></div>
+      </div>
+    `).join('');
+  }
+
+  reelPaused = false;
+  document.getElementById('reel-play-overlay').style.opacity = 0;
+  
+  video.load();
+  video.play().then(() => {
+    startReelTimer();
+  }).catch(err => {
+    console.error('Error playing reel:', err);
+    video.muted = true;
+    reelMuted = true;
+    document.getElementById('reel-mute-btn').textContent = '🔇';
+    video.play();
+    startReelTimer();
+  });
+}
+
+function startReelTimer() {
+  if (reelPlaybackTimer) clearInterval(reelPlaybackTimer);
+  const video = document.getElementById('reel-video-player');
+  if (!video) return;
+
+  const fillEl = document.getElementById(`reel-progress-fill-${activeReelIdx}`);
+  
+  reelPlaybackTimer = setInterval(() => {
+    if (reelPaused) return;
+    
+    if (video.duration) {
+      const pct = (video.currentTime / video.duration) * 100;
+      if (fillEl) fillEl.style.width = `${pct}%`;
+      
+      if (video.ended) {
+        clearInterval(reelPlaybackTimer);
+        nextReel();
+      }
+    }
+  }, 100);
+}
+
+window.closeReels = function() {
+  if (reelPlaybackTimer) clearInterval(reelPlaybackTimer);
+  const modal = document.getElementById('reels-modal');
+  const video = document.getElementById('reel-video-player');
+  if (modal) modal.classList.add('hide');
+  if (video) video.pause();
+};
+
+window.nextReel = function() {
+  if (activeReelIdx < reels.length - 1) {
+    const prevFill = document.getElementById(`reel-progress-fill-${activeReelIdx}`);
+    if (prevFill) prevFill.style.width = '100%';
+    playReelIndex(activeReelIdx + 1);
+  } else {
+    closeReels();
+  }
+};
+
+window.prevReel = function() {
+  if (activeReelIdx > 0) {
+    const prevFill = document.getElementById(`reel-progress-fill-${activeReelIdx}`);
+    if (prevFill) prevFill.style.width = '0%';
+    const currentFill = document.getElementById(`reel-progress-fill-${activeReelIdx - 1}`);
+    if (currentFill) currentFill.style.width = '0%';
+    playReelIndex(activeReelIdx - 1);
+  }
+};
+
+window.toggleReelPause = function() {
+  const video = document.getElementById('reel-video-player');
+  const overlay = document.getElementById('reel-play-overlay');
+  if (!video) return;
+
+  reelPaused = !reelPaused;
+  if (reelPaused) {
+    video.pause();
+    if (overlay) {
+      overlay.textContent = '⏸';
+      overlay.style.opacity = 1;
+    }
+  } else {
+    video.play();
+    if (overlay) {
+      overlay.style.opacity = 0;
+    }
+  }
+};
+
+window.toggleReelAudio = function() {
+  const video = document.getElementById('reel-video-player');
+  const btn = document.getElementById('reel-mute-btn');
+  if (!video) return;
+
+  reelMuted = !reelMuted;
+  video.muted = reelMuted;
+  if (btn) btn.textContent = reelMuted ? '🔇' : '🔊';
+};
+
+// ===== HOMEPAGE TABS SWITCHER =====
+window.switchHomeTab = function(tabId, btn) {
+  activeTab = tabId;
+  document.querySelectorAll('.home-tabs-container .tab-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderProducts();
+};
+
+// ===== HOVER ZOOM LOGIC =====
+window.zoomPhoto = function(e, element) {
+  const img = element.querySelector('img');
+  if (!img) return;
+  const rect = element.getBoundingClientRect();
+  const x = ((e.clientX - rect.left) / rect.width) * 100;
+  const y = ((e.clientY - rect.top) / rect.height) * 100;
+  img.style.transformOrigin = `${x}% ${y}%`;
+  img.style.transform = 'scale(2.2)';
+};
+
+window.resetZoom = function(element) {
+  const img = element.querySelector('img');
+  if (!img) return;
+  img.style.transform = 'scale(1)';
+};
 
 // ===== BOOT COOKIE CONSENT CHECK =====
 initCookieConsent();

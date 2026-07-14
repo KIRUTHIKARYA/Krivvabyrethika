@@ -70,12 +70,21 @@
      ============================================================ -->
 <div id="page-home" class="page">
 
+  <!-- Instagram-style Stories/Reels Row -->
+  <div class="reels-row-container hide" id="reels-row-container" style="margin-bottom:20px; overflow-x:auto">
+    <div class="reels-list" id="reels-list" style="display:flex; gap:16px; padding:10px 4px 6px">
+      <!-- Bubbles loaded dynamically -->
+    </div>
+  </div>
+
   <!-- Search (hidden by default) -->
-  <div id="search-area" class="hide" style="margin-bottom:20px">
+  <div id="search-area" class="hide" style="margin-bottom:20px; position:relative">
     <div class="search-bar">
-      <input type="text" id="search-input" placeholder="Search products…" oninput="doSearch(this.value)"/>
+      <input type="text" id="search-input" placeholder="Search products…" oninput="doSearch(this.value)" autocomplete="off"/>
       <button onclick="closeSearch()">✕</button>
     </div>
+    <!-- Suggestions list -->
+    <div id="search-suggestions" class="search-suggestions-dropdown hide"></div>
     <div id="search-results" class="products-grid"></div>
   </div>
 
@@ -118,6 +127,14 @@
     <div class="section-title">Collections</div>
     <div class="section-sub">Browse by category</div>
     <div class="cats" id="cats-container"></div>
+
+    <!-- Homepage Tab switcher -->
+    <div class="home-tabs-container" style="display:flex;gap:10px;margin:16px 0 20px;border-bottom:1px solid var(--border);padding-bottom:12px">
+      <button class="tab-btn active" onclick="switchHomeTab('all', this)">✨ All Products</button>
+      <button class="tab-btn" onclick="switchHomeTab('best_sellers', this)">🔥 Best Sellers</button>
+      <button class="tab-btn" onclick="switchHomeTab('new_arrivals', this)">🆕 New Arrivals</button>
+      <button class="tab-btn" onclick="switchHomeTab('festive_wear', this)">🪔 Festive Wear</button>
+    </div>
 
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
       <div>
@@ -312,6 +329,50 @@
     </div>
     <div class="or-divider">or</div>
     <div id="auth-form-container"></div>
+  </div>
+</div>
+
+<!-- ============================================================
+     REELS PLAYER MODAL (Instagram Style)
+     ============================================================ -->
+<div id="reels-modal" class="modal-bg hide" style="z-index: 10003; background: rgba(0,0,0,0.95); display: flex; align-items: center; justify-content: center; padding: 0;">
+  <div class="reels-viewer-container" style="position: relative; width: 100%; max-width: 420px; height: 100vh; background: #000; display: flex; flex-direction: column; justify-content: center; overflow: hidden; box-shadow: 0 0 100px rgba(0,0,0,0.8)">
+    
+    <!-- Top Progress Bar -->
+    <div style="position: absolute; top: 12px; left: 12px; right: 12px; height: 3px; display: flex; gap: 4px; z-index: 10; opacity: 0.8" id="reels-progress-bars">
+      <!-- Generated dynamically -->
+    </div>
+    
+    <!-- Header with user & close -->
+    <div style="position: absolute; top: 24px; left: 16px; right: 16px; display: flex; justify-content: space-between; align-items: center; z-index: 10; text-shadow: 0 2px 4px rgba(0,0,0,0.6)">
+      <div style="display: flex; align-items: center; gap: 10px">
+        <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--gold-bg); border: 2px solid var(--gold); display: flex; align-items: center; justify-content: center; font-size: 14px">👗</div>
+        <div>
+          <div style="font-size: 13px; font-weight: 700; color: #fff; margin-bottom: 2px">KRIVVA Fashion</div>
+          <div style="font-size: 10px; color: #ccc;" id="reel-time">Live</div>
+        </div>
+      </div>
+      <div style="display: flex; gap: 8px">
+        <button onclick="toggleReelAudio()" style="background: rgba(0,0,0,0.4); border: none; color: #fff; width: 28px; height: 28px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 12px" title="Toggle sound" id="reel-mute-btn">🔊</button>
+        <button onclick="closeReels()" style="background: rgba(0,0,0,0.4); border: none; color: #fff; width: 28px; height: 28px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px">✕</button>
+      </div>
+    </div>
+    
+    <!-- Video Player -->
+    <div style="position: relative; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center">
+      <video id="reel-video-player" playsinline style="width: 100%; height: 100%; object-fit: cover; cursor: pointer;" onclick="toggleReelPause()"></video>
+      <div id="reel-play-overlay" style="position: absolute; font-size: 48px; opacity: 0; pointer-events: none; transition: 0.15s; text-shadow: 0 4px 8px rgba(0,0,0,0.5); color: #fff">▶</div>
+    </div>
+    
+    <!-- Bottom Caption & Info -->
+    <div style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(0,0,0,0.9)); padding: 24px 16px 16px; z-index: 10; text-shadow: 0 1px 3px rgba(0,0,0,0.8)">
+      <p style="font-size: 13px; color: #fff; line-height: 1.4; font-weight: 500; margin-bottom: 12px; margin-top:0" id="reel-caption">Reel caption details...</p>
+      <button class="btn-gold btn-sm" onclick="closeReels(); document.getElementById('shop').scrollIntoView({behavior:'smooth'})" style="width: 100%">Shop the Look 👗✨</button>
+    </div>
+    
+    <!-- Swipe/Arrows Controls -->
+    <button type="button" onclick="prevReel()" style="position: absolute; left: 8px; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.4); border: none; color: #fff; border-radius: 50%; width: 32px; height: 32px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 10; font-size: 12px">◀</button>
+    <button type="button" onclick="nextReel()" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.4); border: none; color: #fff; border-radius: 50%; width: 32px; height: 32px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 10; font-size: 12px">▶</button>
   </div>
 </div>
 
