@@ -105,6 +105,9 @@ async function loadProductsFromSupabase() {
     loadCartFromLocalStorage();
     loadReelsFromSupabase();
     loadPostersFromSupabase();
+    loadCategoryCoversFromSupabase();
+    loadSpotlightPromoFromSupabase();
+    loadTestimonialsFromSupabase();
     startCountdown();
   } catch (err) {
     console.error("Error loading products from Supabase:", err);
@@ -1860,6 +1863,205 @@ function renderDefaultHeroBackground() {
   if (!container) return;
   container.innerHTML = `<div class="hero-slide active" style="background: linear-gradient(145deg, #080808 50%, #110e02 100%)"></div>`;
 }
+
+// ===== DYNAMIC CATEGORY SHOWCASE COVERS =====
+async function loadCategoryCoversFromSupabase() {
+  if (!supabaseClient) return;
+  const container = document.getElementById('category-bubbles-container');
+  if (!container) return;
+
+  try {
+    const { data, error } = await supabaseClient
+      .from('storefront_settings')
+      .select('value')
+      .eq('key', 'category_covers')
+      .single();
+
+    const coversMap = (!error && data && data.value) ? data.value : {};
+
+    // Get all system categories (excluding 'Other')
+    const catsToShow = CATS.map(c => c.name).filter(name => name !== 'Other' && name !== 'All');
+
+    container.innerHTML = catsToShow.map(cat => {
+      // Find cover image. Fallback to first product image in this category if none uploaded
+      let imageUrl = coversMap[cat];
+      if (!imageUrl) {
+        const matchingProd = PRODUCTS.find(p => p.category === cat);
+        if (matchingProd) {
+          imageUrl = matchingProd.photo ? matchingProd.photo.split(',')[0] : '';
+        }
+      }
+      // If still no cover, use a luxury dress fallback pattern
+      if (!imageUrl) {
+        imageUrl = 'https://images.unsplash.com/photo-1595777457583-95e059d581b8?q=80&w=300&auto=format&fit=crop';
+      }
+
+      return `
+        <div class="category-bubble-card" onclick="selectShowcaseCategory('${cat}')">
+          <div class="category-bubble-ring">
+            <div class="category-bubble-img">
+              <img src="${imageUrl}" alt="${cat}" loading="lazy" />
+            </div>
+          </div>
+          <span class="category-bubble-name">${cat}</span>
+        </div>
+      `;
+    }).join('');
+  } catch (err) {
+    console.error('Error rendering category covers:', err);
+  }
+}
+
+window.selectShowcaseCategory = function(catName) {
+  // Filter catalog
+  filterCat(catName);
+  // Scroll to shop
+  const shopEl = document.getElementById('shop');
+  if (shopEl) {
+    shopEl.scrollIntoView({ behavior: 'smooth' });
+  }
+};
+
+// ===== DYNAMIC SPOTLIGHT PROMO =====
+async function loadSpotlightPromoFromSupabase() {
+  if (!supabaseClient) return;
+  const section = document.getElementById('spotlight-section');
+  if (!section) return;
+
+  try {
+    const { data, error } = await supabaseClient
+      .from('storefront_settings')
+      .select('value')
+      .eq('key', 'spotlight_promo')
+      .single();
+
+    if (error || !data || !data.value || !data.value.image_url) {
+      section.classList.add('hide');
+      return;
+    }
+
+    const promo = data.value;
+    const imgBlock = document.getElementById('spotlight-image-block');
+    const titleEl = document.getElementById('spotlight-title');
+    const descEl = document.getElementById('spotlight-desc');
+    const btnEl = document.getElementById('spotlight-action-btn');
+
+    if (imgBlock) imgBlock.style.backgroundImage = `url('${promo.image_url}')`;
+    if (titleEl) titleEl.innerHTML = promo.title || 'Exclusive Drop';
+    if (descEl) descEl.textContent = promo.subtitle || 'Shop our newest arrivals.';
+    
+    if (btnEl) {
+      btnEl.innerHTML = promo.btn_label || 'Shop Collection 🛍️';
+      btnEl.onclick = () => {
+        const target = promo.btn_link || '#shop';
+        if (target.startsWith('#')) {
+          const el = document.getElementById(target.substring(1));
+          if (el) el.scrollIntoView({ behavior: 'smooth' });
+        } else {
+          window.open(target, '_blank');
+        }
+      };
+    }
+
+    section.classList.remove('hide');
+  } catch (err) {
+    console.error('Error loading spotlight promo:', err);
+    section.classList.add('hide');
+  }
+}
+
+// ===== CLIENT TESTIMONIALS SLIDER =====
+let testimonials = [];
+let activeTestimonialIdx = 0;
+let testimonialInterval = null;
+
+async function loadTestimonialsFromSupabase() {
+  if (!supabaseClient) return;
+  const section = document.getElementById('testimonials-section');
+  const slider = document.getElementById('testimonial-slider');
+  const dotsContainer = document.getElementById('testimonial-dots');
+  if (!section || !slider) return;
+
+  try {
+    const { data, error } = await supabaseClient
+      .from('storefront_settings')
+      .select('value')
+      .eq('key', 'homepage_testimonials')
+      .single();
+
+    if (error || !data || !Array.isArray(data.value) || data.value.length === 0) {
+      section.classList.add('hide');
+      return;
+    }
+
+    testimonials = data.value;
+
+    // Render slides
+    slider.innerHTML = testimonials.map((t, idx) => `
+      <div class="testimonial-slide ${idx === 0 ? 'active' : ''}" id="t-slide-${idx}">
+        <div class="testimonial-stars">${'★'.repeat(t.rating)}</div>
+        <p class="testimonial-text">"${t.review}"</p>
+        <div class="testimonial-author">${t.name} ${t.dress ? `— Bought: ${t.dress}` : ''}</div>
+      </div>
+    `).join('');
+
+    // Render dots
+    if (dotsContainer) {
+      dotsContainer.innerHTML = testimonials.map((_, idx) => `
+        <span class="testimonial-dot ${idx === 0 ? 'active' : ''}" onclick="showTestimonialSlide(${idx})"></span>
+      `).join('');
+    }
+
+    section.classList.remove('hide');
+
+    if (testimonials.length > 1) {
+      startTestimonialInterval();
+    }
+  } catch (err) {
+    console.error('Error loading testimonials:', err);
+    section.classList.add('hide');
+  }
+}
+
+window.showTestimonialSlide = function(idx) {
+  const slides = document.querySelectorAll('.testimonial-slide');
+  const dots = document.querySelectorAll('.testimonial-dot');
+  if (!slides.length) return;
+
+  slides[activeTestimonialIdx].classList.remove('active');
+  if (dots[activeTestimonialIdx]) dots[activeTestimonialIdx].classList.remove('active');
+
+  activeTestimonialIdx = idx;
+
+  slides[activeTestimonialIdx].classList.add('active');
+  if (dots[activeTestimonialIdx]) dots[activeTestimonialIdx].classList.add('active');
+
+  // Reset timer
+  if (testimonials.length > 1) {
+    startTestimonialInterval();
+  }
+};
+
+function startTestimonialInterval() {
+  if (testimonialInterval) clearInterval(testimonialInterval);
+  testimonialInterval = setInterval(() => {
+    const nextIdx = (activeTestimonialIdx + 1) % testimonials.length;
+    showTestimonialSlide(nextIdx);
+  }, 6000); // rotates reviews every 6 seconds
+}
+
+// ===== NEWSLETTER SIGNUP HANDLER =====
+window.handleNewsletterSubmit = function(e) {
+  e.preventDefault();
+  const emailInput = document.getElementById('news-email');
+  if (!emailInput) return;
+
+  const email = emailInput.value.trim();
+  if (email) {
+    showToast("Welcome to the KRIVVA Club! Check your email for your 10% off code 📧✨", "gold");
+    emailInput.value = '';
+  }
+};
 
 // ===== BOOT COOKIE CONSENT CHECK =====
 initCookieConsent();

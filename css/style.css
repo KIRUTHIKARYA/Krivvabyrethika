@@ -1053,3 +1053,362 @@ footer {
   z-index: 2;
 }
 
+/* 6. Brand Trust Pillars */
+.brand-pillars-bar {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 24px;
+  margin-bottom: 32px;
+  border-radius: 8px;
+}
+.pillar-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  transition: transform 0.2s ease;
+}
+.pillar-item:hover {
+  transform: translateY(-2px);
+}
+.pillar-icon {
+  font-size: 24px;
+  color: var(--gold);
+}
+.pillar-info h4 {
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--white);
+  margin-bottom: 2px;
+}
+.pillar-info p {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+/* 7. Category Showcase Circles */
+.category-showcase-section {
+  margin-bottom: 40px;
+}
+.category-bubbles-container {
+  display: flex;
+  gap: 24px;
+  overflow-x: auto;
+  padding: 12px 4px 16px;
+  scrollbar-width: none; /* Firefox */
+}
+.category-bubbles-container::-webkit-scrollbar {
+  display: none; /* Chrome/Safari */
+}
+.category-bubble-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.category-bubble-ring {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  padding: 3px;
+  border: 2px solid var(--border);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.category-bubble-card:hover .category-bubble-ring {
+  border-color: var(--gold);
+  transform: scale(1.06);
+}
+.category-bubble-img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--surface2);
+}
+.category-bubble-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+.category-bubble-card:hover .category-bubble-img img {
+  transform: scale(1.1);
+}
+.category-bubble-name {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text);
+  font-weight: 500;
+  transition: color 0.2s;
+}
+.category-bubble-card:hover .category-bubble-name {
+  color: var(--gold);
+}
+
+/* 8. Spotlight Split Promo */
+.spotlight-promo-section {
+  margin-bottom: 40px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.spotlight-content-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 320px;
+}
+@media (max-width: 768px) {
+  .spotlight-content-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.spotlight-image-block {
+  background-size: cover;
+  background-position: center;
+  min-height: 250px;
+  transition: transform 0.5s ease;
+}
+.spotlight-text-block {
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  background: linear-gradient(135deg, rgba(8,8,8,0.2) 0%, rgba(20,20,20,0.8) 100%);
+}
+.spotlight-tag {
+  font-size: 10px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 12px;
+}
+.spotlight-text-block h2 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 2.2rem;
+  color: var(--white);
+  line-height: 1.2;
+  margin-bottom: 12px;
+  font-weight: 300;
+}
+.spotlight-text-block p {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.6;
+  margin-bottom: 24px;
+}
+
+/* 9. Testimonials Slider */
+.testimonials-section {
+  margin-bottom: 40px;
+  text-align: center;
+}
+.testimonial-card-wrapper {
+  max-width: 650px;
+  margin: 0 auto;
+  position: relative;
+  overflow: hidden;
+  padding: 32px 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+.testimonial-slide {
+  display: none;
+  opacity: 0;
+  transition: opacity 0.6s ease-in-out;
+}
+.testimonial-slide.active {
+  display: block;
+  opacity: 1;
+}
+.testimonial-stars {
+  color: var(--gold);
+  font-size: 14px;
+  margin-bottom: 14px;
+}
+.testimonial-text {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.6rem;
+  font-style: italic;
+  color: var(--white);
+  line-height: 1.4;
+  margin-bottom: 16px;
+}
+.testimonial-author {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--gold);
+  font-weight: 600;
+}
+.testimonial-dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 20px;
+}
+.testimonial-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--border2);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.testimonial-dot.active {
+  background: var(--gold);
+}
+
+/* 10. Newsletter Section */
+.newsletter-section {
+  margin-bottom: 40px;
+}
+.newsletter-card {
+  padding: 48px 32px;
+  text-align: center;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: linear-gradient(145deg, rgba(20, 20, 20, 0.4) 0%, rgba(8, 8, 8, 0.9) 100%);
+  backdrop-filter: blur(10px);
+}
+.newsletter-tag {
+  font-size: 10px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 12px;
+}
+.newsletter-card h2 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 2.2rem;
+  font-weight: 300;
+  color: var(--white);
+  margin-bottom: 8px;
+}
+.newsletter-card p {
+  color: var(--muted);
+  font-size: 12px;
+  max-width: 460px;
+  margin: 0 auto 24px;
+}
+.newsletter-form {
+  display: flex;
+  max-width: 480px;
+  margin: 0 auto;
+  border: 1px solid var(--border);
+  overflow: hidden;
+  border-radius: 4px;
+}
+.newsletter-form input {
+  flex: 1;
+  background: rgba(0,0,0,0.3);
+  border: none;
+  color: var(--text);
+  padding: 12px 16px;
+  font-family: 'Jost', sans-serif;
+  outline: none;
+  font-size: 13px;
+}
+.newsletter-form button {
+  border-radius: 0;
+  padding: 0 24px;
+}
+
+/* 11. Luxury Footer */
+.luxury-footer {
+  background: #050505;
+  border-top: 1px solid var(--border);
+  padding: 64px 40px 24px;
+  margin-top: 56px;
+}
+.footer-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 2fr;
+  gap: 40px;
+  margin-bottom: 48px;
+}
+@media (max-width: 992px) {
+  .footer-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+@media (max-width: 576px) {
+  .footer-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.footer-col h4 {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--white);
+  margin-bottom: 20px;
+  font-weight: 600;
+}
+.footer-col p {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.7;
+}
+.brand-col .footer-logo {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.8rem;
+  letter-spacing: 4px;
+  color: var(--gold);
+  margin-bottom: 16px;
+}
+.footer-socials {
+  display: flex;
+  gap: 16px;
+  margin-top: 20px;
+}
+.footer-socials a {
+  font-size: 12px;
+  color: var(--muted);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.footer-socials a:hover {
+  color: var(--gold);
+}
+.footer-col ul {
+  list-style: none;
+}
+.footer-col ul li {
+  margin-bottom: 12px;
+}
+.footer-col ul li a {
+  font-size: 12px;
+  color: var(--muted);
+  text-decoration: none;
+  transition: all 0.2s;
+}
+.footer-col ul li a:hover {
+  color: var(--gold);
+  padding-left: 4px;
+}
+.contact-col p {
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.footer-bottom {
+  border-top: 1px solid var(--border);
+  padding-top: 24px;
+  text-align: center;
+}
+.footer-bottom p {
+  font-size: 11px;
+  color: var(--muted2);
+}
+
+

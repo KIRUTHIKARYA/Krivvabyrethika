@@ -105,6 +105,60 @@
     </div>
   </div>
 
+  <!-- Brand Trust Pillars -->
+  <div class="brand-pillars-bar">
+    <div class="pillar-item">
+      <span class="pillar-icon">⚡</span>
+      <div class="pillar-info">
+        <h4>Custom Fitting</h4>
+        <p>Tailored to your measurements</p>
+      </div>
+    </div>
+    <div class="pillar-item">
+      <span class="pillar-icon">📦</span>
+      <div class="pillar-info">
+        <h4>Free Shipping</h4>
+        <p>On orders above ₹999</p>
+      </div>
+    </div>
+    <div class="pillar-item">
+      <span class="pillar-icon">👗</span>
+      <div class="pillar-info">
+        <h4>Handloom Fabrics</h4>
+        <p>Pure raw silks & organic cottons</p>
+      </div>
+    </div>
+    <div class="pillar-item">
+      <span class="pillar-icon">🤝</span>
+      <div class="pillar-info">
+        <h4>COD Available</h4>
+        <p>Cash on delivery supported</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Category Dress Showcase circles -->
+  <div class="category-showcase-section">
+    <div class="section-title">Shop by Category</div>
+    <div class="section-sub">Curated luxury styles & patterns</div>
+    <div class="category-bubbles-container" id="category-bubbles-container">
+      <!-- Populated dynamically via JS with dress images -->
+    </div>
+  </div>
+
+  <!-- Spotlight Promotional Showcase -->
+  <div id="spotlight-section" class="spotlight-promo-section hide">
+    <div class="spotlight-content-grid">
+      <div class="spotlight-image-block" id="spotlight-image-block"></div>
+      <div class="spotlight-text-block">
+        <div class="spotlight-tag">✦ Season Spotlight ✦</div>
+        <h2 id="spotlight-title">Spotlight Title</h2>
+        <p id="spotlight-desc">Spotlight description text goes here.</p>
+        <button class="btn-gold" id="spotlight-action-btn">Shop the Drop</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Sale Countdown -->
   <div class="countdown-bar">
     <span class="countdown-label">Sale Ends In</span>
@@ -131,7 +185,7 @@
   <div id="shop">
     <div class="section-title">Collections</div>
     <div class="section-sub">Browse by category</div>
-    <div class="cats" id="cats-container"></div>
+    <div class="cats hide" id="cats-container"></div>
 
     <!-- Homepage Tab switcher -->
     <div class="home-tabs-container" style="display:flex;gap:10px;margin:16px 0 20px;border-bottom:1px solid var(--border);padding-bottom:12px">
@@ -149,6 +203,31 @@
       <div style="font-size:10px;color:var(--muted)" id="product-count"></div>
     </div>
     <div class="products-grid" id="products-container"></div>
+  </div>
+
+  <!-- Testimonials Section -->
+  <div class="testimonials-section hide" id="testimonials-section">
+    <div class="section-title">Client Love</div>
+    <div class="section-sub">What our styling community says</div>
+    <div class="testimonial-card-wrapper">
+      <div class="testimonial-slider" id="testimonial-slider">
+        <!-- Loaded dynamically via JS -->
+      </div>
+      <div class="testimonial-dots" id="testimonial-dots"></div>
+    </div>
+  </div>
+
+  <!-- Newsletter Section -->
+  <div class="newsletter-section">
+    <div class="newsletter-card glass-morphic">
+      <div class="newsletter-tag">✦ Join the Club ✦</div>
+      <h2>Unlock 10% Off Your First Order</h2>
+      <p>Subscribe to receive styling guides, new collection launches, and exclusive member discounts.</p>
+      <form id="newsletter-form" class="newsletter-form" onsubmit="handleNewsletterSubmit(event)">
+        <input type="email" id="news-email" placeholder="Enter your email address" required />
+        <button type="submit" class="btn-gold">Subscribe</button>
+      </form>
+    </div>
   </div>
 
   <!-- Store Location -->
@@ -582,37 +661,47 @@
   </div>
 </div>
 
-<footer>
+<!-- Luxury Footer -->
+<footer class="luxury-footer">
   <div class="footer-grid">
-    <div>
-      <span class="f-logo">KRIVVA</span>
-      <p style="font-size:11px;color:var(--muted);line-height:1.6">
-        Luxury women's fashion curated for the modern woman. Elegance in every thread.
-      </p>
+    <div class="footer-col brand-col">
+      <div class="footer-logo">KRIVVA</div>
+      <p>Timeless elegance & luxury women's fashion. Custom fitted kurtis, co-ords, and festive ensembles made to order.</p>
+      <div class="footer-socials">
+        <a href="https://instagram.com" target="_blank" title="Instagram">📸 Instagram</a>
+        <a href="https://wa.me/919876543210" target="_blank" title="WhatsApp">💬 WhatsApp</a>
+        <a href="https://pinterest.com" target="_blank" title="Pinterest">📌 Pinterest</a>
+      </div>
     </div>
-    <div>
-      <div class="footer-title">Quick Links</div>
-      <span class="footer-link" onclick="showPage('home')">Home</span>
-      <span class="footer-link" onclick="filterCat('new')">New Arrivals</span>
-      <span class="footer-link" onclick="filterCat('trending')">Trending</span>
-      <span class="footer-link" onclick="showPage('orders')">Track Order</span>
+    <div class="footer-col">
+      <h4>Shop</h4>
+      <ul>
+        <li><a href="#shop" onclick="filterCat('Kurtis')">Kurtis & Tunics</a></li>
+        <li><a href="#shop" onclick="filterCat('Co-ords')">Co-ord Sets</a></li>
+        <li><a href="#shop" onclick="filterCat('Festive Gowns')">Festive Gowns</a></li>
+        <li><a href="#shop" onclick="filterCat('Sarees')">Luxury Sarees</a></li>
+      </ul>
     </div>
-    <div>
-      <div class="footer-title">Contact</div>
-      <span class="footer-link">📞 98765 43210</span>
-      <span class="footer-link">📧 hello@krivva.in</span>
-      <span class="footer-link">📸 @krivva.fashion</span>
-      <span class="footer-link">📍 Main Road, Your City</span>
+    <div class="footer-col">
+      <h4>Support</h4>
+      <ul>
+        <li><a href="https://wa.me/919876543210" target="_blank">Personal Styling</a></li>
+        <li><a href="https://wa.me/919876543210" target="_blank">Custom Tailoring</a></li>
+        <li><a href="#" onclick="showPage('orders')">Track Order</a></li>
+        <li><a href="https://wa.me/919876543210" target="_blank">Shipping & Delivery</a></li>
+      </ul>
     </div>
-    <div>
-      <div class="footer-title">Policies</div>
-      <span class="footer-link" onclick="openTos()">Shipping Policy</span>
-      <span class="footer-link" onclick="openTos()">Return &amp; Exchange</span>
-      <span class="footer-link" onclick="openTos()">Privacy Policy</span>
-      <span class="footer-link" onclick="openTos()">Terms of Service</span>
+    <div class="footer-col contact-col">
+      <h4>Fashion Atelier</h4>
+      <p>📍 Near City Mall, Main Road, India</p>
+      <p>✉️ hello@krivvabyrethika.com</p>
+      <p>📞 +91 98765 43210</p>
+      <p>⏱️ Hours: Mon - Sat, 11 AM - 8 PM</p>
     </div>
   </div>
-  <div class="footer-bottom">© 2026 KRIVVA. All rights reserved. Made with ♥ for women who love fashion.</div>
+  <div class="footer-bottom">
+    <p>&copy; 2026 KRIVVA Luxury Fashion. All Rights Reserved. Crafted with love.</p>
+  </div>
 </footer>
 
 <!-- ============================================================
