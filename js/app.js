@@ -1609,6 +1609,32 @@ function playReelIndex(idx) {
 
   video.src = reel.video_url;
   document.getElementById('reel-caption').textContent = reel.caption || '';
+
+  const shopBtn = document.getElementById('reel-shop-btn');
+  if (shopBtn) {
+    if (reel.product_id) {
+      const linkedProduct = products.find(p => p.id === reel.product_id);
+      if (linkedProduct) {
+        shopBtn.textContent = `Shop ${linkedProduct.name} 🛍️`;
+        shopBtn.onclick = function() {
+          closeReels();
+          openDetail(linkedProduct.id);
+        };
+      } else {
+        shopBtn.textContent = 'Shop the Look 👗✨';
+        shopBtn.onclick = function() {
+          closeReels();
+          document.getElementById('shop').scrollIntoView({behavior:'smooth'});
+        };
+      }
+    } else {
+      shopBtn.textContent = 'Shop the Look 👗✨';
+      shopBtn.onclick = function() {
+        closeReels();
+        document.getElementById('shop').scrollIntoView({behavior:'smooth'});
+      };
+    }
+  }
   
   // Render progress segments
   const progressBars = document.getElementById('reels-progress-bars');
