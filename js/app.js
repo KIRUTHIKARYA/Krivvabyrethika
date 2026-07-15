@@ -1635,11 +1635,10 @@ function renderReelsBubbles() {
 
   container.classList.remove('hide');
   list.innerHTML = reels.map((r, idx) => `
-    <div class="reel-card" onclick="openReel(${idx})">
+    <div class="reel-card" onclick="openReel(${idx})" onmouseenter="this.querySelector('video').play()" onmouseleave="const v = this.querySelector('video'); v.pause(); v.currentTime = 0;">
       <div class="reel-card-video-wrapper">
-        <video src="${r.video_url}" muted playsinline loop autoplay></video>
+        <video src="${r.video_url}" muted playsinline loop preload="auto"></video>
         <div class="reel-card-overlay">
-          <div class="reel-card-play-icon">▶</div>
           <span class="reel-card-caption">${r.caption || 'Krivva Styling'}</span>
         </div>
       </div>
