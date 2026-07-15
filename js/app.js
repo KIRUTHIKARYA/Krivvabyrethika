@@ -1376,6 +1376,11 @@ async function loadStorefrontSettings() {
         if (tag && hero.value.tag) tag.textContent = hero.value.tag;
         if (title && hero.value.title) title.innerHTML = hero.value.title;
         if (sub && hero.value.subtitle) sub.textContent = hero.value.subtitle;
+        
+        heroBgImageUrl = hero.value.bg_image_url || '';
+        if (posters && posters.length === 0) {
+          renderDefaultHeroBackground();
+        }
       }
     }
   } catch (err) {
@@ -1832,6 +1837,7 @@ window.resetZoom = function(element) {
 let posters = [];
 let activePosterIdx = 0;
 let posterInterval = null;
+let heroBgImageUrl = '';
 
 async function loadPostersFromSupabase() {
   if (!supabaseClient) return;
@@ -1917,7 +1923,12 @@ function renderDefaultHeroBackground() {
   const container = document.getElementById('hero-slideshow');
   const dotsContainer = document.getElementById('hero-dots');
   if (!container) return;
-  container.innerHTML = `<div class="hero-slide" style="background: linear-gradient(145deg, #fdfbf7 0%, #eae5d9 100%)"></div>`;
+  
+  if (heroBgImageUrl) {
+    container.innerHTML = `<div class="hero-slide" style="background-image: url('${heroBgImageUrl}')"></div>`;
+  } else {
+    container.innerHTML = `<div class="hero-slide" style="background: linear-gradient(145deg, #fdfbf7 0%, #eae5d9 100%)"></div>`;
+  }
   if (dotsContainer) dotsContainer.innerHTML = '';
   container.style.transform = 'none';
 }
