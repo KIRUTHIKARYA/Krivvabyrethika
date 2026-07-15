@@ -42,9 +42,10 @@
   <div class="logo" onclick="showPage('home')">KRIVVA</div>
 
   <div class="nav-center">
-    <span onclick="showPage('home')"     id="nav-home"     class="active">Home</span>
-    <span onclick="showPage('wishlist')" id="nav-wishlist"             >Wishlist</span>
-    <span onclick="showPage('orders')"   id="nav-orders"               >Orders</span>
+    <span onclick="filterCat('new'); showPage('home');"      id="nav-new">New Arrivals</span>
+    <span onclick="filterCat('trending'); showPage('home');" id="nav-trending">Best Seller</span>
+    <span onclick="filterCat('ethnic'); showPage('home');"   id="nav-festive">Festive Finds</span>
+    <span onclick="filterUnderPrice(1000); showPage('home');" id="nav-under1000">Under 1000</span>
   </div>
 
   <div class="nav-right">
@@ -91,18 +92,27 @@
   <!-- Hero -->
   <div class="hero" id="hero-section" style="position:relative; overflow:hidden">
     <!-- Hero Slideshow Background -->
-    <div class="hero-slideshow" id="hero-slideshow" style="position:absolute; inset:0; z-index:1"></div>
+    <div class="hero-slideshow" id="hero-slideshow" style="position:absolute; inset:0; z-index:1; display:flex;"></div>
     
     <div class="hero-content" style="position:relative; z-index:2; width:100%">
-      <div class="hero-tag" id="hero-tagline">✦ New Collection 2026 ✦</div>
-      <h1 id="hero-title">Dressed in<br><em>Elegance</em></h1>
-      <p id="hero-subtitle">Curated luxury women's fashion — timeless, refined, yours</p>
+      <h1 id="hero-title" class="luxury-title">KRIVVA</h1>
+      
+      <!-- Lotus divider line -->
+      <div class="hero-divider">
+        <span class="hl-line"></span>
+        <span class="hl-icon">🪷</span>
+        <span class="hl-line"></span>
+      </div>
+      
+      <p id="hero-subtitle" class="luxury-subtitle">WEAR YOUR ELEGANCE</p>
+      
       <div class="hero-btns">
-        <button class="btn-gold"    onclick="document.getElementById('shop').scrollIntoView({behavior:'smooth'})">Shop Now</button>
-        <button class="btn-outline" onclick="filterCat('new')">New Arrivals</button>
-        <button class="btn-outline" onclick="filterCat('trending')">🔥 Trending</button>
+        <button class="btn-outline-rect" onclick="document.getElementById('shop').scrollIntoView({behavior:'smooth'})">Shop Now</button>
       </div>
     </div>
+
+    <!-- Hero Dots Indicators -->
+    <div class="hero-dots" id="hero-dots" style="position:absolute; bottom:24px; left:50%; transform:translateX(-50%); z-index:3; display:flex; gap:10px"></div>
   </div>
 
   <!-- Brand Trust Pillars -->

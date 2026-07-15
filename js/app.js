@@ -392,12 +392,25 @@ function renderCats() {
     CATS.map(c => `<div class="cat ${c.id === activeCat ? 'active' : ''}" onclick="filterCat('${c.id}')">${c.name}</div>`).join('');
 }
 
+let maxPriceFilter = null;
+
 function filterCat(id) {
+  maxPriceFilter = null; // Clear price filter when selecting a category
   activeCat = id; renderCats(); renderProducts();
   const label = CATS.find(c => c.id === id)?.name || 'All';
   document.getElementById('filter-label').textContent = id === 'all' ? 'All Items' : label;
   document.getElementById('shop').scrollIntoView({ behavior: 'smooth' });
 }
+
+window.filterUnderPrice = function(maxVal) {
+  maxPriceFilter = maxVal;
+  activeCat = 'all';
+  activeTab = 'all';
+  renderCats();
+  renderProducts();
+  document.getElementById('filter-label').textContent = `Items Under ₹${maxVal}`;
+  document.getElementById('shop').scrollIntoView({ behavior: 'smooth' });
+};
 
 let activeTab = 'all'; // 'all', 'best_sellers', 'new_arrivals', 'festive_wear'
 
@@ -422,8 +435,14 @@ function getFiltered() {
     } else if (activeTab === 'festive_wear') {
       matchesTab = p.isFestive;
     }
+
+    // 3. Filter by price
+    let matchesPrice = true;
+    if (maxPriceFilter !== null) {
+      matchesPrice = p.price <= maxPriceFilter;
+    }
     
-    return matchesCat && matchesTab;
+    return matchesCat && matchesTab && matchesPrice;
   });
 }
 
@@ -1784,6 +1803,7 @@ window.toggleReelAudio = function() {
 
 // ===== HOMEPAGE TABS SWITCHER =====
 window.switchHomeTab = function(tabId, btn) {
+  maxPriceFilter = null; // Clear price filter when switching tabs
   activeTab = tabId;
   document.querySelectorAll('.home-tabs-container .tab-btn').forEach(b => b.classList.remove('active'));
   if (btn) btn.classList.add('active');
@@ -1835,33 +1855,70 @@ async function loadPostersFromSupabase() {
 
 function renderPostersSlideshow() {
   const container = document.getElementById('hero-slideshow');
+  const dotsContainer = document.getElementById('hero-dots');
   if (!container) return;
 
-  container.innerHTML = posters.map((p, idx) => `
-    <div class="hero-slide ${idx === 0 ? 'active' : ''}" style="background-image: url('${p.url}')"></div>
+  container.innerHTML = posters.map((p) => `
+    <div class="hero-slide" style="background-image: url('${p.url}')"></div>
   `).join('');
+
+  if (dotsContainer) {
+    if (posters.length > 1) {
+      dotsContainer.innerHTML = posters.map((_, idx) => `
+        <span class="hero-dot ${idx === 0 ? 'active' : ''}" onclick="goToSlide(${idx})" title="Go to slide ${idx + 1}"></span>
+      `).join('');
+    } else {
+      dotsContainer.innerHTML = '';
+    }
+  }
+
+  activePosterIdx = 0;
+  updateSlideshowPosition();
 
   if (posters.length > 1) {
     startPostersInterval();
   }
 }
 
+window.goToSlide = function(idx) {
+  activePosterIdx = idx;
+  updateSlideshowPosition();
+  if (posters.length > 1) {
+    startPostersInterval(); // Reset interval timer
+  }
+};
+
+function updateSlideshowPosition() {
+  const container = document.getElementById('hero-slideshow');
+  if (!container) return;
+  container.style.transform = `translateX(-${activePosterIdx * 100}%)`;
+
+  const dots = document.querySelectorAll('.hero-dot');
+  dots.forEach((dot, idx) => {
+    if (idx === activePosterIdx) {
+      dot.classList.add('active');
+    } else {
+      dot.classList.remove('active');
+    }
+  });
+}
+
 function startPostersInterval() {
   if (posterInterval) clearInterval(posterInterval);
   posterInterval = setInterval(() => {
-    const slides = document.querySelectorAll('.hero-slide');
-    if (!slides.length) return;
-    
-    slides[activePosterIdx].classList.remove('active');
-    activePosterIdx = (activePosterIdx + 1) % slides.length;
-    slides[activePosterIdx].classList.add('active');
+    if (posters.length <= 1) return;
+    activePosterIdx = (activePosterIdx + 1) % posters.length;
+    updateSlideshowPosition();
   }, 5000); // rotates every 5 seconds
 }
 
 function renderDefaultHeroBackground() {
   const container = document.getElementById('hero-slideshow');
+  const dotsContainer = document.getElementById('hero-dots');
   if (!container) return;
-  container.innerHTML = `<div class="hero-slide active" style="background: linear-gradient(145deg, #080808 50%, #110e02 100%)"></div>`;
+  container.innerHTML = `<div class="hero-slide" style="background: linear-gradient(145deg, #fdfbf7 0%, #eae5d9 100%)"></div>`;
+  if (dotsContainer) dotsContainer.innerHTML = '';
+  container.style.transform = 'none';
 }
 
 // ===== DYNAMIC CATEGORY SHOWCASE COVERS =====
