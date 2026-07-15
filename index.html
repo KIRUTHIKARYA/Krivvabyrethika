@@ -71,13 +71,6 @@
      ============================================================ -->
 <div id="page-home" class="page">
 
-  <!-- Instagram-style Stories/Reels Row -->
-  <div class="reels-row-container hide" id="reels-row-container" style="margin-bottom:20px; overflow-x:auto">
-    <div class="reels-list" id="reels-list" style="display:flex; gap:16px; padding:10px 4px 6px">
-      <!-- Bubbles loaded dynamically -->
-    </div>
-  </div>
-
   <!-- Search (hidden by default) -->
   <div id="search-area" class="hide" style="margin-bottom:20px; position:relative">
     <div class="search-bar">
@@ -218,6 +211,17 @@
       <div style="font-size:10px;color:var(--muted)" id="product-count"></div>
     </div>
     <div class="products-grid" id="products-container"></div>
+  </div>
+
+  <!-- Shop As Seen On #Instagram Reels Section -->
+  <div class="reels-section hide" id="reels-row-container">
+    <div class="section-title">Shop As Seen On #Instagram</div>
+    <div class="section-sub">Swipe and click to play live styling reels</div>
+    <div class="reels-swipe-container">
+      <div class="reels-list" id="reels-list">
+        <!-- Loaded dynamically via JS -->
+      </div>
+    </div>
   </div>
 
   <!-- Testimonials Section -->

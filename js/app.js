@@ -1635,13 +1635,14 @@ function renderReelsBubbles() {
 
   container.classList.remove('hide');
   list.innerHTML = reels.map((r, idx) => `
-    <div class="reel-bubble-wrapper" onclick="openReel(${idx})">
-      <div class="reel-bubble">
-        <div class="reel-bubble-inner">
-          <video src="${r.video_url}" muted playsinline loop autoplay></video>
+    <div class="reel-card" onclick="openReel(${idx})">
+      <div class="reel-card-video-wrapper">
+        <video src="${r.video_url}" muted playsinline loop autoplay></video>
+        <div class="reel-card-overlay">
+          <div class="reel-card-play-icon">▶</div>
+          <span class="reel-card-caption">${r.caption || 'Krivva Styling'}</span>
         </div>
       </div>
-      <div class="reel-bubble-title">${r.caption || 'Krivva Reels'}</div>
     </div>
   `).join('');
 }
