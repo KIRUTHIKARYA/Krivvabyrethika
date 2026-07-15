@@ -909,12 +909,13 @@ footer {
   margin: 50px auto;
   max-width: 1200px;
   width: 100%;
+  text-align: center;
 }
 .instagram-highlight {
   font-family: 'Cormorant Garamond', serif;
   font-weight: 700;
   font-style: italic;
-  font-size: 1.45em;
+  font-size: 1.3em;
   background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
