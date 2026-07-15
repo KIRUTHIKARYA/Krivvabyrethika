@@ -105,6 +105,7 @@ async function loadProductsFromSupabase() {
     loadCartFromLocalStorage();
     loadReelsFromSupabase();
     loadPostersFromSupabase();
+    loadPromoBannersFromSupabase();
     loadCategoryCoversFromSupabase();
     loadSpotlightPromoFromSupabase();
     loadTestimonialsFromSupabase();
@@ -1919,6 +1920,73 @@ function renderDefaultHeroBackground() {
   container.innerHTML = `<div class="hero-slide" style="background: linear-gradient(145deg, #fdfbf7 0%, #eae5d9 100%)"></div>`;
   if (dotsContainer) dotsContainer.innerHTML = '';
   container.style.transform = 'none';
+}
+
+// ===== PROMOTIONAL BANNERS GRID LOGIC =====
+async function loadPromoBannersFromSupabase() {
+  if (!supabaseClient) return;
+  try {
+    const { data, error } = await supabaseClient
+      .from('storefront_settings')
+      .select('value')
+      .eq('key', 'homepage_banners')
+      .single();
+      
+    if (!error && data && Array.isArray(data.value)) {
+      renderPromoBanners(data.value);
+    } else {
+      renderPromoBanners([]);
+    }
+  } catch (err) {
+    console.error('Error loading promotional banners:', err);
+    renderPromoBanners([]);
+  }
+}
+
+function renderPromoBanners(bannersList) {
+  const container = document.getElementById('promo-banners-section');
+  if (!container) return;
+
+  if (!bannersList || bannersList.length === 0) {
+    // Render default luxury placeholders
+    bannersList = [
+      {
+        id: 'def1',
+        url: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=600&auto=format&fit=crop',
+        tag: 'New Collection',
+        title: 'Summer Edit 2026',
+        btn_text: 'Discover Now',
+        btn_link: '#shop'
+      },
+      {
+        id: 'def2',
+        url: 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?q=80&w=600&auto=format&fit=crop',
+        tag: 'Best Seller',
+        title: 'Festive Harmony',
+        btn_text: 'Shop Ensembles',
+        btn_link: '#shop'
+      }
+    ];
+  }
+
+  container.innerHTML = bannersList.map(b => {
+    const url = b.url || 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=600&auto=format&fit=crop';
+    const title = b.title || 'Collection Drop';
+    const tag = b.tag || 'Trending';
+    const btnText = b.btn_text || 'Shop Now';
+    const btnLink = b.btn_link || '#shop';
+    
+    return `
+      <div class="promo-banner-card" onclick="window.location.hash = '${btnLink}'; document.getElementById('shop')?.scrollIntoView({behavior:'smooth'});">
+        <div class="promo-banner-img" style="background-image: url('${url}')"></div>
+        <div class="promo-banner-overlay">
+          <span class="promo-banner-tag">${tag}</span>
+          <h3 class="promo-banner-title">${title}</h3>
+          <button class="promo-banner-btn">${btnText}</button>
+        </div>
+      </div>
+    `;
+  }).join('');
 }
 
 // ===== DYNAMIC CATEGORY SHOWCASE COVERS =====
