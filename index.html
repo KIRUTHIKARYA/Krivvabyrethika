@@ -6,7 +6,7 @@
   <title>KRIVVA — Luxury Women's Fashion</title>
   <meta name="description" content="KRIVVA — Curated luxury women's fashion. Shop kurtis, dresses, co-ords, ethnic wear and more. Timeless elegance, delivered to your door."/>
 
-  <!-- Google Fonts -->
+  <!-- Google Fonts: editorial headings + body -->
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,400;1,600&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet"/>
 
   <!-- Main Stylesheet -->
@@ -36,35 +36,51 @@
 </div>
 
 <!-- ============================================================
-     NAVIGATION
+     NAVIGATION — logo-center, menu-left, icons-right
      ============================================================ -->
-<nav>
-  <div class="logo" onclick="showPage('home')">KRIVVA</div>
-
-  <div class="nav-center">
-    <span onclick="filterCat('new'); showPage('home');"      id="nav-new">New Arrivals</span>
-    <span onclick="filterCat('trending'); showPage('home');" id="nav-trending">Best Seller</span>
-    <span onclick="filterCat('ethnic'); showPage('home');"   id="nav-festive">Festive Finds</span>
-    <span onclick="filterUnderPrice(1000); showPage('home');" id="nav-under1000">Under 1000</span>
+<nav class="nav-logo-center">
+  <div class="nav-left">
+    <button class="nav-hamburger" onclick="toggleMobileMenu()" aria-label="Open categories menu">
+      <span></span><span></span><span></span>
+    </button>
+    <span class="nav-quick-link hide-mobile" onclick="filterCat('new'); showPage('home');" id="nav-new">New Arrivals</span>
+    <span class="nav-quick-link hide-mobile" onclick="filterCat('trending'); showPage('home');" id="nav-trending">Best Seller</span>
   </div>
 
-  <div class="nav-right">
-    <button class="nav-icon-btn" onclick="toggleSearch()" title="Search">🔍</button>
+  <div class="logo" onclick="showPage('home')">KRIVVA</div>
 
-    <button class="nav-icon-btn" onclick="showPage('wishlist')" title="Wishlist">
-      🤍<span class="nav-badge hide" id="wl-count-nav">0</span>
+  <div class="nav-right">
+    <button class="nav-icon-btn" onclick="toggleSearch()" title="Search" aria-label="Search">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    </button>
+
+    <button class="nav-icon-btn" onclick="showPage('wishlist')" title="Wishlist" aria-label="Wishlist">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
+      <span class="nav-badge hide" id="wl-count-nav">0</span>
     </button>
 
     <!-- User area — swapped between avatar and login icon by JS -->
     <div id="user-nav-area"></div>
 
-    <div id="welcome-user" style="color:gold;font-size:12px">Welcome Guest</div>
+    <div id="welcome-user" class="welcome-user">Welcome Guest</div>
 
-    <button class="cart-btn" onclick="showCart()">
+    <button class="cart-btn" onclick="showCart()" aria-label="Bag">
       Bag <span id="cart-count">0</span>
     </button>
   </div>
 </nav>
+
+<!-- Category drawer (hamburger menu) -->
+<div id="mobile-menu-overlay" class="mobile-menu-overlay hide" onclick="closeMobileMenu()"></div>
+<aside id="mobile-menu" class="mobile-menu hide" aria-label="Categories menu">
+  <div class="mobile-menu-header">
+    <h3>Shop by Category</h3>
+    <button class="mobile-menu-close" onclick="closeMobileMenu()" aria-label="Close menu">✕</button>
+  </div>
+  <div class="mobile-menu-body" id="mobile-menu-categories">
+    <!-- All inventory categories loaded via JS -->
+  </div>
+</aside>
 
 <!-- ============================================================
      HOME PAGE
@@ -82,77 +98,51 @@
     <div id="search-results" class="products-grid"></div>
   </div>
 
-  <!-- Hero -->
-  <div class="hero" id="hero-section" style="position:relative; overflow:hidden">
-    <!-- Hero Slideshow Background -->
-    <div class="hero-slideshow" id="hero-slideshow" style="position:absolute; inset:0; z-index:1; display:flex;"></div>
+  <!-- Hero Slideshow Banner -->
+  <div class="hero" id="hero-section">
+    <div class="hero-slideshow" id="hero-slideshow"></div>
     
-    <div class="hero-content" style="position:relative; z-index:2; width:100%">
+    <div class="hero-content">
       <h1 id="hero-title" class="luxury-title">KRIVVA</h1>
-      
-      <!-- Lotus divider line -->
       <div class="hero-divider">
         <span class="hl-line"></span>
-        <span class="hl-icon">🪷</span>
+        <span class="hl-icon special-accent">✦</span>
         <span class="hl-line"></span>
       </div>
-      
       <p id="hero-subtitle" class="luxury-subtitle">WEAR YOUR ELEGANCE</p>
-      
       <div class="hero-btns">
-        <button class="btn-outline-rect" onclick="document.getElementById('shop').scrollIntoView({behavior:'smooth'})">Shop Now</button>
+        <button class="btn-maroon" onclick="document.getElementById('shop').scrollIntoView({behavior:'smooth'})">Shop Now</button>
       </div>
     </div>
 
-    <!-- Hero Dots Indicators -->
-    <div class="hero-dots" id="hero-dots" style="position:absolute; bottom:24px; left:50%; transform:translateX(-50%); z-index:3; display:flex; gap:10px"></div>
+    <div class="hero-dots" id="hero-dots"></div>
   </div>
 
-  <!-- Brand Trust Pillars -->
-  <div class="brand-pillars-bar">
-    <div class="pillar-item">
-      <span class="pillar-icon">⚡</span>
-      <div class="pillar-info">
-        <h4>Custom Fitting</h4>
-        <p>Tailored to your measurements</p>
-      </div>
-    </div>
-    <div class="pillar-item">
-      <span class="pillar-icon">📦</span>
-      <div class="pillar-info">
-        <h4>Free Shipping</h4>
-        <p>On orders above ₹999</p>
-      </div>
-    </div>
-    <div class="pillar-item">
-      <span class="pillar-icon">👗</span>
-      <div class="pillar-info">
-        <h4>Handloom Fabrics</h4>
-        <p>Pure raw silks & organic cottons</p>
-      </div>
-    </div>
-    <div class="pillar-item">
-      <span class="pillar-icon">🤝</span>
-      <div class="pillar-info">
-        <h4>COD Available</h4>
-        <p>Cash on delivery supported</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- Category Dress Showcase circles -->
+  <!-- Category Circle Cards Row -->
   <div class="category-showcase-section">
     <div class="section-title">Shop by Category</div>
-    <div class="section-sub">Curated luxury styles & patterns</div>
+    <div class="section-sub">Curated luxury styles &amp; patterns</div>
     <div class="category-bubbles-container" id="category-bubbles-container">
-      <!-- Populated dynamically via JS with dress images -->
+      <!-- Populated dynamically from inventory categories + covers -->
     </div>
   </div>
 
-  <!-- Promotional Banners Section -->
-  <div class="promo-banners-container" id="promo-banners-section">
-    <!-- Populated dynamically via JS -->
+  <!-- New Arrivals horizontal swipe -->
+  <div class="new-arrivals-section" id="new-arrivals-section">
+    <div class="section-head-row">
+      <div>
+        <div class="section-title">New Arrivals</div>
+        <div class="section-sub">Fresh drops from the atelier</div>
+      </div>
+      <button class="text-link-btn" onclick="document.getElementById('shop').scrollIntoView({behavior:'smooth'})">View All</button>
+    </div>
+    <div class="horizontal-product-row" id="new-arrivals-row">
+      <!-- Latest inventory items via JS -->
+    </div>
   </div>
+
+  <!-- Collection Showcase Banner Grid (only when added in inventory) -->
+  <div class="promo-banners-container hide" id="promo-banners-section"></div>
 
   <!-- Spotlight Promotional Showcase -->
   <div id="spotlight-section" class="spotlight-promo-section hide">
@@ -162,7 +152,7 @@
         <div class="spotlight-tag">✦ Season Spotlight ✦</div>
         <h2 id="spotlight-title">Spotlight Title</h2>
         <p id="spotlight-desc">Spotlight description text goes here.</p>
-        <button class="btn-gold" id="spotlight-action-btn">Shop the Drop</button>
+        <button class="btn-maroon" id="spotlight-action-btn">Shop the Drop</button>
       </div>
     </div>
   </div>
@@ -175,96 +165,118 @@
         <span class="countdown-num" id="cd-h">00</span>
         <span class="countdown-sub">Hrs</span>
       </div>
-      <span style="color:var(--gold);font-size:1.2rem;align-self:flex-start;padding-top:2px">:</span>
+      <span class="countdown-sep">:</span>
       <div class="countdown-unit">
         <span class="countdown-num" id="cd-m">00</span>
         <span class="countdown-sub">Min</span>
       </div>
-      <span style="color:var(--gold);font-size:1.2rem;align-self:flex-start;padding-top:2px">:</span>
+      <span class="countdown-sep">:</span>
       <div class="countdown-unit">
         <span class="countdown-num" id="cd-s">00</span>
         <span class="countdown-sub">Sec</span>
       </div>
     </div>
-    <span class="countdown-label">⚡ Limited Stock</span>
+    <span class="countdown-label">Limited Stock</span>
   </div>
 
   <!-- Shop Section -->
   <div id="shop">
-    <div class="section-title">Collections</div>
-    <div class="section-sub">Browse by category</div>
+    <!-- Instagram Reels — above product grid -->
+    <div class="reels-section hide" id="reels-row-container">
+      <div class="section-title">Shop As Seen On <span class="instagram-highlight special-accent">#Instagram</span></div>
+      <div class="section-sub">Swipe and tap to play styling reels</div>
+      <div class="reels-swipe-container">
+        <div class="reels-list" id="reels-list"></div>
+      </div>
+    </div>
+
     <div class="cats hide" id="cats-container"></div>
 
-    <!-- Shop As Seen On #Instagram Reels Section -->
-    <div class="reels-section hide" id="reels-row-container">
-      <div class="section-title">Shop As Seen On <span class="instagram-highlight">#Instagram</span></div>
-      <div class="section-sub">Swipe and click to play live styling reels</div>
-      <div class="reels-swipe-container">
-        <div class="reels-list" id="reels-list">
-          <!-- Loaded dynamically via JS -->
-        </div>
-      </div>
+    <!-- All inventory categories — above Shop by Style -->
+    <div class="shop-category-section" id="shop-category-section">
+      <div class="section-title">Browse Collections</div>
+      <div class="section-sub">Every category from our inventory</div>
+      <div class="shop-category-chips" id="shop-category-chips"></div>
     </div>
 
-    <!-- Homepage Tab switcher -->
-    <div class="home-tabs-container" style="display:flex;gap:10px;margin:16px 0 20px;border-bottom:1px solid var(--border);padding-bottom:12px">
-      <button class="tab-btn active" onclick="switchHomeTab('all', this)">✨ All Products</button>
-      <button class="tab-btn" onclick="switchHomeTab('best_sellers', this)">🔥 Best Sellers</button>
-      <button class="tab-btn" onclick="switchHomeTab('new_arrivals', this)">🆕 New Arrivals</button>
-      <button class="tab-btn" onclick="switchHomeTab('festive_wear', this)">🪔 Festive Wear</button>
-    </div>
-
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+    <!-- Shop by Style — all products -->
+    <div class="shop-header-row">
       <div>
-        <div class="section-title">Products</div>
-        <div class="section-sub" id="filter-label">All Items</div>
+        <div class="section-title">Shop by Style</div>
+        <div class="section-sub" id="filter-label">All Products</div>
       </div>
-      <div style="font-size:10px;color:var(--muted)" id="product-count"></div>
+      <div class="product-count-label" id="product-count"></div>
     </div>
-    <div class="products-grid" id="products-container"></div>
+    <div class="products-grid products-grid-four" id="products-container"></div>
   </div>
 
-  <!-- Testimonials Section -->
+  <!-- The Style Edit -->
+  <section class="style-edit-section" id="style-edit">
+    <div class="style-edit-inner">
+      <p class="special-accent style-edit-eyebrow">The Style Edit</p>
+      <h2 class="style-edit-title">Curated looks for every occasion</h2>
+      <p class="style-edit-text">
+        From everyday elegance to festive statement pieces — explore handpicked styles
+        refreshed straight from our inventory.
+      </p>
+      <button class="btn-maroon" onclick="showPage('home'); document.getElementById('shop').scrollIntoView({behavior:'smooth'})">Shop All Products</button>
+    </div>
+  </section>
+
+  <!-- Testimonials -->
   <div class="testimonials-section hide" id="testimonials-section">
     <div class="section-title">Client Love</div>
-    <div class="section-sub">What our styling community says</div>
+    <div class="section-sub">What our community says</div>
     <div class="testimonial-card-wrapper">
-      <div class="testimonial-slider" id="testimonial-slider">
-        <!-- Loaded dynamically via JS -->
-      </div>
+      <div class="testimonial-slider" id="testimonial-slider"></div>
       <div class="testimonial-dots" id="testimonial-dots"></div>
     </div>
   </div>
 
-  <!-- Newsletter Section -->
+  <!-- Trust Badges Row -->
+  <div class="trust-badges-row">
+    <div class="trust-pillars-item">
+      <span class="tp-icon">🔒</span>
+      <div><strong>Trusted Payments</strong><span>Secure checkout</span></div>
+    </div>
+    <div class="trust-pillars-item">
+      <span class="tp-icon">✂️</span>
+      <div><strong>Fully Stitched</strong><span>Ready to wear</span></div>
+    </div>
+    <div class="trust-pillars-item">
+      <span class="tp-icon">✨</span>
+      <div><strong>Premium Quality</strong><span>Handpicked fabrics</span></div>
+    </div>
+    <div class="trust-pillars-item">
+      <span class="tp-icon">🚚</span>
+      <div><strong>Pan-India Delivery</strong><span>Fast &amp; reliable</span></div>
+    </div>
+  </div>
+
+  <!-- Newsletter -->
   <div class="newsletter-section">
-    <div class="newsletter-card glass-morphic">
+    <div class="newsletter-card">
       <div class="newsletter-tag">✦ Join the Club ✦</div>
-      <h2>Unlock 10% Off Your First Order</h2>
-      <p>Subscribe to receive styling guides, new collection launches, and exclusive member discounts.</p>
+      <h2>Be First to Shop New Drops</h2>
+      <p>Get early access to new arrivals, restock alerts, and styling inspiration — straight to your inbox.</p>
       <form id="newsletter-form" class="newsletter-form" onsubmit="handleNewsletterSubmit(event)">
         <input type="email" id="news-email" placeholder="Enter your email address" required />
-        <button type="submit" class="btn-gold">Subscribe</button>
+        <button type="submit" class="btn-maroon">Join Waitlist</button>
       </form>
     </div>
   </div>
 
-  <!-- Store Location -->
-  <div style="margin-bottom:28px">
-    <div class="section-title">Find Us</div>
-    <div class="section-sub">Visit our store</div>
-    <div class="map-placeholder">
-      <div style="font-size:36px">📍</div>
-      <div style="font-size:13px;color:var(--text)">KRIVVA Fashion Store</div>
-      <div style="font-size:11px">Near City Mall, Main Road, Your City</div>
-      <a href="https://maps.google.com" target="_blank" class="btn-outline"
-         style="margin-top:8px;text-decoration:none;font-size:10px;padding:7px 16px">
-        Open in Google Maps
-      </a>
-    </div>
-  </div>
-
 </div><!-- /#page-home -->
+
+<!-- ============================================================
+     CATEGORY PAGE (separate view per category)
+     ============================================================ -->
+<div id="page-category" class="page hide">
+  <button class="text-link-btn category-back-btn" onclick="showPage('home')">← Back to Home</button>
+  <div class="section-title" id="category-page-title">Category</div>
+  <div class="section-sub" id="category-page-count"></div>
+  <div class="products-grid products-grid-four" id="category-products-container"></div>
+</div>
 
 <!-- ============================================================
      WISHLIST PAGE
@@ -407,8 +419,8 @@
       <span>📐 Size Chart</span>
       <button class="close-btn" onclick="closeSizeChart()">✕</button>
     </div>
-    <div style="background:#1c162e;border-radius:6px;padding:10px;border:1px solid var(--border)">
-      <img id="size-chart-img" src="" style="max-width:100%;max-height:70vh;object-fit:contain;border-radius:4px" />
+    <div style="background:var(--bg-cream);border-radius:0;padding:10px;border:1px solid var(--border)">
+      <img id="size-chart-img" src="" style="max-width:100%;max-height:70vh;object-fit:contain;border-radius:0" />
     </div>
   </div>
 </div>
@@ -531,7 +543,7 @@
 
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
       <span style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted)">Order Total</span>
-      <span style="font-family:'Cormorant Garamond',serif;font-size:1.4rem;color:var(--gold)" id="order-total-display">₹0</span>
+      <span style="font-family:'Cormorant Garamond',serif;font-size:1.4rem;color:var(--maroon)" id="order-total-display">₹0</span>
     </div>
 
     <!-- Trust Badges -->
@@ -547,7 +559,7 @@
       UPI • Cards • NetBanking • Wallets — Secured by Razorpay
     </div>
     <div style="font-size:10px;color:var(--muted);text-align:center;margin-top:6px">
-      By placing your order you agree to our <a href="#" onclick="openTos();return false;" style="color:var(--gold);text-decoration:underline">Terms of Service</a>
+      By placing your order you agree to our <a href="#" onclick="openTos();return false;" style="color:var(--maroon);text-decoration:underline">Terms of Service</a>
     </div>
   </div>
 </div>
@@ -680,46 +692,41 @@
   </div>
 </div>
 
-<!-- Luxury Footer -->
+<!-- Luxury Footer — Links | Contact | Newsletter -->
 <footer class="luxury-footer">
-  <div class="footer-grid">
-    <div class="footer-col brand-col">
-      <div class="footer-logo">KRIVVA</div>
-      <p>Timeless elegance & luxury women's fashion. Custom fitted kurtis, co-ords, and festive ensembles made to order.</p>
-      <div class="footer-socials">
-        <a href="https://instagram.com" target="_blank" title="Instagram">📸 Instagram</a>
-        <a href="https://wa.me/919876543210" target="_blank" title="WhatsApp">💬 WhatsApp</a>
-        <a href="https://pinterest.com" target="_blank" title="Pinterest">📌 Pinterest</a>
-      </div>
-    </div>
+  <div class="footer-grid footer-grid-three">
     <div class="footer-col">
-      <h4>Shop</h4>
+      <h4>Quick Links</h4>
       <ul>
-        <li><a href="#shop" onclick="filterCat('Kurtis')">Kurtis & Tunics</a></li>
-        <li><a href="#shop" onclick="filterCat('Co-ords')">Co-ord Sets</a></li>
-        <li><a href="#shop" onclick="filterCat('Festive Gowns')">Festive Gowns</a></li>
-        <li><a href="#shop" onclick="filterCat('Sarees')">Luxury Sarees</a></li>
-      </ul>
-    </div>
-    <div class="footer-col">
-      <h4>Support</h4>
-      <ul>
-        <li><a href="https://wa.me/919876543210" target="_blank">Personal Styling</a></li>
-        <li><a href="https://wa.me/919876543210" target="_blank">Custom Tailoring</a></li>
-        <li><a href="#" onclick="showPage('orders')">Track Order</a></li>
-        <li><a href="https://wa.me/919876543210" target="_blank">Shipping & Delivery</a></li>
+        <li><a href="#shop" onclick="filterCat('all'); return false;">Shop All</a></li>
+        <li><a href="#shop" onclick="filterCat('new'); return false;">New Arrivals</a></li>
+        <li><a href="#shop" onclick="filterCat('trending'); return false;">Best Sellers</a></li>
+        <li><a href="#style-edit">The Style Edit</a></li>
+        <li><a href="#" onclick="showPage('orders'); return false;">Track Order</a></li>
       </ul>
     </div>
     <div class="footer-col contact-col">
-      <h4>Fashion Atelier</h4>
+      <h4>Contact</h4>
       <p>📍 Near City Mall, Main Road, India</p>
       <p>✉️ hello@krivvabyrethika.com</p>
       <p>📞 +91 98765 43210</p>
-      <p>⏱️ Hours: Mon - Sat, 11 AM - 8 PM</p>
+      <p>⏱️ Mon – Sat, 11 AM – 8 PM</p>
+      <div class="footer-socials">
+        <a href="https://instagram.com" target="_blank" title="Instagram">Instagram</a>
+        <a href="https://wa.me/919876543210" target="_blank" title="WhatsApp">WhatsApp</a>
+      </div>
+    </div>
+    <div class="footer-col brand-col">
+      <div class="footer-logo">KRIVVA</div>
+      <p>Timeless elegance &amp; luxury women's fashion. Subscribe for early access to drops.</p>
+      <form class="footer-newsletter" onsubmit="handleNewsletterSubmit(event)">
+        <input type="email" placeholder="Your email" required aria-label="Newsletter email"/>
+        <button type="submit" class="btn-maroon btn-sm">Join</button>
+      </form>
     </div>
   </div>
   <div class="footer-bottom">
-    <p>&copy; 2026 KRIVVA Luxury Fashion. All Rights Reserved. Crafted with love.</p>
+    <p>&copy; 2026 KRIVVA Luxury Fashion. All Rights Reserved.</p>
   </div>
 </footer>
 

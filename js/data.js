@@ -146,11 +146,16 @@ function ep(p) {
   return p.offer > 0 ? Math.round(p.mrp * (1 - p.offer / 100)) : p.mrp;
 }
 
+/** Get all photo URLs for a product */
+function getProductPhotos(p) {
+  const raw = photoStore[p.id] || p.photo || '';
+  return raw.split(',').map(s => s.trim()).filter(Boolean);
+}
+
 /** Get the best available photo for a product (always returns the first photo URL) */
 function getPhoto(p) {
-  const raw = photoStore[p.id] || p.photo || '';
-  // photos are stored comma-separated — always use first one for card/thumbnail
-  return raw.split(',')[0].trim();
+  const photos = getProductPhotos(p);
+  return photos[0] || '';
 }
 
 /** Build an <img> or emoji fallback for a product */

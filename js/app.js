@@ -100,6 +100,8 @@ async function loadProductsFromSupabase() {
 
     renderCats();
     renderProducts();
+    renderShopCategoryChips();
+    renderMobileMenuCategories();
     loadWishlistFromSupabase();
     handleURLHashProduct();
     loadCartFromLocalStorage();
@@ -293,16 +295,107 @@ async function startCountdown() {
 
 // ===== NAVIGATION =====
 function showPage(pg) {
-  ['home', 'wishlist', 'orders', 'admin', 'profile'].forEach(x => {
-    document.getElementById('page-' + x).classList.toggle('hide', x !== pg);
+  ['home', 'wishlist', 'orders', 'admin', 'profile', 'category'].forEach(x => {
+    const el = document.getElementById('page-' + x);
+    if (el) el.classList.toggle('hide', x !== pg);
     const n = document.getElementById('nav-' + x); if (n) n.classList.toggle('active', x === pg);
   });
   if (pg === 'orders')   renderMyOrders();
   if (pg === 'wishlist') renderWishlist();
   if (pg === 'admin')    renderAdminStats();
   if (pg === 'profile')  populateProfilePage();
-  setBN(pg);
+  if (pg !== 'category') closeMobileMenu();
+  setBN(pg === 'category' ? 'home' : pg);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
+
+/** All real inventory categories from loaded products */
+function getInventoryCategories() {
+  const systemIds = new Set(['new', 'trending', 'all', 'ethnic']);
+  const cats = new Map();
+  products.forEach(p => {
+    if (p.cat && !systemIds.has(p.cat) && p.cat !== 'Other') {
+      cats.set(p.cat, p.cat);
+    }
+  });
+  return Array.from(cats.entries())
+    .map(([id, name]) => ({ id, name }))
+    .sort((a, b) => a.name.localeCompare(b.name));
+}
+
+function renderShopCategoryChips() {
+  const container = document.getElementById('shop-category-chips');
+  const section = document.getElementById('shop-category-section');
+  if (!container) return;
+  const cats = getInventoryCategories();
+  if (!cats.length) {
+    if (section) section.classList.add('hide');
+    return;
+  }
+  if (section) section.classList.remove('hide');
+  container.innerHTML = cats.map(c => {
+    const count = products.filter(p => p.cat === c.id).length;
+    return `<button type="button" class="shop-cat-chip" onclick="showCategoryPage('${c.id.replace(/'/g, "\\'")}')">${c.name} <span style="color:var(--muted);font-size:9px">(${count})</span></button>`;
+  }).join('');
+}
+
+function renderMobileMenuCategories() {
+  const container = document.getElementById('mobile-menu-categories');
+  if (!container) return;
+  const cats = getInventoryCategories();
+  const quickHTML = `
+    <button type="button" class="mobile-menu-link" onclick="closeMobileMenu();showPage('home');filterCat('all')">Shop All</button>
+    <button type="button" class="mobile-menu-link" onclick="closeMobileMenu();showPage('home');filterCat('new')">New Arrivals</button>
+    <button type="button" class="mobile-menu-link" onclick="closeMobileMenu();showPage('home');filterCat('trending')">Best Sellers</button>
+  `;
+  const catHTML = cats.map(c => {
+    const count = products.filter(p => p.cat === c.id).length;
+    return `<button type="button" class="mobile-menu-link" onclick="showCategoryPage('${c.id.replace(/'/g, "\\'")}')">
+      ${c.name}<span class="cat-count">${count}</span>
+    </button>`;
+  }).join('');
+  container.innerHTML = quickHTML + catHTML;
+}
+
+window.toggleMobileMenu = function() {
+  const menu = document.getElementById('mobile-menu');
+  const overlay = document.getElementById('mobile-menu-overlay');
+  if (!menu || !overlay) return;
+  renderMobileMenuCategories();
+  const willOpen = menu.classList.contains('hide');
+  if (willOpen) {
+    menu.classList.remove('hide');
+    overlay.classList.remove('hide');
+    document.body.style.overflow = 'hidden';
+  } else {
+    closeMobileMenu();
+  }
+};
+
+window.closeMobileMenu = function() {
+  const menu = document.getElementById('mobile-menu');
+  const overlay = document.getElementById('mobile-menu-overlay');
+  if (menu) menu.classList.add('hide');
+  if (overlay) overlay.classList.add('hide');
+  document.body.style.overflow = '';
+};
+
+window.showCategoryPage = function(catId) {
+  closeMobileMenu();
+  const catName = catId;
+  const list = products.filter(p => p.cat === catId);
+  const titleEl = document.getElementById('category-page-title');
+  const countEl = document.getElementById('category-page-count');
+  const grid = document.getElementById('category-products-container');
+  if (titleEl) titleEl.textContent = catName;
+  if (countEl) countEl.textContent = list.length + ' items';
+  if (grid) {
+    grid.innerHTML = list.length
+      ? list.map(productCardHTML).join('')
+      : `<div style="grid-column:1/-1;padding:40px;text-align:center;color:var(--muted)">No products in this category yet.</div>`;
+  }
+  showPage('category');
+};
 
 function setBN(pg) {
   document.querySelectorAll('.bottom-nav-item').forEach(el => el.classList.remove('active'));
@@ -396,55 +489,35 @@ function renderCats() {
 let maxPriceFilter = null;
 
 function filterCat(id) {
-  maxPriceFilter = null; // Clear price filter when selecting a category
-  activeCat = id; renderCats(); renderProducts();
-  const label = CATS.find(c => c.id === id)?.name || 'All';
-  document.getElementById('filter-label').textContent = id === 'all' ? 'All Items' : label;
-  document.getElementById('shop').scrollIntoView({ behavior: 'smooth' });
+  maxPriceFilter = null;
+  activeCat = id;
+  renderCats();
+  showPage('home');
+  if (id === 'new') {
+    document.getElementById('new-arrivals-section')?.scrollIntoView({ behavior: 'smooth' });
+    return;
+  }
+  if (id === 'trending' || id === 'all') {
+    document.getElementById('shop')?.scrollIntoView({ behavior: 'smooth' });
+    return;
+  }
+  showCategoryPage(id);
 }
 
 window.filterUnderPrice = function(maxVal) {
   maxPriceFilter = maxVal;
   activeCat = 'all';
-  activeTab = 'all';
   renderCats();
   renderProducts();
   document.getElementById('filter-label').textContent = `Items Under ₹${maxVal}`;
   document.getElementById('shop').scrollIntoView({ behavior: 'smooth' });
 };
 
-let activeTab = 'all'; // 'all', 'best_sellers', 'new_arrivals', 'festive_wear'
-
-function getFiltered() {
-  return products.filter(p => {
-    // 1. Filter by category
-    let matchesCat = true;
-    if (activeCat === 'new') {
-      matchesCat = p.isNew;
-    } else if (activeCat === 'trending') {
-      matchesCat = p.isTrending;
-    } else if (activeCat !== 'all') {
-      matchesCat = (p.cat === activeCat);
-    }
-    
-    // 2. Filter by tab
-    let matchesTab = true;
-    if (activeTab === 'best_sellers') {
-      matchesTab = p.isTrending;
-    } else if (activeTab === 'new_arrivals') {
-      matchesTab = p.isNew;
-    } else if (activeTab === 'festive_wear') {
-      matchesTab = p.isFestive;
-    }
-
-    // 3. Filter by price
-    let matchesPrice = true;
-    if (maxPriceFilter !== null) {
-      matchesPrice = p.price <= maxPriceFilter;
-    }
-    
-    return matchesCat && matchesTab && matchesPrice;
-  });
+function getShopProducts() {
+  if (maxPriceFilter !== null) {
+    return products.filter(p => ep(p) <= maxPriceFilter);
+  }
+  return products;
 }
 
 // ===== PRODUCTS =====
@@ -460,11 +533,28 @@ function productCardHTML(p) {
   const isLow     = p.stock > 0 && p.stock <= 5;
   const isOnSale  = p.offer > 0;
   const stars = avgStars(p);
-  return `<div class="product-card" id="pc-${p.id}" style="position:relative">
+  const photos = getProductPhotos(p);
+  const primary = photos[0] || '';
+  const hover = photos[1] || '';
+  const sizePills = (p.sizes || []).map(s => {
+    const q = (p.sizeQtyMap && p.sizeQtyMap[s]) || 0;
+    const sold = q === 0;
+    const active = selectedSizes[p.id] === s;
+    return `<button type="button" class="size-pill ${sold ? 'sold' : ''} ${active ? 'active' : ''}"
+      ${sold ? 'disabled' : ''}
+      onclick="event.stopPropagation();selectCardSize('${p.id}','${s}',this)">${s}</button>`;
+  }).join('');
+
+  const imageBlock = primary
+    ? (hover
+        ? `<img class="product-img-primary" src="${primary}" alt="${p.name}" loading="lazy" onerror="this.style.display='none'"/>
+           <img class="product-img-hover" src="${hover}" alt="${p.name}" loading="lazy" onerror="this.style.display='none'"/>`
+        : `<img class="product-img-primary" src="${primary}" alt="${p.name}" loading="lazy" onerror="this.style.display='none'"/>`)
+    : `<span class="emoji-fb">${p.icon}</span>`;
+
+  return `<div class="product-card" id="pc-${p.id}">
     <div class="product-img" onclick="openDetail('${p.id}')">
-      ${getPhoto(p)
-        ? `<img src="${getPhoto(p)}" alt="${p.name}" style="width:100%;height:160px;object-fit:cover" onerror="this.style.display='none'"/>`
-        : `<span class="emoji-fb">${p.icon}</span>`}
+      ${imageBlock}
       ${isSoldOut ? '<div class="sold-out-overlay"><div class="sold-out-stamp">SOLD OUT</div></div>' : ''}
       <div class="product-img-overlay">
         <button class="overlay-btn" onclick="event.stopPropagation();openDetail('${p.id}')">Quick View</button>
@@ -472,10 +562,10 @@ function productCardHTML(p) {
     </div>
     <div class="p-badges">
       ${p.isNew      ? '<span class="p-badge badge-new">New</span>' : ''}
-      ${p.isTrending ? '<span class="p-badge badge-trending">🔥 Hot</span>' : ''}
+      ${p.isTrending ? '<span class="p-badge badge-trending">Hot</span>' : ''}
       ${isOnSale     ? `<span class="p-badge badge-sale">${p.offer}% OFF</span>` : ''}
       ${isSoldOut    ? '<span class="p-badge badge-soldout">Sold Out</span>' : ''}
-      ${isLow && !isSoldOut ? `<span class="p-badge" style="background:rgba(224,82,82,.85);color:#fff">Only ${p.stock} left!</span>` : ''}
+      ${isLow && !isSoldOut ? `<span class="p-badge badge-sale">Only ${p.stock} left</span>` : ''}
     </div>
     <button class="wishlist-btn ${wl ? 'active' : ''}" onclick="toggleWishlist('${p.id}')">♥</button>
     <div class="product-info">
@@ -487,21 +577,48 @@ function productCardHTML(p) {
         ${p.mrp > price ? `<span class="product-old">₹${p.mrp.toLocaleString()}</span>` : ''}
         ${isOnSale     ? `<span class="offer-tag">${p.offer}% off</span>` : ''}
       </div>
+      ${sizePills ? `<div class="card-size-pills">${sizePills}</div>` : ''}
       ${isSoldOut
-        ? `<button class="add-cart" onclick="event.stopPropagation();openNotifyMe('${p.id}')" style="background:var(--surface2);border:1px solid var(--border2);color:var(--muted);cursor:pointer">🔔 Notify Me</button>`
+        ? `<button class="add-cart" onclick="event.stopPropagation();openNotifyMe('${p.id}')" style="color:var(--muted)">Notify Me</button>`
         : `<button class="add-cart" onclick="quickAddToCart('${p.id}')">Add to Bag</button>`}
     </div>
   </div>`;
 }
 
+function renderNewArrivalsRow() {
+  const row = document.getElementById('new-arrivals-row');
+  const section = document.getElementById('new-arrivals-section');
+  if (!row) return;
+  const latest = products.filter(p => p.isNew).slice(0, 12);
+  const list = latest.length ? latest : products.slice(0, 8);
+  if (!list.length) {
+    if (section) section.classList.add('hide');
+    return;
+  }
+  if (section) section.classList.remove('hide');
+  row.innerHTML = list.map(productCardHTML).join('');
+}
+
 function renderProducts() {
-  const list = getFiltered();
-  document.getElementById('product-count').textContent = list.length + ' items';
-  document.getElementById('products-container').innerHTML = list.length
+  const list = getShopProducts();
+  const countEl = document.getElementById('product-count');
+  const labelEl = document.getElementById('filter-label');
+  if (countEl) countEl.textContent = list.length + ' items';
+  if (labelEl) {
+    labelEl.textContent = maxPriceFilter !== null
+      ? `Items Under ₹${maxPriceFilter}`
+      : 'All Products';
+  }
+  const container = document.getElementById('products-container');
+  if (!container) return;
+  container.innerHTML = list.length
     ? list.map(productCardHTML).join('')
     : `<div style="grid-column:1/-1;padding:40px;text-align:center;color:var(--muted)">
          <div style="font-size:36px;margin-bottom:10px">👗</div><div>No products here</div>
        </div>`;
+  if (typeof renderNewArrivalsRow === 'function') renderNewArrivalsRow();
+  if (typeof renderShopCategoryChips === 'function') renderShopCategoryChips();
+  if (typeof renderMobileMenuCategories === 'function') renderMobileMenuCategories();
 }
 
 // ===== PRODUCT DETAIL =====
@@ -597,7 +714,7 @@ function openDetail(id) {
     </div>
     <div class="divider"></div>
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-      <div style="font-size:12px;font-weight:500;color:var(--white)">Customer Reviews</div>
+      <div style="font-size:12px;font-weight:500;color:var(--text)">Customer Reviews</div>
       <button class="btn-outline btn-sm" onclick="openReview('${id}')">Write Review</button>
     </div>
     ${p.reviews?.length
@@ -611,17 +728,17 @@ function openDetail(id) {
           </div>`).join('')
       : '<div style="font-size:12px;color:var(--muted);padding:8px">No reviews yet. Be the first!</div>'}
     <div class="divider"></div>
-    <div style="font-size:12px;font-weight:500;color:var(--white);margin-bottom:10px">You May Also Like</div>
+    <div style="font-size:12px;font-weight:500;color:var(--text);margin-bottom:10px">You May Also Like</div>
     <div class="related-grid">
       ${products.filter(x => x.cat === p.cat && x.id !== p.id).slice(0, 4).map(r => `
-        <div style="background:var(--surface);border:1px solid var(--border);cursor:pointer"
+        <div style="background:var(--bg-cream);border:1px solid var(--border);cursor:pointer"
              onclick="closeDetail();setTimeout(()=>openDetail('${r.id}'),100)">
-          <div style="height:80px;display:flex;align-items:center;justify-content:center;background:var(--surface2);overflow:hidden">
+          <div style="height:80px;display:flex;align-items:center;justify-content:center;background:var(--bg-beige);overflow:hidden">
             ${getPhoto(r) ? `<img src="${getPhoto(r)}" style="width:100%;height:80px;object-fit:cover"/>` : `<span style="font-size:28px">${r.icon}</span>`}
           </div>
           <div style="padding:8px">
-            <div style="font-size:11px;color:var(--white)">${r.name}</div>
-            <div style="font-size:10px;color:var(--gold)">₹${ep(r).toLocaleString()}</div>
+            <div style="font-size:11px;color:var(--text)">${r.name}</div>
+            <div style="font-size:10px;color:var(--maroon)">₹${ep(r).toLocaleString()}</div>
           </div>
         </div>`).join('')}
     </div>`;
@@ -657,7 +774,15 @@ function closeDetail() {
 function selectSize(pid, size, el) {
   selectedSizes[pid] = size;
   document.querySelectorAll('#detail-modal .size-btn').forEach(b => b.classList.remove('active'));
-  el.classList.add('active');
+  if (el) el.classList.add('active');
+
+  // Sync card pills when selecting from detail modal
+  const card = document.getElementById('pc-' + pid);
+  if (card) {
+    card.querySelectorAll('.size-pill').forEach(pill => {
+      pill.classList.toggle('active', pill.textContent.trim() === size);
+    });
+  }
 
   const p = products.find(x => x.id === pid);
   if (p) {
@@ -669,6 +794,15 @@ function selectSize(pid, size, el) {
     }
   }
 }
+
+window.selectCardSize = function(pid, size, el) {
+  selectedSizes[pid] = size;
+  const card = document.getElementById('pc-' + pid);
+  if (card) {
+    card.querySelectorAll('.size-pill').forEach(b => b.classList.remove('active'));
+  }
+  if (el) el.classList.add('active');
+};
 
 function shareProduct(id) {
   const p = products.find(x => x.id === id); if (!p) return;
@@ -788,8 +922,8 @@ function renderWishlist() {
         ${getPhoto(p) ? `<img src="${getPhoto(p)}" style="width:100%;height:110px;object-fit:cover"/>` : p.icon}
       </div>
       <div class="wl-info">
-        <div style="font-size:12px;font-weight:500;color:var(--white);margin-bottom:3px">${p.name}</div>
-        <div style="font-family:'Cormorant Garamond',serif;font-size:1rem;color:var(--gold);margin-bottom:8px">₹${ep(p).toLocaleString()}</div>
+        <div style="font-size:12px;font-weight:500;color:var(--text);margin-bottom:3px">${p.name}</div>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:1rem;color:var(--maroon);margin-bottom:8px">₹${ep(p).toLocaleString()}</div>
         <div style="display:flex;gap:6px">
           <button class="add-cart" style="flex:1" onclick="quickAddToCart('${p.id}')">Add to Bag</button>
           <button onclick="toggleWishlist('${p.id}')" style="background:none;border:1px solid var(--border);color:var(--red);padding:7px 8px;cursor:pointer">✕</button>
@@ -801,9 +935,12 @@ function renderWishlist() {
 // ===== CART =====
 function quickAddToCart(id) {
   const p = products.find(x => x.id === id); if (!p) return;
+  if (!selectedSizes[id] && p.sizes?.length) {
+    showToast('Please select a size first', 'red');
+    return;
+  }
   const size = selectedSizes[id] || (p.sizes?.length ? p.sizes[0] : 'M');
-  const variant = p.raw_variants?.find(v => v.size === size);
-  const qty = variant?.stock?.quantity || 0;
+  const qty = (p.sizeQtyMap && p.sizeQtyMap[size]) || 0;
   if (qty === 0) {
     showToast(`Size ${size} is out of stock`, 'red');
     return;
@@ -866,9 +1003,9 @@ function renderCart() {
     <div class="cart-item">
       <div class="cart-thumb">${i.photo ? `<img src="${i.photo}" style="width:100%;height:100%;object-fit:cover"/>` : i.icon}</div>
       <div style="flex:1">
-        <div style="font-size:12px;font-weight:500;color:var(--white)">${i.name}</div>
+        <div style="font-size:12px;font-weight:500;color:var(--text)">${i.name}</div>
         <div style="font-size:10px;color:var(--muted)">Size: ${i.size}</div>
-        <div style="font-size:12px;color:var(--gold)">₹${i.price.toLocaleString()}</div>
+        <div style="font-size:12px;color:var(--maroon)">₹${i.price.toLocaleString()}</div>
         <div style="display:flex;align-items:center;gap:7px;margin-top:5px">
           <button class="qty-btn" onclick="changeQty('${i.key}',-1)">−</button>
           <span style="font-size:12px">${i.qty}</span>
@@ -1236,7 +1373,7 @@ async function renderMyOrders() {
       `<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.05)">
         ${i.photo ? `<img src="${i.photo}" style="width:36px;height:36px;object-fit:cover;border-radius:4px;flex-shrink:0" onerror="this.style.display='none'"/>` : '<div style="width:36px;height:36px;background:rgba(255,255,255,0.05);border-radius:4px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:14px">👗</div>'}
         <div style="flex:1;min-width:0">
-          <div style="font-size:11px;font-weight:600;color:var(--white);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${i.name}</div>
+          <div style="font-size:11px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${i.name}</div>
           <div style="font-size:10px;color:var(--muted)">Size: ${i.size}${i.qty > 1 ? ' × ' + i.qty : ''} · ₹${(i.price * i.qty).toLocaleString()}</div>
         </div>
       </div>`
@@ -1250,7 +1387,7 @@ async function renderMyOrders() {
       <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:6px;margin-bottom:10px">
         <div>
           <div style="font-size:11px;font-weight:700;color:var(--gold);letter-spacing:0.5px">ORDER</div>
-          <div style="font-size:12px;font-weight:600;color:var(--white);word-break:break-all">${o.id.substring(0,8)}…</div>
+          <div style="font-size:12px;font-weight:600;color:var(--text);word-break:break-all">${o.id.substring(0,8)}…</div>
           <div style="font-size:10px;color:var(--muted);margin-top:2px">${o.date} · ${o.city || ''}</div>
         </div>
         <span class="status-badge status-${o.status}" style="white-space:nowrap">${o.fulfillment_status || o.status}</span>
@@ -1807,15 +1944,6 @@ window.toggleReelAudio = function() {
   if (btn) btn.textContent = reelMuted ? '🔇' : '🔊';
 };
 
-// ===== HOMEPAGE TABS SWITCHER =====
-window.switchHomeTab = function(tabId, btn) {
-  maxPriceFilter = null; // Clear price filter when switching tabs
-  activeTab = tabId;
-  document.querySelectorAll('.home-tabs-container .tab-btn').forEach(b => b.classList.remove('active'));
-  if (btn) btn.classList.add('active');
-  renderProducts();
-};
-
 // ===== HOVER ZOOM LOGIC =====
 window.zoomPhoto = function(e, element) {
   const img = element.querySelector('img');
@@ -1959,29 +2087,15 @@ function renderPromoBanners(bannersList) {
   if (!container) return;
 
   if (!bannersList || bannersList.length === 0) {
-    // Render default luxury placeholders
-    bannersList = [
-      {
-        id: 'def1',
-        url: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=600&auto=format&fit=crop',
-        tag: 'New Collection',
-        title: 'Summer Edit 2026',
-        btn_text: 'Discover Now',
-        btn_link: '#shop'
-      },
-      {
-        id: 'def2',
-        url: 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?q=80&w=600&auto=format&fit=crop',
-        tag: 'Best Seller',
-        title: 'Festive Harmony',
-        btn_text: 'Shop Ensembles',
-        btn_link: '#shop'
-      }
-    ];
+    container.innerHTML = '';
+    container.classList.add('hide');
+    return;
   }
 
+  container.classList.remove('hide');
   container.innerHTML = bannersList.map(b => {
-    const url = b.url || 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=600&auto=format&fit=crop';
+    const url = b.url || '';
+    if (!url) return '';
     const title = b.title || 'Collection Drop';
     const tag = b.tag || 'Trending';
     const btnText = b.btn_text || 'Shop Now';
@@ -1997,7 +2111,11 @@ function renderPromoBanners(bannersList) {
         </div>
       </div>
     `;
-  }).join('');
+  }).filter(Boolean).join('');
+
+  if (!container.innerHTML.trim()) {
+    container.classList.add('hide');
+  }
 }
 
 // ===== DYNAMIC CATEGORY SHOWCASE COVERS =====
@@ -2014,32 +2132,26 @@ async function loadCategoryCoversFromSupabase() {
       .single();
 
     const coversMap = (!error && data && data.value) ? data.value : {};
+    const catsToShow = getInventoryCategories();
 
-    // Get all system categories (excluding 'Other')
-    const catsToShow = CATS.map(c => c.name).filter(name => name !== 'Other' && name !== 'All');
-
-    container.innerHTML = catsToShow.map(cat => {
-      // Find cover image. Fallback to first product image in this category if none uploaded
-      let imageUrl = coversMap[cat];
+    container.innerHTML = catsToShow.map(({ id, name }) => {
+      let imageUrl = coversMap[name] || coversMap[id];
       if (!imageUrl) {
-        const matchingProd = PRODUCTS.find(p => p.category === cat);
-        if (matchingProd) {
-          imageUrl = matchingProd.photo ? matchingProd.photo.split(',')[0] : '';
-        }
+        const matchingProd = products.find(p => p.cat === id || p.cat === name);
+        if (matchingProd) imageUrl = getPhoto(matchingProd);
       }
-      // If still no cover, use a luxury dress fallback pattern
       if (!imageUrl) {
         imageUrl = 'https://images.unsplash.com/photo-1595777457583-95e059d581b8?q=80&w=300&auto=format&fit=crop';
       }
 
       return `
-        <div class="category-bubble-card" onclick="selectShowcaseCategory('${cat}')">
+        <div class="category-bubble-card" onclick="showCategoryPage('${id.replace(/'/g, "\\'")}')">
           <div class="category-bubble-ring">
             <div class="category-bubble-img">
-              <img src="${imageUrl}" alt="${cat}" loading="lazy" />
+              <img src="${imageUrl}" alt="${name}" loading="lazy" />
             </div>
           </div>
-          <span class="category-bubble-name">${cat}</span>
+          <span class="category-bubble-name">${name}</span>
         </div>
       `;
     }).join('');
@@ -2049,13 +2161,7 @@ async function loadCategoryCoversFromSupabase() {
 }
 
 window.selectShowcaseCategory = function(catName) {
-  // Filter catalog
-  filterCat(catName);
-  // Scroll to shop
-  const shopEl = document.getElementById('shop');
-  if (shopEl) {
-    shopEl.scrollIntoView({ behavior: 'smooth' });
-  }
+  showCategoryPage(catName);
 };
 
 // ===== DYNAMIC SPOTLIGHT PROMO =====
@@ -2194,7 +2300,7 @@ window.handleNewsletterSubmit = function(e) {
 
   const email = emailInput.value.trim();
   if (email) {
-    showToast("Welcome to the KRIVVA Club! Check your email for your 10% off code 📧✨", "gold");
+    showToast("You're on the list! We'll notify you about new drops & restocks.", "gold");
     emailInput.value = '';
   }
 };
