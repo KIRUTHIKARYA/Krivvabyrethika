@@ -802,11 +802,11 @@ window.showFullProductPage = function(id) {
             const photos = p.photo ? p.photo.split(',') : [];
             if (photos.length > 1) {
               return `
-                <div class="carousel-container" style="position:relative;width:100%;height:380px;overflow:hidden;border-radius:4px">
+                <div class="carousel-container" style="position:relative;width:100%;height:100%;overflow:hidden;border-radius:4px">
                   <div class="carousel-slides" style="display:flex;width:100%;height:100%;transition:transform 0.3s ease-in-out" id="slides-page-${p.id}">
                     ${photos.map(url => `
-                      <div class="zoom-img-wrapper" onmousemove="zoomPhoto(event, this)" onmouseleave="resetZoom(this)" style="width:100%;height:100%;overflow:hidden;flex-shrink:0;">
-                        <img src="${url}" style="width:100%;height:100%;object-fit:cover;transition:transform 0.1s ease-out"/>
+                      <div class="zoom-img-wrapper" onmousemove="zoomPhoto(event, this)" onmouseleave="resetZoom(this)" style="width:100%;height:100%;overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:var(--bg-cream);">
+                        <img src="${url}" style="max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;transition:transform 0.1s ease-out"/>
                       </div>
                     `).join('')}
                   </div>
@@ -819,12 +819,12 @@ window.showFullProductPage = function(id) {
               `;
             } else if (photos.length === 1) {
               return `
-                <div class="zoom-img-wrapper" onmousemove="zoomPhoto(event, this)" onmouseleave="resetZoom(this)" style="width:100%;height:380px;overflow:hidden;border-radius:4px;">
-                  <img src="${photos[0]}" style="width:100%;height:380px;object-fit:cover;transition:transform 0.1s ease-out"/>
+                <div class="zoom-img-wrapper" onmousemove="zoomPhoto(event, this)" onmouseleave="resetZoom(this)" style="width:100%;height:100%;overflow:hidden;border-radius:4px;display:flex;align-items:center;justify-content:center;background:var(--bg-cream);">
+                  <img src="${photos[0]}" style="max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;transition:transform 0.1s ease-out"/>
                 </div>
               `;
             } else {
-              return `<div style="font-size:52px;height:380px;display:flex;align-items:center;justify-content:center;background:var(--surface2)">${p.icon}</div>`;
+              return `<div style="font-size:52px;height:100%;width:100%;display:flex;align-items:center;justify-content:center;background:var(--surface2)">${p.icon}</div>`;
             }
           })()}
         </div>
