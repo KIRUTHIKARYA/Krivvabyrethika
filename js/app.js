@@ -151,35 +151,40 @@ function subscribeStockChanges() {
           if (activeDetailProductId === p.id) {
             const selectedSize = selectedSizes[p.id];
             
-            // Refresh size grid buttons dynamically
+            // Refresh size grid buttons dynamically for both modal and page
             const sizeGrid = document.querySelector('#detail-modal .size-grid');
-            if (sizeGrid) {
-              sizeGrid.innerHTML = p.sizes.map(s => {
-                const q = p.sizeQtyMap[s] || 0;
-                if (q === 0) {
-                  return `<button class="size-btn out-of-stock" disabled>${s}<span class="size-stock-badge">Sold Out</span></button>`;
-                } else if (q <= 5) {
-                  return `<button class="size-btn ${selectedSizes[p.id] === s ? 'active' : ''}" onclick="selectSize('${p.id}','${s}',this)">${s}<span class="size-stock-badge">${q} left</span></button>`;
-                } else {
-                  return `<button class="size-btn ${selectedSizes[p.id] === s ? 'active' : ''}" onclick="selectSize('${p.id}','${s}',this)">${s}</button>`;
-                }
-              }).join('');
-            }
+            const pageSizeGrid = document.querySelector('#page-product-detail .size-grid');
+            const updateSizeGrid = (gridEl) => {
+              if (gridEl) {
+                gridEl.innerHTML = p.sizes.map(s => {
+                  const q = p.sizeQtyMap[s] || 0;
+                  if (q === 0) {
+                    return `<button class="size-btn out-of-stock" disabled>${s}<span class="size-stock-badge">Sold Out</span></button>`;
+                  } else if (q <= 5) {
+                    return `<button class="size-btn ${selectedSizes[p.id] === s ? 'active' : ''}" onclick="selectSize('${p.id}','${s}',this)">${s}<span class="size-stock-badge">${q} left</span></button>`;
+                  } else {
+                    return `<button class="size-btn ${selectedSizes[p.id] === s ? 'active' : ''}" onclick="selectSize('${p.id}','${s}',this)">${s}</button>`;
+                  }
+                }).join('');
+              }
+            };
+            updateSizeGrid(sizeGrid);
+            updateSizeGrid(pageSizeGrid);
 
-            if (selectedSize && selectedSize === variant.size) {
-              const qty = payload.new.qty;
-              const stockEl = document.getElementById('detail-stock-display');
-              if (stockEl) {
-                stockEl.style.color = qty <= 5 ? 'var(--red)' : 'var(--muted)';
-                stockEl.textContent = qty === 0 ? 'Out of Stock' : qty <= 5 ? `Only ${qty} left!` : `${qty} in stock`;
+            const qty = payload.new.qty;
+            const updateStockDisplay = (el) => {
+              if (el) {
+                if (selectedSize && selectedSize === variant.size) {
+                  el.style.color = qty <= 5 ? 'var(--red)' : 'var(--muted)';
+                  el.textContent = qty === 0 ? 'Out of Stock' : qty <= 5 ? `Only ${qty} left!` : `${qty} in stock`;
+                } else if (!selectedSize) {
+                  el.style.color = p.stock <= 5 ? 'var(--red)' : 'var(--muted)';
+                  el.textContent = p.stock === 0 ? 'Out of Stock' : p.stock <= 5 ? `Only ${p.stock} left!` : `${p.stock} in stock`;
+                }
               }
-            } else if (!selectedSize) {
-              const stockEl = document.getElementById('detail-stock-display');
-              if (stockEl) {
-                stockEl.style.color = p.stock <= 5 ? 'var(--red)' : 'var(--muted)';
-                stockEl.textContent = p.stock === 0 ? 'Out of Stock' : p.stock <= 5 ? `Only ${p.stock} left!` : `${p.stock} in stock`;
-              }
-            }
+            };
+            updateStockDisplay(document.getElementById('detail-stock-display'));
+            updateStockDisplay(document.getElementById('page-stock-display'));
           }
         }
       });
@@ -294,8 +299,16 @@ async function startCountdown() {
 }
 
 // ===== NAVIGATION =====
+let currentPage = 'home';
+let previousPage = 'home';
+
 function showPage(pg) {
-  ['home', 'wishlist', 'orders', 'admin', 'profile', 'category'].forEach(x => {
+  if (pg !== 'product-detail' && pg !== currentPage) {
+    previousPage = currentPage;
+  }
+  currentPage = pg;
+
+  ['home', 'wishlist', 'orders', 'admin', 'profile', 'category', 'product-detail'].forEach(x => {
     const el = document.getElementById('page-' + x);
     if (el) el.classList.toggle('hide', x !== pg);
     const n = document.getElementById('nav-' + x); if (n) n.classList.toggle('active', x === pg);
@@ -304,10 +317,14 @@ function showPage(pg) {
   if (pg === 'wishlist') renderWishlist();
   if (pg === 'admin')    renderAdminStats();
   if (pg === 'profile')  populateProfilePage();
-  if (pg !== 'category') closeMobileMenu();
-  setBN(pg === 'category' ? 'home' : pg);
+  if (pg !== 'category' && pg !== 'product-detail') closeMobileMenu();
+  setBN((pg === 'category' || pg === 'product-detail') ? 'home' : pg);
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
+
+window.goBackFromProductDetail = function() {
+  showPage(previousPage || 'home');
+};
 
 /** All real inventory categories from loaded products */
 function getInventoryCategories() {
@@ -443,7 +460,7 @@ function doSearch(q) {
     if (res.length > 0) {
       suggestionsBox.classList.remove('hide');
       suggestionsBox.innerHTML = res.slice(0, 5).map(p => `
-        <div class="suggestion-item" onclick="openDetail('${p.id}'); closeSearchSuggestion()">
+        <div class="suggestion-item" onclick="showFullProductPage('${p.id}'); closeSearchSuggestion()">
           <img src="${getPhoto(p)}" alt="" />
           <div class="suggestion-item-details">
             <span class="suggestion-title">${p.name}</span>
@@ -553,7 +570,7 @@ function productCardHTML(p) {
     : `<span class="emoji-fb">${p.icon}</span>`;
 
   return `<div class="product-card" id="pc-${p.id}">
-    <div class="product-img" onclick="openDetail('${p.id}')">
+    <div class="product-img" onclick="showFullProductPage('${p.id}')">
       ${imageBlock}
       ${isSoldOut ? '<div class="sold-out-overlay"><div class="sold-out-stamp">SOLD OUT</div></div>' : ''}
       <div class="product-img-overlay">
@@ -569,7 +586,7 @@ function productCardHTML(p) {
     </div>
     <button class="wishlist-btn ${wl ? 'active' : ''}" onclick="toggleWishlist('${p.id}')">♥</button>
     <div class="product-info">
-      <div class="product-name">${p.name}</div>
+      <div class="product-name" onclick="showFullProductPage('${p.id}')" style="cursor:pointer">${p.name}</div>
       <div class="product-cat">${p.cat}</div>
       ${stars > 0 ? `<div class="stars">${starsHTML(stars)} <span style="font-size:9px;color:var(--muted)">(${p.reviews.length})</span></div>` : ''}
       <div class="price-row">
@@ -580,7 +597,7 @@ function productCardHTML(p) {
       ${sizePills ? `<div class="card-size-pills">${sizePills}</div>` : ''}
       ${isSoldOut
         ? `<button class="add-cart" onclick="event.stopPropagation();openNotifyMe('${p.id}')" style="color:var(--muted)">Notify Me</button>`
-        : `<button class="add-cart" onclick="quickAddToCart('${p.id}')">Add to Bag</button>`}
+        : `<button class="add-cart" onclick="event.stopPropagation();quickAddToCart('${p.id}')">Add to Bag</button>`}
     </div>
   </div>`;
 }
@@ -771,12 +788,163 @@ function closeDetail() {
   document.getElementById('detail-modal').classList.add('hide');
 }
 
+window.showFullProductPage = function(id) {
+  activeDetailProductId = id;
+  const p = products.find(x => x.id === id || String(x.id) === String(id)); if (!p) return;
+  const price = ep(p);
+  
+  // Format HTML
+  document.getElementById('full-product-content').innerHTML = `
+    <div class="product-detail">
+      <div>
+        <div class="pd-img">
+          ${(() => {
+            const photos = p.photo ? p.photo.split(',') : [];
+            if (photos.length > 1) {
+              return `
+                <div class="carousel-container" style="position:relative;width:100%;height:380px;overflow:hidden;border-radius:4px">
+                  <div class="carousel-slides" style="display:flex;width:100%;height:100%;transition:transform 0.3s ease-in-out" id="slides-page-${p.id}">
+                    ${photos.map(url => `
+                      <div class="zoom-img-wrapper" onmousemove="zoomPhoto(event, this)" onmouseleave="resetZoom(this)" style="width:100%;height:100%;overflow:hidden;flex-shrink:0;">
+                        <img src="${url}" style="width:100%;height:100%;object-fit:cover;transition:transform 0.1s ease-out"/>
+                      </div>
+                    `).join('')}
+                  </div>
+                  <button type="button" onclick="prevSlide('${p.id}', true)" style="position:absolute;left:8px;top:50%;transform:translateY(-50%);background:rgba(0,0,0,0.6);border:none;color:#fff;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:10px;z-index:2">◀</button>
+                  <button type="button" onclick="nextSlide('${p.id}', true)" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:rgba(0,0,0,0.6);border:none;color:#fff;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:10px;z-index:2">▶</button>
+                  <div style="position:absolute;bottom:8px;left:50%;transform:translateX(-50%);display:flex;gap:4px;z-index:2">
+                    ${photos.map((_, idx) => `<span class="dot" onclick="setSlide('${p.id}', ${idx}, true)" style="width:6px;height:6px;border-radius:50%;background:${idx === 0 ? 'var(--gold)' : 'rgba(255,255,255,0.5)'};cursor:pointer" id="dot-page-${p.id}-${idx}"></span>`).join('')}
+                  </div>
+                </div>
+              `;
+            } else if (photos.length === 1) {
+              return `
+                <div class="zoom-img-wrapper" onmousemove="zoomPhoto(event, this)" onmouseleave="resetZoom(this)" style="width:100%;height:380px;overflow:hidden;border-radius:4px;">
+                  <img src="${photos[0]}" style="width:100%;height:380px;object-fit:cover;transition:transform 0.1s ease-out"/>
+                </div>
+              `;
+            } else {
+              return `<div style="font-size:52px;height:380px;display:flex;align-items:center;justify-content:center;background:var(--surface2)">${p.icon}</div>`;
+            }
+          })()}
+        </div>
+        <div style="margin-top:10px">
+          <div style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:6px">Share</div>
+          <button onclick="shareProduct('${p.id}')" class="btn-outline btn-sm" style="display:flex;align-items:center;gap:6px;padding:6px 12px;font-size:11px;">
+            <span>🔗</span> Share Product
+          </button>
+        </div>
+      </div>
+      <div>
+        <h1 class="pd-title" style="margin-top:0">${p.name}</h1>
+        <div style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:8px">${p.cat}</div>
+        ${avgStars(p) > 0 ? `<div class="stars" style="margin-bottom:8px">${starsHTML(avgStars(p))} (${p.reviews.length} reviews)</div>` : ''}
+        <div class="price-row" style="margin-bottom:10px">
+          <span class="product-price">₹${price.toLocaleString()}</span>
+          ${p.mrp > price ? `<span class="product-old">₹${p.mrp.toLocaleString()}</span>` : ''}
+          ${p.offer > 0   ? `<span class="offer-tag">${p.offer}% off</span>` : ''}
+        </div>
+        <div class="pd-desc">${p.desc}</div>
+        <div style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:8px">Select Size</div>
+        <div class="size-grid" style="margin-bottom:4px">
+          ${p.sizes.map(s => {
+            const q = p.sizeQtyMap[s] || 0;
+            if (q === 0) {
+              return `<button class="size-btn out-of-stock" disabled>${s}<span class="size-stock-badge">Sold Out</span></button>`;
+            } else if (q <= 5) {
+              return `<button class="size-btn ${selectedSizes[id] === s ? 'active' : ''}" onclick="selectSize('${id}','${s}',this)">${s}<span class="size-stock-badge">${q} left</span></button>`;
+            } else {
+              return `<button class="size-btn ${selectedSizes[id] === s ? 'active' : ''}" onclick="selectSize('${id}','${s}',this)">${s}</button>`;
+            }
+          }).join('')}
+        </div>
+        <div id="page-size-chart-btn-container" style="margin-bottom:8px"></div>
+        <div id="page-stock-display" style="font-size:11px;color:${(() => {
+          const selectedSize = selectedSizes[id];
+          const qty = selectedSize ? (p.sizeQtyMap[selectedSize] || 0) : p.stock;
+          return qty <= 5 ? 'var(--red)' : 'var(--muted)';
+        })()};margin-bottom:12px">
+          ${(() => {
+            const selectedSize = selectedSizes[id];
+            const qty = selectedSize ? (p.sizeQtyMap[selectedSize] || 0) : p.stock;
+            return qty === 0 ? 'Out of Stock' : qty <= 5 ? `Only ${qty} left!` : `${qty} in stock`;
+          })()}
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          ${p.stock === 0
+            ? `<button class="btn-outline btn-sm" onclick="openNotifyMe('${id}')" style="flex:1">🔔 Notify Me When Back</button>`
+            : `<button class="btn-gold" onclick="addToCartFromDetail('${id}')">Add to Bag</button>`
+          }
+          <button class="btn-outline btn-sm" onclick="toggleWishlist('${id}')">${wishlist.includes(id) ? '❤️ Saved' : '🤍 Wishlist'}</button>
+        </div>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <div style="font-size:12px;font-weight:500;color:var(--text)">Customer Reviews</div>
+      <button class="btn-outline btn-sm" onclick="openReview('${id}')">Write Review</button>
+    </div>
+    ${p.reviews?.length
+      ? p.reviews.map(r => `
+          <div class="review-card">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+              <div class="review-author">${r.author}</div>
+              <div style="font-size:10px">⭐${r.stars}</div>
+            </div>
+            <div class="review-text">${r.text}</div>
+          </div>`).join('')
+      : '<div style="font-size:12px;color:var(--muted);padding:8px">No reviews yet. Be the first!</div>'}
+    <div class="divider"></div>
+    <div style="font-size:12px;font-weight:500;color:var(--text);margin-bottom:10px">You May Also Like</div>
+    <div class="related-grid">
+      ${products.filter(x => x.cat === p.cat && x.id !== p.id).slice(0, 4).map(r => `
+        <div style="background:var(--bg-cream);border:1px solid var(--border);cursor:pointer"
+             onclick="showFullProductPage('${r.id}')">
+          <div style="height:80px;display:flex;align-items:center;justify-content:center;background:var(--bg-beige);overflow:hidden">
+            ${getPhoto(r) ? `<img src="${getPhoto(r)}" style="width:100%;height:80px;object-fit:cover"/>` : `<span style="font-size:28px">${r.icon}</span>`}
+          </div>
+          <div style="padding:8px">
+            <div style="font-size:11px;color:var(--text)">${r.name}</div>
+            <div style="font-size:10px;color:var(--maroon)">₹${ep(r).toLocaleString()}</div>
+          </div>
+        </div>`).join('')}
+    </div>`;
+
+  showPage('product-detail');
+
+  // Query size chart after details element is added to DOM
+  setTimeout(async () => {
+    try {
+      const { data } = await supabaseClient
+        .from('storefront_settings')
+        .select('value')
+        .eq('key', `size_chart_${p.id}`)
+        .single();
+      if (data && data.value?.url) {
+        const btnContainer = document.getElementById('page-size-chart-btn-container');
+        if (btnContainer) {
+          btnContainer.innerHTML = `
+            <button type="button" onclick="openSizeChart('${data.value.url}')" class="btn-outline btn-sm" style="padding:4px 8px;font-size:10px;display:inline-flex;align-items:center;gap:4px;margin-top:2px">
+              📐 View Size Chart
+            </button>
+          `;
+        }
+      }
+    } catch (e) {}
+  }, 50);
+};
+
 function selectSize(pid, size, el) {
   selectedSizes[pid] = size;
-  document.querySelectorAll('#detail-modal .size-btn').forEach(b => b.classList.remove('active'));
-  if (el) el.classList.add('active');
+  document.querySelectorAll('#detail-modal .size-btn, #page-product-detail .size-btn').forEach(b => {
+    if (b.textContent.trim().split('\n')[0] === size) {
+      b.classList.add('active');
+    } else {
+      b.classList.remove('active');
+    }
+  });
 
-  // Sync card pills when selecting from detail modal
+  // Sync card pills when selecting from detail modal/page
   const card = document.getElementById('pc-' + pid);
   if (card) {
     card.querySelectorAll('.size-pill').forEach(pill => {
@@ -791,6 +959,11 @@ function selectSize(pid, size, el) {
     if (stockEl) {
       stockEl.style.color = qty <= 5 ? 'var(--red)' : 'var(--muted)';
       stockEl.textContent = qty === 0 ? 'Out of Stock' : qty <= 5 ? `Only ${qty} left!` : `${qty} in stock`;
+    }
+    const pageStockEl = document.getElementById('page-stock-display');
+    if (pageStockEl) {
+      pageStockEl.style.color = qty <= 5 ? 'var(--red)' : 'var(--muted)';
+      pageStockEl.textContent = qty === 0 ? 'Out of Stock' : qty <= 5 ? `Only ${qty} left!` : `${qty} in stock`;
     }
   }
 }
@@ -833,7 +1006,7 @@ function handleURLHashProduct() {
   if (hash && hash.startsWith('#prod-')) {
     const id = hash.replace('#prod-', '');
     setTimeout(() => {
-      openDetail(id);
+      showFullProductPage(id);
     }, 200);
   }
 }
@@ -854,6 +1027,11 @@ async function toggleWishlist(id) {
   }
   updateWLCount(); renderProducts();
   if (!document.getElementById('page-wishlist').classList.contains('hide')) renderWishlist();
+
+  // Sync details wishlist buttons
+  document.querySelectorAll('#detail-modal button[onclick^="toggleWishlist"], #page-product-detail button[onclick^="toggleWishlist"]').forEach(btn => {
+    btn.innerHTML = wishlist.includes(id) ? '❤️ Saved' : '🤍 Wishlist';
+  });
 
   // Sync to database if logged in
   if (supabaseClient && currentUser) {
@@ -918,7 +1096,7 @@ function renderWishlist() {
   const items = products.filter(p => wishlist.includes(p.id));
   c.innerHTML = `<div class="wishlist-grid">${items.map(p => `
     <div class="wishlist-card">
-      <div class="wl-img" onclick="openDetail('${p.id}')" style="cursor:pointer">
+      <div class="wl-img" onclick="showFullProductPage('${p.id}')" style="cursor:pointer">
         ${getPhoto(p) ? `<img src="${getPhoto(p)}" style="width:100%;height:110px;object-fit:cover"/>` : p.icon}
       </div>
       <div class="wl-info">
@@ -1592,40 +1770,46 @@ loadCartFromLocalStorage();
 // ===== MULTI-PHOTO CAROUSEL CONTROLS =====
 let activeSlides = {};
 
-window.nextSlide = function(id) {
+window.nextSlide = function(id, isPage = false) {
   const p = products.find(x => x.id === id);
   const photos = p && p.photo ? p.photo.split(',') : [];
   if (photos.length <= 1) return;
-  if (activeSlides[id] === undefined) activeSlides[id] = 0;
-  activeSlides[id] = (activeSlides[id] + 1) % photos.length;
-  updateSlidePosition(id, photos.length);
+  const key = isPage ? `page-${id}` : id;
+  if (activeSlides[key] === undefined) activeSlides[key] = 0;
+  activeSlides[key] = (activeSlides[key] + 1) % photos.length;
+  updateSlidePosition(id, photos.length, isPage);
 };
 
-window.prevSlide = function(id) {
+window.prevSlide = function(id, isPage = false) {
   const p = products.find(x => x.id === id);
   const photos = p && p.photo ? p.photo.split(',') : [];
   if (photos.length <= 1) return;
-  if (activeSlides[id] === undefined) activeSlides[id] = 0;
-  activeSlides[id] = (activeSlides[id] - 1 + photos.length) % photos.length;
-  updateSlidePosition(id, photos.length);
+  const key = isPage ? `page-${id}` : id;
+  if (activeSlides[key] === undefined) activeSlides[key] = 0;
+  activeSlides[key] = (activeSlides[key] - 1 + photos.length) % photos.length;
+  updateSlidePosition(id, photos.length, isPage);
 };
 
-window.setSlide = function(id, idx) {
+window.setSlide = function(id, idx, isPage = false) {
   const p = products.find(x => x.id === id);
   const photos = p && p.photo ? p.photo.split(',') : [];
   if (photos.length <= 1) return;
-  activeSlides[id] = idx;
-  updateSlidePosition(id, photos.length);
+  const key = isPage ? `page-${id}` : id;
+  activeSlides[key] = idx;
+  updateSlidePosition(id, photos.length, isPage);
 };
 
-function updateSlidePosition(id, total) {
-  const idx = activeSlides[id] || 0;
-  const slidesEl = document.getElementById(`slides-${id}`);
+function updateSlidePosition(id, total, isPage = false) {
+  const key = isPage ? `page-${id}` : id;
+  const idx = activeSlides[key] || 0;
+  const slidesId = isPage ? `slides-page-${id}` : `slides-${id}`;
+  const slidesEl = document.getElementById(slidesId);
   if (slidesEl) {
     slidesEl.style.transform = `translateX(-${idx * 100}%)`;
   }
   for (let i = 0; i < total; i++) {
-    const dot = document.getElementById(`dot-${id}-${i}`);
+    const dotId = isPage ? `dot-page-${id}-${i}` : `dot-${id}-${i}`;
+    const dot = document.getElementById(dotId);
     if (dot) {
       dot.style.background = i === idx ? 'var(--gold)' : 'rgba(255,255,255,0.5)';
     }
@@ -1820,7 +2004,7 @@ function playReelIndex(idx) {
         shopBtn.textContent = `Shop ${linkedProduct.name} 🛍️`;
         shopBtn.onclick = function() {
           closeReels();
-          openDetail(linkedProduct.id);
+          showFullProductPage(linkedProduct.id);
         };
       } else {
         shopBtn.textContent = 'Shop the Look 👗✨';
