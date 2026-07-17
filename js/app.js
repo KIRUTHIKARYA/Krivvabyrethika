@@ -1732,6 +1732,14 @@ function subscribeStorefrontSettings() {
 function saveCartToLocalStorage() {
   const email = currentUser ? currentUser.email : 'guest';
   localStorage.setItem(`krivva_cart_${email}`, JSON.stringify(cart));
+
+  if (supabaseClient && currentUser) {
+    supabaseClient.auth.updateUser({
+      data: { cart: cart }
+    }).catch(err => {
+      console.error("Error saving cart to Supabase:", err);
+    });
+  }
 }
 
 function loadCartFromLocalStorage() {

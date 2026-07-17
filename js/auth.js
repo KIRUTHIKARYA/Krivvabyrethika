@@ -7,6 +7,60 @@
 // Initialised after the Supabase SDK script loads (see index.html)
 let supabaseClient = null;
 
+// ----- USER PROFILE & CART SYNCHRONIZATION -----
+async function syncUserSessionData(u) {
+  if (!u) return;
+  const email = u.email;
+
+  // 1. Restore address from Supabase metadata if present
+  if (u.user_metadata?.address) {
+    localStorage.setItem(`profile_address_${email}`, JSON.stringify(u.user_metadata.address));
+  }
+
+  // 2. Restore/Merge cart from Supabase metadata if present
+  const accountCart = u.user_metadata?.cart || [];
+  const guestCartJson = localStorage.getItem('krivva_cart_guest');
+  let guestCart = [];
+  if (guestCartJson) {
+    try { guestCart = JSON.parse(guestCartJson) || []; } catch(e){}
+  }
+
+  let finalCart = [...accountCart];
+  let changed = false;
+
+  if (guestCart.length > 0) {
+    // Merge guest cart with account cart
+    guestCart.forEach(gItem => {
+      const ex = finalCart.find(mItem => mItem.key === gItem.key);
+      if (ex) {
+        ex.qty += gItem.qty;
+      } else {
+        finalCart.push(gItem);
+      }
+    });
+    // Clear guest cart
+    localStorage.removeItem('krivva_cart_guest');
+    changed = true;
+  }
+
+  localStorage.setItem(`krivva_cart_${email}`, JSON.stringify(finalCart));
+
+  // Sync back to active cart state in app.js if loaded
+  if (typeof cart !== 'undefined') {
+    cart.length = 0;
+    cart.push(...finalCart);
+    if (typeof updateCartCount === 'function') updateCartCount();
+  }
+
+  if (changed && supabaseClient) {
+    try {
+      await supabaseClient.auth.updateUser({ data: { cart: finalCart } });
+    } catch(err) {
+      console.error("Error syncing merged cart back to Supabase:", err);
+    }
+  }
+}
+
 function initSupabase() {
   if (window.supabase) {
     supabaseClient = window.supabase.createClient(
@@ -41,16 +95,23 @@ function initSupabase() {
           email: u.email,
           phone: u.user_metadata?.phone || '',
         };
-        if (typeof loadWishlistFromSupabase === 'function') {
-          loadWishlistFromSupabase();
-        }
+        syncUserSessionData(u).then(() => {
+          if (typeof loadWishlistFromSupabase === 'function') {
+            loadWishlistFromSupabase();
+          }
+          updateUserNav();
+          updateWelcomeBanner();
+          if (typeof loadCartFromLocalStorage === 'function') {
+            loadCartFromLocalStorage();
+          }
+        });
       } else {
         currentUser = null;
-      }
-      updateUserNav();
-      updateWelcomeBanner();
-      if (typeof loadCartFromLocalStorage === 'function') {
-        loadCartFromLocalStorage();
+        updateUserNav();
+        updateWelcomeBanner();
+        if (typeof loadCartFromLocalStorage === 'function') {
+          loadCartFromLocalStorage();
+        }
       }
     });
   }
@@ -124,7 +185,7 @@ function doLogin() {
 
   if (supabaseClient) {
     supabaseClient.auth.signInWithPassword({ email, password: pass })
-      .then(({ data, error }) => {
+      .then(async ({ data, error }) => {
         if (error) {
           showToast('Login error: ' + error.message, 'red');
         } else {
@@ -134,6 +195,7 @@ function doLogin() {
             email: u.email,
             phone: u.user_metadata?.phone || '',
           };
+          await syncUserSessionData(u);
           afterLogin();
         }
       });
@@ -153,7 +215,7 @@ function doSignup() {
 
   if (supabaseClient) {
     supabaseClient.auth.signUp({ email, password: pass, options: { data: { full_name: name, phone } } })
-      .then(({ data, error }) => {
+      .then(async ({ data, error }) => {
         if (error) {
           showToast('Signup error: ' + error.message, 'red');
         } else {
@@ -164,6 +226,7 @@ function doSignup() {
               email: u.email,
               phone: u.user_metadata?.phone || phone
             };
+            await syncUserSessionData(u);
             afterLogin();
           } else {
             closeAuth();
@@ -296,7 +359,21 @@ function saveProfileAddress(event) {
   };
 
   localStorage.setItem(`profile_address_${currentUser.email}`, JSON.stringify(addressDetails));
-  showToast('Default shipping address saved successfully! ✓', 'green');
+
+  if (supabaseClient) {
+    supabaseClient.auth.updateUser({
+      data: { address: addressDetails }
+    }).then(({ error }) => {
+      if (error) {
+        console.error("Error saving address to Supabase:", error);
+        showToast('Address saved locally (Cloud sync failed)', 'coral');
+      } else {
+        showToast('Default shipping address saved to account! ✓', 'green');
+      }
+    });
+  } else {
+    showToast('Default shipping address saved successfully! ✓', 'green');
+  }
 }
 
 function toggleSecurityInfo() {
