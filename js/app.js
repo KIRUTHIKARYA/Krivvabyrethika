@@ -129,6 +129,7 @@ async function loadProductsFromSupabase() {
         isTrending: p.is_trending || false,
         isFestive: p.is_festive || false,
         isPreorder: p.is_preorder || false,
+        sizeChartUrl: p.size_chart_url || '',
         colors: [...new Set(rawVariants.map(v => v.color).filter(Boolean))],
         colorImageMap: Object.fromEntries(rawVariants.filter(v => v.color && v.color_image).map(v => [v.color, v.color_image]))
       };
@@ -856,7 +857,7 @@ function openDetail(id) {
             }
           }).join('')}
         </div>
-        <div id="size-chart-btn-container" style="margin-bottom:8px"></div>
+        ${p.sizeChartUrl ? `<div id="size-chart-btn-container" style="margin-bottom:8px"><button type="button" onclick="openSizeChart('${p.sizeChartUrl}')" class="btn-outline btn-sm" style="padding:4px 8px;font-size:10px;display:inline-flex;align-items:center;gap:4px;margin-top:2px">📐 Size Chart</button></div>` : '<div id="size-chart-btn-container" style="margin-bottom:8px"></div>'}
         <div id="detail-stock-display" style="font-size:11px;color:${(() => {
           const selectedSize = selectedSizes[id];
           const qty = selectedSize ? (p.sizeQtyMap[selectedSize] || 0) : p.stock;
@@ -908,27 +909,6 @@ function openDetail(id) {
         </div>`).join('')}
     </div>`;
   document.getElementById('detail-modal').classList.remove('hide');
-
-  // Query size chart after details element is added to DOM
-  setTimeout(async () => {
-    try {
-      const { data } = await supabaseClient
-        .from('storefront_settings')
-        .select('value')
-        .eq('key', `size_chart_${p.id}`)
-        .single();
-      if (data && data.value?.url) {
-        const btnContainer = document.getElementById('size-chart-btn-container');
-        if (btnContainer) {
-          btnContainer.innerHTML = `
-            <button type="button" onclick="openSizeChart('${data.value.url}')" class="btn-outline btn-sm" style="padding:4px 8px;font-size:10px;display:inline-flex;align-items:center;gap:4px;margin-top:2px">
-              📐 View Size Chart
-            </button>
-          `;
-        }
-      }
-    } catch (e) {}
-  }, 50);
 }
 
 function closeDetail() {
@@ -1008,7 +988,7 @@ window.showFullProductPage = function(id) {
             }
           }).join('')}
         </div>
-        <div id="size-chart-btn-container" style="margin-bottom:8px"></div>
+        ${p.sizeChartUrl ? `<div id="size-chart-btn-container" style="margin-bottom:8px"><button type="button" onclick="openSizeChart('${p.sizeChartUrl}')" class="btn-outline btn-sm" style="padding:4px 8px;font-size:10px;display:inline-flex;align-items:center;gap:4px;margin-top:2px">📐 Size Chart</button></div>` : '<div id="size-chart-btn-container" style="margin-bottom:8px"></div>'}
         <div id="detail-stock-display" style="font-size:11px;color:${(() => {
           const selectedSize = selectedSizes[id];
           const qty = selectedSize ? (p.sizeQtyMap[selectedSize] || 0) : p.stock;
@@ -1061,27 +1041,6 @@ window.showFullProductPage = function(id) {
     </div>`;
 
   showPage('product-detail');
-
-  // Query size chart after details element is added to DOM
-  setTimeout(async () => {
-    try {
-      const { data } = await supabaseClient
-        .from('storefront_settings')
-        .select('value')
-        .eq('key', `size_chart_${p.id}`)
-        .single();
-      if (data && data.value?.url) {
-        const btnContainer = document.getElementById('page-size-chart-btn-container');
-        if (btnContainer) {
-          btnContainer.innerHTML = `
-            <button type="button" onclick="openSizeChart('${data.value.url}')" class="btn-outline btn-sm" style="padding:4px 8px;font-size:10px;display:inline-flex;align-items:center;gap:4px;margin-top:2px">
-              📐 View Size Chart
-            </button>
-          `;
-        }
-      }
-    } catch (e) {}
-  }, 50);
 };
 
 function selectSize(pid, size, el) {
