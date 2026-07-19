@@ -563,6 +563,7 @@
     </div>
 
     <button id="razorpay-pay-btn" class="razorpay-btn" onclick="simulateRazorpay()">💳 Pay with Razorpay</button>
+    <div class="h-captcha" data-sitekey="10000000-ffff-ffff-ffff-000000000001" data-callback="onCaptchaCheckedOut" style="margin-top:10px;display:flex;justify-content:center"></div>
     <div style="font-size:10px;color:var(--muted);text-align:center;margin-top:6px">
       UPI • Cards • NetBanking • Wallets — Secured by Razorpay
     </div>
@@ -734,6 +735,17 @@
     </div>
   </div>
   <div class="footer-bottom">
+    <div class="footer-policy-links">
+      <a href="#" onclick="openTos();return false;">Privacy Policy</a>
+      <a href="#" onclick="openTos();return false;">Refund Policy</a>
+      <a href="#" onclick="openTos();return false;">Shipping Policy</a>
+    </div>
+    <div class="footer-payment-icons">
+      <span>💳 Razorpay</span>
+      <span>🍎 Apple Pay</span>
+      <span>🔵 Google Pay</span>
+      <span>🅿️ PayPal</span>
+    </div>
     <p>&copy; 2026 KRIVVA Luxury Fashion. All Rights Reserved.</p>
   </div>
 </footer>
@@ -756,6 +768,9 @@
 
 <!-- Razorpay SDK -->
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+<!-- hCaptcha -->
+<script src="https://js.hcaptcha.com/1/api.js" async defer></script>
 
 <!-- 6. Boot Supabase client after SDK is loaded -->
 <script>

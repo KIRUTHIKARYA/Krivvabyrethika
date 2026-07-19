@@ -515,6 +515,7 @@ nav.nav-logo-center {
 .badge-new { background: var(--maroon); color: #fff; }
 .badge-trending { background: var(--gold); color: var(--maroon); }
 .badge-offer, .badge-sale { background: var(--coral); color: #fff; }
+.badge-preorder { background: #1a1a1a; color: #fff; }
 .wishlist-btn {
   position: absolute; top: 8px; right: 8px; z-index: 2;
   background: rgba(255,255,255,.9); border: none; color: var(--muted);
@@ -556,6 +557,26 @@ nav.nav-logo-center {
 .size-pill.sold,
 .size-pill:disabled {
   opacity: 0.35; text-decoration: line-through; cursor: not-allowed;
+}
+
+/* Color swatches on product cards */
+.card-color-swatches {
+  display: flex; flex-wrap: wrap; gap: 6px;
+  margin-bottom: 8px;
+}
+.color-swatch {
+  width: 22px; height: 22px; border-radius: 50%;
+  border: 2px solid var(--border2); cursor: pointer;
+  transition: .2s; padding: 0; overflow: hidden;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--bg); font-size: 8px; color: var(--text2);
+  text-transform: uppercase;
+}
+.color-swatch img {
+  width: 100%; height: 100%; object-fit: cover; border-radius: 50%;
+}
+.color-swatch.active {
+  border-color: var(--maroon); box-shadow: 0 0 0 2px var(--maroon-bg);
 }
 
 .add-cart {
@@ -1885,6 +1906,32 @@ footer {
 .footer-bottom p {
   font-size: 11px;
   color: var(--muted2);
+}
+.footer-policy-links {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+.footer-policy-links a {
+  font-size: 11px;
+  color: var(--muted2);
+  text-decoration: underline;
+}
+.footer-payment-icons {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+.footer-payment-icons span {
+  font-size: 10px;
+  color: var(--muted2);
+  padding: 4px 8px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
 }
 
 /* ---- NEW ARRIVALS HORIZONTAL ROW ---- */

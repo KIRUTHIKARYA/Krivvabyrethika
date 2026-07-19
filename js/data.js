@@ -133,6 +133,7 @@ let activeCat     = 'all';
 let orderCount    = parseInt(localStorage.getItem('krivva_order_count')) || orders.length;
 let currentUser   = null;
 let selectedSizes = {};
+let selectedColors = {};
 let activeReviewProductId = null;
 let appliedCoupon = null;
 let newPhotoData  = '';

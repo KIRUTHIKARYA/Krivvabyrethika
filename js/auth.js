@@ -178,7 +178,8 @@ function renderAuthForm(type) {
         <label>Phone</label>
         <input type="text" id="auth-phone" placeholder="10 digit number"/>
       </div>
-      <button class="btn-gold" onclick="doSignup()" style="width:100%">Create Account</button>`;
+      <button class="btn-gold" onclick="doSignup()" style="width:100%">Create Account</button>
+      <div class="h-captcha" data-sitekey="10000000-ffff-ffff-ffff-000000000001" data-callback="onCaptchaSignedUp" style="margin-top:10px;display:flex;justify-content:center"></div>`;
   }
 }
 
@@ -211,12 +212,19 @@ function doLogin() {
   }
 }
 
+let captchaToken = null;
+
+function onCaptchaSignedUp(token) {
+  captchaToken = token;
+}
+
 function doSignup() {
   const name  = document.getElementById('auth-name').value.trim();
   const email = document.getElementById('auth-email').value.trim();
   const pass  = document.getElementById('auth-pass').value.trim();
   const phone = document.getElementById('auth-phone')?.value || '';
   if (!name || !email || !pass) { showToast('Please fill all fields', 'red'); return; }
+  if (!captchaToken) { showToast('Please complete the captcha', 'red'); return; }
 
   if (supabaseClient) {
     supabaseClient.auth.signUp({ email, password: pass, options: { data: { full_name: name, phone } } })

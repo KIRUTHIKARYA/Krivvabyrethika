@@ -8,6 +8,12 @@ const PRODUCTS_PER_PAGE = 12;
 let currentPageNum = 1;
 let displayedCount = 0;
 const scrollPositions = {};
+let checkoutCaptchaToken = null;
+const POPULAR_SEARCHES = ['Kurti', 'Dress', 'Co-ord', 'Ethnic', 'New Arrivals', 'Best Seller'];
+
+window.onCaptchaCheckedOut = function(token) {
+  checkoutCaptchaToken = token;
+};
 
 // ===== CURSOR =====
 const cursor = document.getElementById('cursor');
@@ -70,7 +76,9 @@ async function loadProductsFromSupabase() {
         product_variants (
           id,
           size,
-          qty
+          qty,
+          color,
+          color_image
         ),
         product_reviews (
           user_name,
@@ -119,7 +127,10 @@ async function loadProductsFromSupabase() {
         raw_variants: rawVariants,
         isNew: p.is_new || false,
         isTrending: p.is_trending || false,
-        isFestive: p.is_festive || false
+        isFestive: p.is_festive || false,
+        isPreorder: p.is_preorder || false,
+        colors: [...new Set(rawVariants.map(v => v.color).filter(Boolean))],
+        colorImageMap: Object.fromEntries(rawVariants.filter(v => v.color && v.color_image).map(v => [v.color, v.color_image]))
       };
     });
 
@@ -499,8 +510,9 @@ function doSearch(q) {
   if (!q.trim()) {
     r.innerHTML = '';
     if (suggestionsBox) {
-      suggestionsBox.innerHTML = '';
-      suggestionsBox.classList.add('hide');
+      suggestionsBox.innerHTML = `<div style="padding:12px;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Popular searches</div>` +
+        POPULAR_SEARCHES.map(s => `<div class="suggestion-item" onclick="document.getElementById('search-input').value='${escapeHtml(s)}';doSearch('${escapeHtml(s)}')"><span class="suggestion-title">${escapeHtml(s)}</span></div>`).join('');
+      suggestionsBox.classList.remove('hide');
     }
     return;
   }
@@ -654,6 +666,7 @@ function productCardHTML(p) {
     <div class="p-badges">
       ${p.isNew      ? '<span class="p-badge badge-new">New</span>' : ''}
       ${p.isTrending ? '<span class="p-badge badge-trending">Hot</span>' : ''}
+      ${p.isPreorder ? '<span class="p-badge badge-preorder">Pre-order</span>' : ''}
       ${isOnSale     ? `<span class="p-badge badge-sale">${p.offer}% OFF</span>` : ''}
       ${isSoldOut    ? '<span class="p-badge badge-soldout">Sold Out</span>' : ''}
       ${isLow && !isSoldOut ? `<span class="p-badge badge-sale">Only ${p.stock} left</span>` : ''}
@@ -669,6 +682,10 @@ function productCardHTML(p) {
         ${isOnSale     ? `<span class="offer-tag">${p.offer}% off</span>` : ''}
       </div>
       ${sizePills ? `<div class="card-size-pills">${sizePills}</div>` : ''}
+      ${p.colors?.length > 1 ? `<div class="card-color-swatches">${p.colors.map(c => {
+        const img = p.colorImageMap?.[c];
+        return img ? `<img class="color-swatch" src="${img}" alt="${escapeHtml(c)}" title="${escapeHtml(c)}" onclick="event.stopPropagation();selectColor('${p.id}','${c}')"/>` : `<button class="color-swatch color-swatch-text" onclick="event.stopPropagation();selectColor('${p.id}','${c}')" title="${escapeHtml(c)}">${escapeHtml(c)}</button>`;
+      }).join('')}</div>` : ''}
       ${isSoldOut
         ? `<button class="add-cart" onclick="event.stopPropagation();openNotifyMe('${p.id}')" style="color:var(--muted)">Notify Me</button>`
         : `<button class="add-cart" onclick="event.stopPropagation();quickAddToCart('${p.id}')">Add to Bag</button>`}
@@ -824,6 +841,8 @@ function openDetail(id) {
           ${p.offer > 0   ? `<span class="offer-tag">${p.offer}% off</span>` : ''}
         </div>
         <div class="pd-desc">${p.desc}</div>
+        ${p.isPreorder ? '<div class="p-badge badge-preorder" style="display:inline-block;margin-bottom:8px">Pre-order</div>' : ''}
+        ${p.colors?.length > 1 ? `<div style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:6px">Color</div><div class="size-grid" style="margin-bottom:4px">${p.colors.map(c => `<button class="size-btn ${selectedColors[id] === c ? 'active' : ''}" onclick="selectColor('${id}','${c}',this)" title="${escapeHtml(c)}">${escapeHtml(c)}</button>`).join('')}</div>` : ''}
         <div style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:8px">Select Size</div>
         <div class="size-grid" style="margin-bottom:4px">
           ${p.sizes.map(s => {
@@ -974,6 +993,8 @@ window.showFullProductPage = function(id) {
           ${p.offer > 0   ? `<span class="offer-tag">${p.offer}% off</span>` : ''}
         </div>
         <div class="pd-desc">${p.desc}</div>
+        ${p.isPreorder ? '<div class="p-badge badge-preorder" style="display:inline-block;margin-bottom:8px">Pre-order</div>' : ''}
+        ${p.colors?.length > 1 ? `<div style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:6px">Color</div><div class="size-grid" style="margin-bottom:4px">${p.colors.map(c => `<button class="size-btn ${selectedColors[id] === c ? 'active' : ''}" onclick="selectColor('${id}','${c}',this)" title="${escapeHtml(c)}">${escapeHtml(c)}</button>`).join('')}</div>` : ''}
         <div style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:8px">Select Size</div>
         <div class="size-grid" style="margin-bottom:4px">
           ${p.sizes.map(s => {
@@ -987,8 +1008,8 @@ window.showFullProductPage = function(id) {
             }
           }).join('')}
         </div>
-        <div id="page-size-chart-btn-container" style="margin-bottom:8px"></div>
-        <div id="page-stock-display" style="font-size:11px;color:${(() => {
+        <div id="size-chart-btn-container" style="margin-bottom:8px"></div>
+        <div id="detail-stock-display" style="font-size:11px;color:${(() => {
           const selectedSize = selectedSizes[id];
           const qty = selectedSize ? (p.sizeQtyMap[selectedSize] || 0) : p.stock;
           return qty <= 5 ? 'var(--red)' : 'var(--muted)';
@@ -1028,7 +1049,7 @@ window.showFullProductPage = function(id) {
     <div class="related-grid">
       ${products.filter(x => x.cat === p.cat && x.id !== p.id).slice(0, 4).map(r => `
         <div style="background:var(--bg-cream);border:1px solid var(--border);cursor:pointer"
-             onclick="showFullProductPage('${r.id}')">
+             onclick="closeDetail();setTimeout(()=>openDetail('${r.id}'),100)">
           <div style="height:80px;display:flex;align-items:center;justify-content:center;background:var(--bg-beige);overflow:hidden">
             ${getPhoto(r) ? `<img src="${getPhoto(r)}" style="width:100%;height:80px;object-fit:cover"/>` : `<span style="font-size:28px">${r.icon}</span>`}
           </div>
@@ -1104,6 +1125,16 @@ window.selectCardSize = function(pid, size, el) {
     card.querySelectorAll('.size-pill').forEach(b => b.classList.remove('active'));
   }
   if (el) el.classList.add('active');
+};
+
+window.selectColor = function(pid, color) {
+  selectedColors[pid] = color;
+  const card = document.getElementById('pc-' + pid);
+  if (card) {
+    card.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active'));
+    const target = card.querySelector(`.color-swatch[title="${color}"]`);
+    if (target) target.classList.add('active');
+  }
 };
 
 function shareProduct(id) {
@@ -1331,7 +1362,8 @@ function renderCart() {
   }
   const total    = Math.max(0, subtotal - discount);
   const shipping = total >= 999 ? 0 : 99;
-  const grand    = total + shipping;
+  const giftWrapCost = giftWrap ? 99 : 0;
+  const grand    = total + shipping + giftWrapCost;
 
   f.innerHTML = `
     <div class="coupon-row">
@@ -1339,6 +1371,15 @@ function renderCart() {
              value="${appliedCoupon ? appliedCoupon.code : ''}" ${appliedCoupon ? 'disabled' : ''}/>
       <button onclick="${appliedCoupon ? 'removeCoupon()' : 'applyCoupon()'}">${appliedCoupon ? 'Remove' : 'Apply'}</button>
     </div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+      <input type="checkbox" id="gift-wrap-check" onchange="toggleGiftWrap()" style="accent-color:var(--maroon)" ${giftWrap ? 'checked' : ''}/>
+      <label for="gift-wrap-check" style="font-size:11px;color:var(--text);cursor:pointer">🎁 Gift wrap — ₹99</label>
+    </div>
+    <div style="display:flex;gap:6px;margin-bottom:8px">
+      <input type="text" id="cart-shipping-pin" placeholder="Pincode" style="flex:1;padding:6px 8px;border:1px solid var(--border2);border-radius:2px;font-size:11px"/>
+      <button onclick="checkCartShipping()" style="padding:6px 10px;border:1px solid var(--border2);background:var(--bg);cursor:pointer;font-size:11px">Check</button>
+    </div>
+    <div id="cart-shipping-result" style="font-size:10px;color:var(--muted);margin-bottom:8px"></div>
     ${appliedCoupon ? `<div style="font-size:11px;color:var(--green);margin-bottom:8px">✓ ${appliedCoupon.code} applied — Saved ₹${discount.toLocaleString()}</div>` : ''}
     <div class="order-note-row">
       <div class="order-note-label">📝 Order Note (optional)</div>
@@ -1396,6 +1437,21 @@ function applyCoupon() {
   renderCart();
 }
 function removeCoupon() { appliedCoupon = null; renderCart(); }
+
+let giftWrap = false;
+function toggleGiftWrap() {
+  giftWrap = document.getElementById('gift-wrap-check')?.checked || false;
+  renderCart();
+}
+function checkCartShipping() {
+  const pin = document.getElementById('cart-shipping-pin')?.value.trim() || '';
+  const el = document.getElementById('cart-shipping-result');
+  if (!/^\d{6}$/.test(pin)) {
+    el.innerHTML = '<span style="color:var(--red)">Enter a valid 6-digit pincode</span>';
+    return;
+  }
+  el.innerHTML = '<span style="color:var(--green)">Delivery available — 3-5 business days</span>';
+}
 
 // ===== CHECKOUT =====
 function goCheckout(total) {
@@ -1483,6 +1539,7 @@ async function simulateRazorpay() {
   const pin   = document.getElementById('o-pin').value.trim();
   const note  = document.getElementById('o-note')?.value?.trim() || cartNote || '';
   if (!name || !phone || !addr) { showToast('Please fill all required fields', 'red'); return; }
+  if (!checkoutCaptchaToken) { showToast('Please complete the captcha', 'red'); return; }
 
   // Guests are allowed — use the form fields directly (no currentUser needed)
 
