@@ -3,9 +3,49 @@
 // Navigation, Products, Cart, Wishlist, Orders, Reviews
 // =============================================
 
+// ===== PAGINATION / SCROLL / SEARCH STATE =====
+const PRODUCTS_PER_PAGE = 12;
+let currentPageNum = 1;
+let displayedCount = 0;
+const scrollPositions = {};
+
 // ===== CURSOR =====
 const cursor = document.getElementById('cursor');
 const ring   = document.getElementById('cursor-ring');
+
+// ===== FUZZY SEARCH HELPER =====
+// Matches characters of `query` in order (not necessarily consecutively), case-insensitive.
+function fuzzyMatch(text, query) {
+  if (!text || !query) return false;
+  const t = text.toLowerCase();
+  const q = query.toLowerCase().trim();
+  if (!q) return false;
+  // Quick exact / substring shortcut first
+  if (t.includes(q)) return true;
+  let ti = 0;
+  for (let qi = 0; qi < q.length; qi++) {
+    const ch = q[qi];
+    // Skip spaces in the query
+    if (ch === ' ') continue;
+    let found = false;
+    while (ti < t.length) {
+      if (t[ti] === ch) { ti++; found = true; break; }
+      ti++;
+    }
+    if (!found) return false;
+  }
+  return true;
+}
+
+function escapeHtml(str) {
+  if (!str) return '';
+  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+}
+
+// Returns a CSS spinner string used for loading states
+function spinnerHTML(size = 24) {
+  return `<div style="display:inline-block;border:2px solid rgba(188,143,143,0.15);border-left-color:var(--gold);border-radius:50%;width:${size}px;height:${size}px;animation:spin 1s linear infinite"></div>`;
+}
 
 // ===== SUPABASE READS/WRITES & REALTIME SUBSCRIPTION =====
 let activeDetailProductId = null;
@@ -14,6 +54,11 @@ async function loadProductsFromSupabase() {
   if (!supabaseClient) {
     console.warn("Supabase client is not initialized yet.");
     return;
+  }
+  // Show loading spinner in the products grid while fetching
+  const loadingContainer = document.getElementById('products-container');
+  if (loadingContainer) {
+    loadingContainer.innerHTML = `<div style="grid-column:1/-1;display:flex;flex-direction:column;align-items:center;gap:12px;padding:60px;color:var(--muted)">${spinnerHTML(32)}<div>Loading collection…</div></div>`;
   }
   try {
     // Read from product_variants (inventory manager's actual table)
@@ -190,7 +235,7 @@ function subscribeStockChanges() {
       });
 
       if (updated) {
-        renderProducts();
+        renderVisibleProducts();
       }
     })
     .subscribe();
@@ -215,7 +260,7 @@ function subscribeStockChanges() {
           products[idx].photo = payload.new.photo || payload.new.image_url || '';
           products[idx].cat = payload.new.category || 'Other';
         }
-        renderProducts();
+        renderVisibleProducts();
       } else if (payload.new.is_active !== false) {
         // New product became active — reload full list
         loadProductsFromSupabase();
@@ -303,6 +348,8 @@ let currentPage = 'home';
 let previousPage = 'home';
 
 function showPage(pg) {
+  // Preserve scroll position of the page we are leaving
+  scrollPositions[currentPage] = window.scrollY;
   if (pg !== 'product-detail' && pg !== currentPage) {
     previousPage = currentPage;
   }
@@ -320,6 +367,13 @@ function showPage(pg) {
   if (pg !== 'category' && pg !== 'product-detail') closeMobileMenu();
   setBN((pg === 'category' || pg === 'product-detail') ? 'home' : pg);
   window.scrollTo({ top: 0, behavior: 'smooth' });
+  // Restore scroll position when navigating back to a previously viewed page
+  const savedY = scrollPositions[pg];
+  if (savedY && savedY > 0 && pg !== 'product-detail') {
+    requestAnimationFrame(() => {
+      window.scrollTo({ top: savedY, behavior: 'auto' });
+    });
+  }
 }
 
 window.goBackFromProductDetail = function() {
@@ -412,6 +466,7 @@ window.showCategoryPage = function(catId) {
       : `<div style="grid-column:1/-1;padding:40px;text-align:center;color:var(--muted)">No products in this category yet.</div>`;
   }
   showPage('category');
+  smoothScrollTo(document.getElementById('category-page-title'));
 };
 
 function setBN(pg) {
@@ -440,45 +495,58 @@ function closeSearch() {
 function doSearch(q) {
   const r = document.getElementById('search-results');
   const suggestionsBox = document.getElementById('search-suggestions');
-  
-  if (!q.trim()) { 
-    r.innerHTML = ''; 
+
+  if (!q.trim()) {
+    r.innerHTML = '';
     if (suggestionsBox) {
       suggestionsBox.innerHTML = '';
       suggestionsBox.classList.add('hide');
     }
-    return; 
-  }
-  
-  const res = products.filter(p =>
-    p.name.toLowerCase().includes(q.toLowerCase()) ||
-    p.cat.toLowerCase().includes(q.toLowerCase())
-  );
-  
-  // Suggestions Dropdown rendering
-  if (suggestionsBox) {
-    if (res.length > 0) {
-      suggestionsBox.classList.remove('hide');
-      suggestionsBox.innerHTML = res.slice(0, 5).map(p => `
-        <div class="suggestion-item" onclick="showFullProductPage('${p.id}'); closeSearchSuggestion()">
-          <img src="${getPhoto(p)}" alt="" />
-          <div class="suggestion-item-details">
-            <span class="suggestion-title">${p.name}</span>
-            <span class="suggestion-meta">${p.cat} • ₹${ep(p).toLocaleString()}</span>
-          </div>
-        </div>
-      `).join('');
-    } else {
-      suggestionsBox.innerHTML = '<div style="padding:12px; font-size:11px; color:var(--muted); text-align:center">No suggestions</div>';
-      suggestionsBox.classList.remove('hide');
-    }
-  }
-
-  if (!res.length) {
-    r.innerHTML = '<div class="empty" style="padding:20px;color:var(--muted)">No products found</div>';
     return;
   }
-  r.innerHTML = res.map(p => productCardHTML(p)).join('');
+
+  const query = q.toLowerCase();
+  // First pass: fuzzy + substring matching against name and category
+  let res = products.filter(p =>
+    fuzzyMatch(p.name, query) || fuzzyMatch(p.cat, query)
+  );
+  // Fallback: if fuzzy found nothing, try a plain substring match
+  if (!res.length) {
+    res = products.filter(p =>
+      p.name.toLowerCase().includes(query) ||
+      p.cat.toLowerCase().includes(query)
+    );
+  }
+  
+  // Briefly show a loading indicator so search feels responsive
+  r.innerHTML = `<div style="display:flex;align-items:center;gap:10px;padding:20px;color:var(--muted)">${spinnerHTML(18)}<span>Searching…</span></div>`;
+
+  setTimeout(() => {
+    // Suggestions Dropdown rendering
+    if (suggestionsBox) {
+      if (res.length > 0) {
+        suggestionsBox.classList.remove('hide');
+        suggestionsBox.innerHTML = res.slice(0, 5).map(p => `
+          <div class="suggestion-item" onclick="showFullProductPage('${p.id}'); closeSearchSuggestion()">
+            <img src="${getPhoto(p)}" alt="" />
+            <div class="suggestion-item-details">
+              <span class="suggestion-title">${escapeHtml(p.name)}</span>
+              <span class="suggestion-meta">${escapeHtml(p.cat)} • ₹${ep(p).toLocaleString()}</span>
+            </div>
+          </div>
+        `).join('');
+      } else {
+        suggestionsBox.innerHTML = '<div style="padding:12px; font-size:11px; color:var(--muted); text-align:center">No suggestions</div>';
+        suggestionsBox.classList.remove('hide');
+      }
+    }
+
+    if (!res.length) {
+      r.innerHTML = '<div class="empty" style="padding:20px;color:var(--muted)">No products found</div>';
+      return;
+    }
+    r.innerHTML = res.map(p => productCardHTML(p)).join('');
+  }, 100);
 }
 
 window.closeSearchSuggestion = function() {
@@ -505,17 +573,23 @@ function renderCats() {
 
 let maxPriceFilter = null;
 
+function smoothScrollTo(el) {
+  if (el && typeof el.scrollIntoView === 'function') {
+    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
+
 function filterCat(id) {
   maxPriceFilter = null;
   activeCat = id;
   renderCats();
   showPage('home');
   if (id === 'new') {
-    document.getElementById('new-arrivals-section')?.scrollIntoView({ behavior: 'smooth' });
+    smoothScrollTo(document.getElementById('new-arrivals-section'));
     return;
   }
   if (id === 'trending' || id === 'all') {
-    document.getElementById('shop')?.scrollIntoView({ behavior: 'smooth' });
+    smoothScrollTo(document.getElementById('shop'));
     return;
   }
   showCategoryPage(id);
@@ -527,7 +601,7 @@ window.filterUnderPrice = function(maxVal) {
   renderCats();
   renderProducts();
   document.getElementById('filter-label').textContent = `Items Under ₹${maxVal}`;
-  document.getElementById('shop').scrollIntoView({ behavior: 'smooth' });
+  smoothScrollTo(document.getElementById('shop'));
 };
 
 function getShopProducts() {
@@ -586,8 +660,8 @@ function productCardHTML(p) {
     </div>
     <button class="wishlist-btn ${wl ? 'active' : ''}" onclick="toggleWishlist('${p.id}')">♥</button>
     <div class="product-info">
-      <div class="product-name" onclick="showFullProductPage('${p.id}')" style="cursor:pointer">${p.name}</div>
-      <div class="product-cat">${p.cat}</div>
+      <div class="product-name" onclick="showFullProductPage('${p.id}')" style="cursor:pointer">${escapeHtml(p.name)}</div>
+      <div class="product-cat">${escapeHtml(p.cat)}</div>
       ${stars > 0 ? `<div class="stars">${starsHTML(stars)} <span style="font-size:9px;color:var(--muted)">(${p.reviews.length})</span></div>` : ''}
       <div class="price-row">
         <span class="product-price">₹${price.toLocaleString()}</span>
@@ -628,11 +702,66 @@ function renderProducts() {
   }
   const container = document.getElementById('products-container');
   if (!container) return;
-  container.innerHTML = list.length
-    ? list.map(productCardHTML).join('')
+  // Reset pagination to first page whenever the full list is (re)rendered
+  currentPageNum = 1;
+  displayedCount = Math.min(PRODUCTS_PER_PAGE, list.length);
+  container.innerHTML = displayedCount
+    ? list.slice(0, displayedCount).map(productCardHTML).join('')
     : `<div style="grid-column:1/-1;padding:40px;text-align:center;color:var(--muted)">
          <div style="font-size:36px;margin-bottom:10px">👗</div><div>No products here</div>
        </div>`;
+  renderLoadMoreButton(list.length);
+  if (typeof renderNewArrivalsRow === 'function') renderNewArrivalsRow();
+  if (typeof renderShopCategoryChips === 'function') renderShopCategoryChips();
+  if (typeof renderMobileMenuCategories === 'function') renderMobileMenuCategories();
+}
+
+// Appends the next page of products to the existing grid (used by "Load More")
+function loadMoreProducts() {
+  const list = getShopProducts();
+  if (displayedCount >= list.length) return;
+  currentPageNum++;
+  displayedCount = Math.min(currentPageNum * PRODUCTS_PER_PAGE, list.length);
+  const container = document.getElementById('products-container');
+  if (!container) return;
+  // Append next slice rather than re-rendering everything
+  const nextSlice = list.slice((currentPageNum - 1) * PRODUCTS_PER_PAGE, displayedCount);
+  container.insertAdjacentHTML('beforeend', nextSlice.map(productCardHTML).join(''));
+  renderLoadMoreButton(list.length);
+}
+
+// Renders (or removes) the "Load More" button based on how many are displayed
+function renderLoadMoreButton(total) {
+  let btn = document.getElementById('load-more-products');
+  if (displayedCount >= total || total === 0) {
+    if (btn) btn.remove();
+    return;
+  }
+  if (!btn) {
+    const html = `<div id="products-load-more-wrap" style="grid-column:1/-1;display:flex;justify-content:center;margin-top:20px">
+        <button id="load-more-products" class="btn-outline" onclick="loadMoreProducts()" style="min-width:200px">Load More (${total - displayedCount} left)</button>
+      </div>`;
+    const container = document.getElementById('products-container');
+    if (container) container.insertAdjacentHTML('beforeend', html);
+  } else {
+    btn.textContent = `Load More (${total - displayedCount} left)`;
+  }
+}
+
+// Re-renders only the currently visible product cards (used by realtime stock updates)
+function renderVisibleProducts() {
+  const list = getShopProducts().slice(0, displayedCount);
+  const container = document.getElementById('products-container');
+  if (!container) return;
+  list.forEach(p => {
+    const card = document.getElementById('pc-' + p.id);
+    const html = productCardHTML(p);
+    if (card) {
+      card.outerHTML = html;
+    } else {
+      container.insertAdjacentHTML('beforeend', html);
+    }
+  });
   if (typeof renderNewArrivalsRow === 'function') renderNewArrivalsRow();
   if (typeof renderShopCategoryChips === 'function') renderShopCategoryChips();
   if (typeof renderMobileMenuCategories === 'function') renderMobileMenuCategories();
@@ -738,10 +867,10 @@ function openDetail(id) {
       ? p.reviews.map(r => `
           <div class="review-card">
             <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
-              <div class="review-author">${r.author}</div>
+              <div class="review-author">${escapeHtml(r.author)}</div>
               <div style="font-size:10px">⭐${r.stars}</div>
             </div>
-            <div class="review-text">${r.text}</div>
+            <div class="review-text">${escapeHtml(r.text)}</div>
           </div>`).join('')
       : '<div style="font-size:12px;color:var(--muted);padding:8px">No reviews yet. Be the first!</div>'}
     <div class="divider"></div>
@@ -888,10 +1017,10 @@ window.showFullProductPage = function(id) {
       ? p.reviews.map(r => `
           <div class="review-card">
             <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
-              <div class="review-author">${r.author}</div>
+              <div class="review-author">${escapeHtml(r.author)}</div>
               <div style="font-size:10px">⭐${r.stars}</div>
             </div>
-            <div class="review-text">${r.text}</div>
+            <div class="review-text">${escapeHtml(r.text)}</div>
           </div>`).join('')
       : '<div style="font-size:12px;color:var(--muted);padding:8px">No reviews yet. Be the first!</div>'}
     <div class="divider"></div>
@@ -1270,39 +1399,50 @@ function removeCoupon() { appliedCoupon = null; renderCart(); }
 
 // ===== CHECKOUT =====
 function goCheckout(total) {
-  if (!currentUser) { closeCart(); showToast('Please login to continue', 'red'); showAuthModal('checkout'); return; }
   closeCart();
   
-  // Try to load saved profile address details
-  const savedAddress = localStorage.getItem(`profile_address_${currentUser.email}`);
-  if (savedAddress) {
-    try {
-      const addr = JSON.parse(savedAddress);
-      document.getElementById('o-name').value  = addr.name || currentUser.name || '';
-      document.getElementById('o-phone').value = addr.phone || '';
+
+  if (currentUser) {
+    // Try to load saved profile address details
+    const savedAddress = localStorage.getItem(`profile_address_${currentUser.email}`);
+    if (savedAddress) {
+      try {
+        const addr = JSON.parse(savedAddress);
+        document.getElementById('o-name').value  = addr.name || currentUser.name || '';
+        document.getElementById('o-phone').value = addr.phone || '';
+        document.getElementById('o-email').value = currentUser.email || '';
+        document.getElementById('o-addr').value  = addr.street || '';
+        document.getElementById('o-city').value  = addr.city || '';
+        document.getElementById('o-pin').value   = addr.pin || '';
+      } catch (e) {
+        console.error('Error auto-filling checkout address:', e);
+      }
+    } else {
+      document.getElementById('o-name').value  = currentUser.name || '';
       document.getElementById('o-email').value = currentUser.email || '';
-      document.getElementById('o-addr').value  = addr.street || '';
-      document.getElementById('o-city').value  = addr.city || '';
-      document.getElementById('o-pin').value   = addr.pin || '';
-    } catch (e) {
-      console.error('Error auto-filling checkout address:', e);
+      document.getElementById('o-phone').value = '';
+      document.getElementById('o-addr').value  = '';
+      document.getElementById('o-city').value  = '';
+      document.getElementById('o-pin').value   = '';
     }
+    document.getElementById('checkout-user-info').innerHTML =
+      `👤 Logged in as <strong>${escapeHtml(currentUser.name)}</strong> (${escapeHtml(currentUser.email)})`;
   } else {
-    document.getElementById('o-name').value  = currentUser.name || '';
-    document.getElementById('o-email').value = currentUser.email || '';
+    // Guest checkout — clear fields so the user fills them in
+    document.getElementById('o-name').value  = '';
     document.getElementById('o-phone').value = '';
+    document.getElementById('o-email').value = '';
     document.getElementById('o-addr').value  = '';
     document.getElementById('o-city').value  = '';
     document.getElementById('o-pin').value   = '';
+    document.getElementById('checkout-user-info').innerHTML =
+      `🛍️ Guest checkout — no account needed. Fill in your details to place the order.`;
   }
 
   document.getElementById('order-total-display').textContent = '₹' + total.toLocaleString();
-  document.getElementById('checkout-user-info').innerHTML =
-    `👤 Logged in as <strong>${currentUser.name}</strong> (${currentUser.email})`;
   setEstDelivery();
   document.getElementById('order-modal').classList.remove('hide');
 }
-
 function setEstDelivery() {
   const d    = new Date(); d.setDate(d.getDate() + 4);
   const opts = { weekday: 'long', month: 'long', day: 'numeric' };
@@ -1312,14 +1452,18 @@ function setEstDelivery() {
 function checkDelivery() {
   const pin = document.getElementById('delivery-pin').value.trim();
   const el  = document.getElementById('delivery-result');
-  if (pin.length !== 6 || isNaN(pin)) {
-    el.innerHTML = '<div class="pincode-result pincode-no">Please enter a valid 6-digit pincode</div>'; return;
+  if (!/^\d{6}$/.test(pin)) {
+    el.innerHTML = '<div class="pincode-result pincode-no">Please enter a valid 6-digit pincode</div>';
+    return;
   }
-  const serviceablePins = ['400001', '411001', '560001', '500001', '600001', '110001', '302001', '380001'];
-  const ok = serviceablePins.includes(pin) || pin.startsWith('4') || pin.startsWith('5');
-  el.innerHTML = ok
-    ? `<div class="pincode-result pincode-ok">✓ Delivery available to ${pin} — arrives in 3-5 days</div>`
-    : `<div class="pincode-result pincode-no">✕ We don't deliver to ${pin} yet. Try a nearby pincode.</div>`;
+
+  el.innerHTML = '<div class="pincode-result pincode-ok">Checking delivery availability…</div>';
+
+  // Real delivery-API integration is not ready yet. For now, accept any valid
+  // 6-digit pincode as serviceable across India.
+  setTimeout(() => {
+    el.innerHTML = `<div class="pincode-result pincode-ok">✓ Delivery available to ${pin} — arrives in 3-5 business days</div>`;
+  }, 600);
 }
 
 function closeOrderModal() { document.getElementById('order-modal').classList.add('hide'); }
@@ -1340,6 +1484,18 @@ async function simulateRazorpay() {
   const note  = document.getElementById('o-note')?.value?.trim() || cartNote || '';
   if (!name || !phone || !addr) { showToast('Please fill all required fields', 'red'); return; }
 
+  // Guests are allowed — use the form fields directly (no currentUser needed)
+
+  // Show processing state on the Pay button and lock it
+  const payBtn = document.getElementById('razorpay-pay-btn');
+  const originalLabel = payBtn ? payBtn.innerHTML : '';
+  if (payBtn) {
+    payBtn.disabled = true;
+    payBtn.style.opacity = '0.7';
+    payBtn.style.pointerEvents = 'none';
+    payBtn.innerHTML = `<span style="display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,0.4);border-left-color:#fff;border-radius:50%;animation:spin 1s linear infinite;vertical-align:-2px;margin-right:8px"></span> Processing…`;
+  }
+
   const subtotal = cart.reduce((a, b) => a + b.price * b.qty, 0);
   let discount   = 0;
   if (appliedCoupon) {
@@ -1349,89 +1505,155 @@ async function simulateRazorpay() {
   }
   const shipping = subtotal >= 999 ? 0 : 99;
   const total    = Math.max(0, subtotal - discount) + shipping;
+  const amountPaise = Math.round(total * 100);
+
+  const restorePayBtn = () => {
+    if (payBtn) {
+      payBtn.disabled = false;
+      payBtn.style.opacity = '';
+      payBtn.style.pointerEvents = '';
+      payBtn.innerHTML = originalLabel || '💳 Pay with Razorpay';
+    }
+  };
+
+  // Build the order-creation routine (shared by success path)
+  const createOrderInDb = async (paymentId) => {
+    try {
+      // 1. Create the order row in the Supabase orders table
+      const { data: orderData, error: orderError } = await supabaseClient
+        .from('orders')
+        .insert({
+          source: 'ecommerce',
+          customer_name: name,
+          customer_phone: phone,
+          customer_email: email || null,
+          status: 'pending',
+          total_amount: total,
+          shipping_address: addr,
+          shipping_city: city,
+          shipping_pincode: pin,
+          customer_note: note || null,
+          razorpay_payment_id: paymentId || null
+        })
+        .select()
+        .single();
+
+      if (orderError) throw orderError;
+
+      const orderId = orderData.id;
+
+      // 2. Map cart items to variant IDs and prepare records for order_items
+      const orderItemsToInsert = cart.map(item => {
+        const p = products.find(x => x.id === item.id);
+        const variant = p?.raw_variants?.find(v => v.size === item.size);
+        if (!variant) {
+          throw new Error(`Variant not found for size ${item.size} of product ${item.name}`);
+        }
+        return {
+          order_id: orderId,
+          variant_id: variant.id,
+          quantity: item.qty,
+          unit_price: item.price
+        };
+      });
+
+      // 3. Save order items to Supabase (this will trigger stock decrement)
+      const { error: itemsError } = await supabaseClient
+        .from('order_items')
+        .insert(orderItemsToInsert);
+
+      if (itemsError) throw itemsError;
+
+      showToast('Order placed! Payment successful ✓', 'green');
+
+      // Add to local storage for "My Orders" tab
+      orders.unshift({
+        id: orderId,
+        name,
+        phone,
+        email,
+        addr,
+        city,
+        pin,
+        items: cart.map(i => ({ name: i.name, price: i.price, qty: i.qty, icon: i.icon, size: i.size })),
+        total,
+        status: 'placed',
+        date: new Date().toISOString().split('T')[0],
+        subtotal,
+        discount,
+        shipping,
+        cgst: 0,
+        sgst: 0
+      });
+      saveOrders();
+
+      cart = [];
+      appliedCoupon = null;
+      updateCartCount();
+      saveCartToLocalStorage();
+      closeOrderModal();
+      restorePayBtn();
+
+      // Reload the catalog to reflect the decremented stock immediately
+      await loadProductsFromSupabase();
+
+      setTimeout(() => showPage('orders'), 1400);
+    } catch (err) {
+      console.error("Error placing order:", err);
+      showToast("Failed to place order: " + err.message, "red");
+      restorePayBtn();
+    }
+  };
+
+  // If Razorpay SDK is not available, fall back to creating the order directly
+  if (typeof Razorpay === 'undefined') {
+    showToast('Payment gateway unavailable — placing order directly', 'coral');
+    await createOrderInDb(null);
+    return;
+  }
+
+  const options = {
+    key: 'rzp_test_1xxxxxxxxxx', // TODO: replace with real Razorpay test/live key
+    amount: amountPaise,
+    currency: 'INR',
+    name: 'KRIVVA — Luxury Women\'s Fashion',
+    description: 'Order Payment',
+    image: '/logo.png',
+    prefill: {
+      name: name,
+      email: email,
+      contact: phone
+    },
+    notes: {
+      address: addr + (city ? ', ' + city : '') + (pin ? ' - ' + pin : '')
+    },
+    theme: { color: '#7a2e4d' },
+    handler: function (response) {
+      // payment.success — create the order in DB
+      createOrderInDb(response.razorpay_payment_id);
+    },
+    modal: {
+      ondismiss: function () {
+        // User closed the modal without paying — do NOT create an order
+        showToast('Payment cancelled', 'coral');
+        restorePayBtn();
+      }
+    }
+  };
 
   try {
-    // 1. Create the order row in the Supabase orders table
-    const { data: orderData, error: orderError } = await supabaseClient
-      .from('orders')
-      .insert({
-        source: 'ecommerce',
-        customer_name: name,
-        customer_phone: phone,
-        customer_email: email || null,
-        status: 'pending',
-        total_amount: total,
-        shipping_address: addr,
-        shipping_city: city,
-        shipping_pincode: pin,
-        customer_note: note || null
-      })
-      .select()
-      .single();
-
-    if (orderError) throw orderError;
-
-    const orderId = orderData.id;
-
-    // 2. Map cart items to variant IDs and prepare records for order_items
-    const orderItemsToInsert = cart.map(item => {
-      const p = products.find(x => x.id === item.id);
-      const variant = p?.raw_variants?.find(v => v.size === item.size);
-      if (!variant) {
-        throw new Error(`Variant not found for size ${item.size} of product ${item.name}`);
-      }
-      return {
-        order_id: orderId,
-        variant_id: variant.id,
-        quantity: item.qty,
-        unit_price: item.price
-      };
+    const rzp = new Razorpay(options);
+    rzp.on('payment.failed', function (response) {
+      // payment.error — do NOT create an order
+      console.error('Razorpay payment failed:', response.error);
+      showToast('Payment failed: ' + (response.error?.description || 'Please try again'), 'red');
+      restorePayBtn();
     });
-
-    // 3. Save order items to Supabase (this will trigger stock decrement)
-    const { error: itemsError } = await supabaseClient
-      .from('order_items')
-      .insert(orderItemsToInsert);
-
-    if (itemsError) throw itemsError;
-
-    showToast('Order placed! Payment successful ✓', 'green');
-
-    // Add to local storage for "My Orders" tab
-    orders.unshift({
-      id: orderId,
-      name,
-      phone,
-      email,
-      addr,
-      city,
-      pin,
-      items: cart.map(i => ({ name: i.name, price: i.price, qty: i.qty, icon: i.icon, size: i.size })),
-      total,
-      status: 'placed',
-      date: new Date().toISOString().split('T')[0],
-      subtotal,
-      discount,
-      shipping,
-      cgst: 0,
-      sgst: 0
-    });
-    saveOrders();
-
-    cart = [];
-    appliedCoupon = null;
-    updateCartCount();
-    saveCartToLocalStorage();
-    closeOrderModal();
-
-    // Reload the catalog to reflect the decremented stock immediately
-    await loadProductsFromSupabase();
-
-    setTimeout(() => showPage('orders'), 1400);
-
+    rzp.open();
   } catch (err) {
-    console.error("Error placing order:", err);
-    showToast("Failed to place order: " + err.message, "red");
+    console.error('Error opening Razorpay:', err);
+    showToast('Could not open payment — please try again', 'red');
+    restorePayBtn();
   }
 }
 

@@ -562,7 +562,7 @@
       <span class="trust-badge"><span class="tb-icon">🚚</span> Fast Delivery</span>
     </div>
 
-    <button class="razorpay-btn" onclick="simulateRazorpay()">💳 Pay with Razorpay</button>
+    <button id="razorpay-pay-btn" class="razorpay-btn" onclick="simulateRazorpay()">💳 Pay with Razorpay</button>
     <div style="font-size:10px;color:var(--muted);text-align:center;margin-top:6px">
       UPI • Cards • NetBanking • Wallets — Secured by Razorpay
     </div>
@@ -753,6 +753,9 @@
 
 <!-- 5. Core app logic — UI, products, cart, wishlist, orders, reviews -->
 <script src="js/app.js"></script>
+
+<!-- Razorpay SDK -->
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
 <!-- 6. Boot Supabase client after SDK is loaded -->
 <script>

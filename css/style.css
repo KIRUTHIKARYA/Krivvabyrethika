@@ -15,6 +15,8 @@
 /* ---- RESET & VARIABLES ---- */
 * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
+@keyframes spin { to { transform: rotate(360deg); } }
+
 :root {
   /* Light luxury base */
   --bg: #FFFFFF;
@@ -122,16 +124,18 @@ body {
 /* ---- NAV — logo center, menu left, icons right ---- */
 nav,
 nav.nav-logo-center {
-  background: rgba(255,255,255,0.97);
-  backdrop-filter: blur(14px);
-  border-bottom: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
   padding: 0 40px;
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
   height: 68px;
   position: sticky; top: 0; z-index: 500;
-  box-shadow: 0 1px 12px rgba(0,0,0,0.04);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.03);
+  transition: background 0.3s, border-color 0.3s;
 }
 .nav-left {
   display: flex; gap: 20px; align-items: center; justify-content: flex-start;
@@ -310,12 +314,15 @@ nav.nav-logo-center {
   letter-spacing: 2.5px;
   text-transform: uppercase;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 10px rgba(95, 13, 36, 0.15);
 }
 .btn-maroon:hover {
   background: var(--gold);
   border-color: var(--gold);
   color: var(--maroon);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(202, 162, 76, 0.3);
 }
 .btn-maroon.btn-sm { padding: 8px 16px; font-size: 10px; }
 
@@ -371,9 +378,15 @@ nav.nav-logo-center {
   background: var(--gold); color: var(--maroon); border: 1px solid var(--gold);
   padding: 10px 26px; font-size: 10px; letter-spacing: 2px;
   text-transform: uppercase; cursor: pointer;
-  font-family: 'Jost', sans-serif; font-weight: 700; transition: .2s;
+  font-family: 'Jost', sans-serif; font-weight: 700;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 10px rgba(202, 162, 76, 0.15);
 }
-.btn-gold:hover { background: var(--maroon); color: #fff; border-color: var(--maroon); }
+.btn-gold:hover {
+  background: var(--maroon); color: #fff; border-color: var(--maroon);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(95, 13, 36, 0.3);
+}
 .btn-outline {
   background: transparent; color: var(--maroon); border: 1px solid var(--maroon);
   padding: 10px 26px; font-size: 10px; letter-spacing: 2px;
@@ -439,10 +452,13 @@ nav.nav-logo-center {
 }
 .product-card {
   background: var(--bg); border: none;
-  overflow: hidden; transition: all .3s ease; position: relative;
+  overflow: hidden;
+  transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
 }
 .product-card:hover {
-  border-color: transparent; box-shadow: none;
+  transform: translateY(-8px);
+  box-shadow: 0 16px 36px rgba(95, 13, 36, 0.08);
 }
 .product-img {
   aspect-ratio: 3 / 4;
@@ -451,7 +467,13 @@ nav.nav-logo-center {
   justify-content: center; background: var(--bg-cream);
   overflow: hidden; position: relative; cursor: pointer;
 }
-.product-img img { width: 100%; height: 100%; object-fit: cover; transition: opacity .4s ease; }
+.product-img img {
+  width: 100%; height: 100%; object-fit: cover;
+  transition: opacity 0.45s cubic-bezier(0.16, 1, 0.3, 1), transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.product-card:hover .product-img img {
+  transform: scale(1.04);
+}
 .product-img .product-img-primary,
 .product-img .product-img-hover {
   position: absolute;
@@ -696,11 +718,16 @@ nav.nav-logo-center {
 .form-group textarea {
   width: 100%; background: var(--bg); border: 1px solid var(--border2);
   color: var(--text); padding: 10px 12px;
-  font-family: 'Jost', sans-serif; font-size: 13px; outline: none; transition: .2s;
+  border-radius: 4px;
+  font-family: 'Jost', sans-serif; font-size: 13px; outline: none;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .form-group input:focus,
 .form-group select:focus,
-.form-group textarea:focus { border-color: var(--maroon); }
+.form-group textarea:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(202, 162, 76, 0.18);
+}
 .form-group select option { background: var(--bg); }
 .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .razorpay-btn {
@@ -795,14 +822,21 @@ nav.nav-logo-center {
 
 /* ---- MODAL ---- */
 .modal-bg {
-  position: fixed; inset: 0; background: rgba(0, 0, 0, .9);
+  position: fixed; inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   z-index: 600; display: flex; align-items: center; justify-content: center;
-  padding: 16px; animation: fadeIn .2s ease;
+  padding: 16px; animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .modal {
-  background: var(--surface); border: 1px solid var(--border);
-  padding: 24px; width: 100%; max-width: 480px;
-  max-height: 88vh; overflow-y: auto; animation: slideUp .3s ease;
+  background: #fcfbf8;
+  border: 1px solid rgba(202, 162, 76, 0.2);
+  border-radius: 12px;
+  box-shadow: 0 24px 60px rgba(95, 13, 36, 0.12);
+  padding: 30px 24px; width: 100%; max-width: 480px;
+  max-height: 88vh; overflow-y: auto;
+  animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 @keyframes slideUp {
   from { transform: translateY(20px); opacity: 0; }
@@ -884,8 +918,12 @@ nav.nav-logo-center {
 /* ---- BOTTOM NAV ---- */
 .bottom-nav {
   position: fixed; bottom: 0; left: 0; right: 0;
-  background: rgba(255, 255, 255, .97); backdrop-filter: blur(12px);
-  border-top: 1px solid var(--border); display: flex; z-index: 450; padding: 8px 0 10px;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+  display: flex; z-index: 450; padding: 8px 0 10px;
+  box-shadow: 0 -4px 30px rgba(0, 0, 0, 0.03);
 }
 .bottom-nav-item {
   flex: 1; display: flex; flex-direction: column; align-items: center;

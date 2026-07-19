@@ -7,6 +7,11 @@
 // Initialised after the Supabase SDK script loads (see index.html)
 let supabaseClient = null;
 
+const KRIVVA_CONFIG = window.KRIVVA_CONFIG || {
+  url: 'https://lhsfxibmgamsxnhzdkao.supabase.co',
+  anonKey: 'sb_publishable_J-kV5jiXlqQo5itAwTVShA_4jrkLyv8'
+};
+
 // ----- USER PROFILE & CART SYNCHRONIZATION -----
 async function syncUserSessionData(u) {
   if (!u) return;
@@ -64,8 +69,8 @@ async function syncUserSessionData(u) {
 function initSupabase() {
   if (window.supabase) {
     supabaseClient = window.supabase.createClient(
-      'https://lhsfxibmgamsxnhzdkao.supabase.co',
-      'sb_publishable_J-kV5jiXlqQo5itAwTVShA_4jrkLyv8'
+      KRIVVA_CONFIG.url,
+      KRIVVA_CONFIG.anonKey
     );
 
     // Load products from Supabase
@@ -389,6 +394,10 @@ function doLogout() {
       if (error) {
         showToast('Logout error: ' + error.message, 'red');
       } else {
+        // Clear all krivva_ localStorage keys
+        Object.keys(localStorage).forEach(key => {
+          if (key.startsWith('krivva_')) localStorage.removeItem(key);
+        });
         currentUser = null;
         updateUserNav();
         updateWelcomeBanner();
@@ -397,6 +406,9 @@ function doLogout() {
       }
     });
   } else {
+    Object.keys(localStorage).forEach(key => {
+      if (key.startsWith('krivva_')) localStorage.removeItem(key);
+    });
     currentUser = null;
     updateUserNav();
     updateWelcomeBanner();
