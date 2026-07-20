@@ -10,6 +10,7 @@ let displayedCount = 0;
 const scrollPositions = {};
 let checkoutCaptchaToken = null;
 const POPULAR_SEARCHES = ['Kurti', 'Dress', 'Co-ord', 'Ethnic', 'New Arrivals', 'Best Seller'];
+let globalSizeChartUrl = '';
 
 window.onCaptchaCheckedOut = function(token) {
   checkoutCaptchaToken = token;
@@ -166,6 +167,7 @@ async function loadProductsFromSupabase() {
     loadPostersFromSupabase();
     loadPromoBannersFromSupabase();
     loadCategoryCoversFromSupabase();
+    loadGlobalSizeChart();
     loadSpotlightPromoFromSupabase();
     loadTestimonialsFromSupabase();
     startCountdown();
@@ -857,7 +859,7 @@ function openDetail(id) {
             }
           }).join('')}
         </div>
-        ${p.sizeChartUrl ? `<div id="size-chart-btn-container" style="margin-bottom:8px"><button type="button" onclick="openSizeChart('${p.sizeChartUrl}')" class="btn-outline btn-sm" style="padding:4px 8px;font-size:10px;display:inline-flex;align-items:center;gap:4px;margin-top:2px">📐 Size Chart</button></div>` : '<div id="size-chart-btn-container" style="margin-bottom:8px"></div>'}
+        ${(p.sizeChartUrl || globalSizeChartUrl) ? `<div id="size-chart-btn-container" style="margin-bottom:8px"><button type="button" onclick="openSizeChart('${p.sizeChartUrl || globalSizeChartUrl}')" class="btn-outline btn-sm" style="padding:4px 8px;font-size:10px;display:inline-flex;align-items:center;gap:4px;margin-top:2px">📐 Size Chart</button></div>` : '<div id="size-chart-btn-container" style="margin-bottom:8px"></div>'}
         <div id="detail-stock-display" style="font-size:11px;color:${(() => {
           const selectedSize = selectedSizes[id];
           const qty = selectedSize ? (p.sizeQtyMap[selectedSize] || 0) : p.stock;
@@ -988,7 +990,7 @@ window.showFullProductPage = function(id) {
             }
           }).join('')}
         </div>
-        ${p.sizeChartUrl ? `<div id="size-chart-btn-container" style="margin-bottom:8px"><button type="button" onclick="openSizeChart('${p.sizeChartUrl}')" class="btn-outline btn-sm" style="padding:4px 8px;font-size:10px;display:inline-flex;align-items:center;gap:4px;margin-top:2px">📐 Size Chart</button></div>` : '<div id="size-chart-btn-container" style="margin-bottom:8px"></div>'}
+        ${(p.sizeChartUrl || globalSizeChartUrl) ? `<div id="size-chart-btn-container" style="margin-bottom:8px"><button type="button" onclick="openSizeChart('${p.sizeChartUrl || globalSizeChartUrl}')" class="btn-outline btn-sm" style="padding:4px 8px;font-size:10px;display:inline-flex;align-items:center;gap:4px;margin-top:2px">📐 Size Chart</button></div>` : '<div id="size-chart-btn-container" style="margin-bottom:8px"></div>'}
         <div id="detail-stock-display" style="font-size:11px;color:${(() => {
           const selectedSize = selectedSizes[id];
           const qty = selectedSize ? (p.sizeQtyMap[selectedSize] || 0) : p.stock;
@@ -2066,7 +2068,7 @@ window.openSizeChart = function(url) {
   const modal = document.getElementById('size-chart-modal');
   const img = document.getElementById('size-chart-img');
   if (modal && img) {
-    img.src = url;
+    img.src = url || globalSizeChartUrl;
     modal.classList.remove('hide');
   }
 };
@@ -2077,6 +2079,21 @@ window.closeSizeChart = function() {
     modal.classList.add('hide');
   }
 };
+
+async function loadGlobalSizeChart() {
+  try {
+    const { data } = await supabaseClient
+      .from('storefront_settings')
+      .select('value')
+      .eq('key', 'global_size_chart_url')
+      .single();
+    if (data && data.value?.url) {
+      globalSizeChartUrl = data.value.url;
+    }
+  } catch (e) {
+    globalSizeChartUrl = '';
+  }
+}
 
 // ===== CART NOTE GLOBAL =====
 let cartNote = '';
