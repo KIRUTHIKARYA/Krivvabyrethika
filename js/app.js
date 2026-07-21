@@ -827,12 +827,6 @@ function openDetail(id) {
             }
           })()}
         </div>
-        <div style="margin-top:10px">
-          <div style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:6px">Share</div>
-          <button onclick="shareProduct('${p.id}')" class="btn-outline btn-sm" style="display:flex;align-items:center;gap:6px;padding:6px 12px;font-size:11px;">
-            <span>🔗</span> Share Product
-          </button>
-        </div>
       </div>
       <div>
         <div class="pd-title">${p.name}</div>
@@ -909,7 +903,14 @@ function openDetail(id) {
             <div style="font-size:10px;color:var(--maroon)">₹${ep(r).toLocaleString()}</div>
           </div>
         </div>`).join('')}
-    </div>`;
+    </div>
+    <div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--border)">
+      <div style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:6px">Share</div>
+      <button onclick="shareProduct('${p.id}')" class="btn-outline btn-sm" style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;font-size:11px;">
+        <span>🔗</span> Share Product
+      </button>
+    </div>
+  </div>`;
   document.getElementById('detail-modal').classList.remove('hide');
 }
 
@@ -957,12 +958,6 @@ window.showFullProductPage = function(id) {
               return `<div style="font-size:52px;height:100%;width:100%;display:flex;align-items:center;justify-content:center;background:var(--surface2)">${p.icon}</div>`;
             }
           })()}
-        </div>
-        <div style="margin-top:10px">
-          <div style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:6px">Share</div>
-          <button onclick="shareProduct('${p.id}')" class="btn-outline btn-sm" style="display:flex;align-items:center;gap:6px;padding:6px 12px;font-size:11px;">
-            <span>🔗</span> Share Product
-          </button>
         </div>
       </div>
       <div>
